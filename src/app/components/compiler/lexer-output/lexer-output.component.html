@@ -1,10 +1,16 @@
-<ul *ngFor = "let token of tokens">
-    <li class = "lexer-output-li">
-        EMOJII <span class={{token.name}}>{{token.name}}</span>  Lexeme: {{token.lexeme}} ({{token.lineNumber}}:{{token.linePosition}})
+<ul style="margin-top: 15px; margin-bottom: 15px;">
+    <li class="lexer-output-li">
+        {{header.source}} <span class={{footer.type}}>{{header.type}}</span> - {{header.message}}
     </li>
 </ul>
-<ul *ngFor = "let msg of lexerOutput">
-    <li class = "lexer-output-li">
-        {{msg.source}}  <span class={{msg.type}}>{{msg.type}}</span>  -  {{msg.message}}
+<ul *ngFor="let token of tokens">
+    <li class="lexer-output-li">
+        <span class={{token.name}}>{{token.name}}</span> Lexeme:  {{token.lexeme}} 
+        ({{token.lineNumber}}:{{token.linePosition}})
+    </li>
+</ul>
+<ul style="margin-top: 15px; margin-bottom: 15px;">
+    <li class="lexer-output-li">
+        {{footer.source}} <span class={{footer.type}}>{{footer.type}}</span> - {{footer.message}}
     </li>
 </ul>

@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { CustomNode } from '../services/compiler/models/node';
-import { Program } from '../services/compiler/models/program';
+import { CustomNode } from '../../../services/compiler/models/node';
+import { Program } from '../../../services/compiler/models/program';
 
 @Component({
   selector: 'app-cst',
@@ -44,10 +44,9 @@ export class CstComponent implements OnInit {
     ul.id = `cst_p${programId}_ul_node_id_0`;
     let li: HTMLLIElement = document.createElement("li");
     li.id = `cst_p${programId}_li_node_id_0`;
-    li.innerHTML = `<a onclick="NightingaleCompiler.CompilerController.compilerControllerBtnLightUpTree_click(${programId}, 0, 'CST');" name = "node-anchor-tag">${root.name}</a>`;
+    li.innerHTML = `<a onclick="highlightSubtree(${programId}, 0, 'CST')" name = "node-anchor-tag" style="cursor: pointer;">${root.name}</a>`;
     ul.appendChild(li);
     tree_div.appendChild(ul);
-    console.log(tree_div);
 
     this.traverse_tree(root, programId, docFrag);
     this.cstDiv.appendChild(docFrag);
@@ -89,8 +88,7 @@ export class CstComponent implements OnInit {
           li.id = `cst_p${programId}_li_node_id_${curr.id}`;
 
           ul.appendChild(li);
-
-          li.innerHTML = `<a onclick="NightingaleCompiler.CompilerController.compilerControllerBtnLightUpTree_click(${programId}, ${curr.id}, 'CST');" name = "node-anchor-tag" >${curr.name}</a>`;
+          li.innerHTML = `<a onclick="highlightSubtree(${programId}, ${curr.id}, 'CST')" name = "node-anchor-tag" style="cursor: pointer;">${curr.name}</a>`;
 
           // TODO: Fix more alignments
           // Single characters alignment are off... Add padding to the left.
@@ -104,7 +102,7 @@ export class CstComponent implements OnInit {
         else {
           let li: HTMLLIElement = document.createElement("li");
           li.id = `cst_p${programId}_li_node_id_${curr.id}`;
-          li.innerHTML = `<a onclick="NightingaleCompiler.CompilerController.compilerControllerBtnLightUpTree_click(${programId}, ${curr.id}, 'CST');" name = "node-anchor-tag">${curr.name}</a>`;
+          li.innerHTML = `<a onclick="highlightSubtree(${programId}, ${curr.id}, 'CST')" name = "node-anchor-tag" style="cursor: pointer;">${curr.name}</a>`;
 
           // TODO: Fix more alignments
           // Single characters alignment are off... Add padding to the left.

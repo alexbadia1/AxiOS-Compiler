@@ -58,26 +58,37 @@
             <!-- Compiler Output -->
             <as-split-area [size]="30" [minSize]="20">
               <mat-tab-group animationDuration="0ms" [dynamicHeight]="false">
-                <mat-tab label="Lexer">
+                <mat-tab label="Summary">
                   <ul>
                     <li *ngFor="let prog of programs" style="overflow: hidden;">
-                      <!-- {{prog.lexerOutput}} -->
-                      <app-lexer-output [lexerOutput]="prog.lexerOutput" [tokens] = "prog.cleanTokenStream"></app-lexer-output>
+                      <app-output [lexerOutput]="prog.lexerOutput" [parserOutput]="prog.parserOutput"></app-output>
                     </li>
                   </ul>
                 </mat-tab>
-                <mat-tab label="Parser"> Parser </mat-tab>
-                <mat-tab label="CST">
+                <mat-tab label="Lex">
                   <ul>
                     <li *ngFor="let prog of programs" style="overflow: hidden;">
-                      <drag-scroll style="width: 95%; height: 500px; overflow: hidden;">
+                      <app-lexer-output [header]="prog.lexerOutput[0]" [footer]="prog.lexerOutput[1]"
+                        [tokens]="prog.cleanTokenStream"></app-lexer-output>
+                    </li>
+                  </ul>
+                </mat-tab>
+                <mat-tab label="Parse">
+                  <ul>
+                    <li *ngFor="let prog of programs" style="overflow: hidden;">
+                      <h1 style="font-size: .7rem; color: white;">
+                        Program {{prog.id}}
+                        <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
+                        <span *ngIf="prog.isValid == true">Concrete Syntax Tree:</span>
+                      </h1>
+                      <drag-scroll *ngIf="prog.isValid == true"
+                        style="width: 95%; height: 500px; overflow: hidden; cursor: move;">
                         <app-cst [program]="prog"></app-cst>
                       </drag-scroll>
                     </li>
                   </ul>
                 </mat-tab>
                 <mat-tab label="Semantic Analysis"> Semantic Analysis </mat-tab>
-                <mat-tab label="AST"> AST </mat-tab>
                 <mat-tab label="Scope Tree"> Scope Tree </mat-tab>
                 <mat-tab label="6502a Op Codes"> Terminal </mat-tab>
               </mat-tab-group>
@@ -93,3 +104,87 @@
     </mat-grid-list>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<script>
+  function highlightSubtree(program_num, node_id) {
+    // To simulate recursion, iteratively, use a stack.
+    let stack = [];
+
+    // Get the starting node from DOM
+    let currentNode = document.getElementById(`cst_p${program_num}_li_node_id_${node_id}`);
+    console.log(currentNode);
+    if (currentNode == null) { return; }
+
+    // Push starting node's children onto stack
+    let children = currentNode.children;
+
+    // Add to recursion stack
+    stack.push(children);
+
+    // Starting node is already highlighted, thus unhighlight starting node and it's descendants.
+    if (children.namedItem("node-anchor-tag").classList.contains("anchor-node__active")) {
+
+      if (currentNode instanceof HTMLAnchorElement) {
+        // Remove the CSS class that highlights the node
+        currentNode.classList.remove("anchor-node__active");
+      }// if
+
+      while (stack.length > 0) {
+
+        // Get current nodes children elements from the stack
+        let currentRemoveItemInStack = stack.pop();
+
+        // Remove highlight from each child
+        for (let removeChild = 0; removeChild < currentRemoveItemInStack.length; ++removeChild) {
+
+          // Only remove highlight from links <a> and <li>
+          if (currentRemoveItemInStack[removeChild] instanceof HTMLAnchorElement) {
+            if (currentRemoveItemInStack[removeChild].classList.contains("anchor-node__active")) {
+              currentRemoveItemInStack[removeChild].classList.remove("anchor-node__active");
+            }// if
+          }// if
+
+          let nestedChildren = currentRemoveItemInStack[removeChild].children;
+
+          // Prevents infinite stack hopefully... I hatre recursion...
+          if (nestedChildren !== undefined && nestedChildren !== null && nestedChildren.length > 0) {
+            stack.push(nestedChildren);
+          }// if
+        }// for
+      }// while
+    }// if
+
+    // Highlight current nod and its descendants
+    else {
+
+      if (currentNode instanceof HTMLAnchorElement) {
+        // Add the CSS class that highlights the node
+        currentNode.classList.add("anchor-node__active");
+      }// if
+
+      while (stack.length > 0) {
+
+        // Get current nodes children elements from the stack
+        let currentAddItemInStack = stack.pop();
+
+        // Add highlight from each child
+        for (let addChild = 0; addChild < currentAddItemInStack.length; ++addChild) {
+
+          // Only remove highlight from links <a> and <li>
+          if (currentAddItemInStack[addChild] instanceof HTMLAnchorElement) {
+            if (!currentAddItemInStack[addChild].classList.contains("anchor-node__active")) {
+              currentAddItemInStack[addChild].classList.add("anchor-node__active");
+            }// if
+          }// if
+
+          let nestedChildren = currentAddItemInStack[addChild].children;
+
+          // Prevents infinite stack hopefully... I hatre recursion...
+          if (nestedChildren !== undefined && nestedChildren !== null && nestedChildren.length > 0) {
+            stack.push(nestedChildren);
+          }// if
+        }// for
+      }// while
+    }// else
+  }// highlightSubtree
+</script>

@@ -2,7 +2,6 @@ import { Component, ComponentFactoryResolver, ElementRef, OnInit, ViewChild } fr
 import { MonacoStandaloneCodeEditor } from '@materia-ui/ngx-monaco-editor';
 import { CompilerService } from '../services/compiler.service';
 import { Subject } from "rxjs";
-import { CstComponent } from '../cst/cst.component';
 import { Program } from '../services/compiler/models/program';
 
 @Component({
@@ -21,7 +20,8 @@ export class DashboardComponent implements OnInit {
   private editor: any = null;
   editorOptions = {
     theme: 'vs-dark',
-    language: ''
+    language: '',
+    fontSize: 13
   };
   code: string = 'function x() {\nconsole.log("Hello world!");\n}';
   originalCode: string = 'function x() { // TODO }';

@@ -1,5 +1,11 @@
-<ul *ngFor = "let msg of lexerOutput">
-    <li class = "lexer-output-li">
-        {{msg.source}}  <span class={{msg.type}}>{{msg.type}}</span>  -  {{msg.message}}
+<div style="margin-top: 15px; margin-bottom: 15px;"></div>
+<ul *ngFor = "let l_msg of lexerOutput">
+    <li class = "output-li">
+        {{l_msg.source}}  <span class={{l_msg.type}}>{{l_msg.type}}</span>  -  {{l_msg.message}}
+    </li>
+</ul>
+<ul *ngFor = "let p_msg of parserOutput">
+    <li class = "output-li">
+        {{p_msg.source}}  <span class={{p_msg.type}}>{{p_msg.type}}</span>  -  {{p_msg.message}}
     </li>
 </ul>

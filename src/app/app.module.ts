@@ -14,12 +14,13 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 import { AngularSplitModule } from 'angular-split';
 import {MatTabsModule} from '@angular/material/tabs';
-import { CstComponent } from './cst/cst.component';
+import { CstComponent } from './components/compiler/cst/cst.component';
 import { NodeComponent } from './node/node.component';
 import { DragScrollModule } from 'ngx-drag-scroll';
 import { CliComponent } from './cli/cli.component';
 import { LexerOutputComponent } from './components/compiler/lexer-output/lexer-output.component';
 import { OutputComponent } from './components/compiler/output/output.component';
+import { AstComponent } from './components/compiler/ast/ast.component';
 
 
 
@@ -33,6 +34,7 @@ import { OutputComponent } from './components/compiler/output/output.component';
     CliComponent,
     LexerOutputComponent,
     OutputComponent,
+    AstComponent,
   ],
   imports: [
     BrowserModule,

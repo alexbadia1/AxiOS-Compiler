@@ -8,11 +8,11 @@ import { OutputConsoleMessage } from 'src/app/services/compiler/models/output_co
   styleUrls: ['./lexer-output.component.scss']
 })
 export class LexerOutputComponent implements OnInit {
-  @Input() lexerOutput: Array<OutputConsoleMessage>;
   @Input() tokens: Array<LexicalToken>;
+  @Input() header: OutputConsoleMessage;
+  @Input() footer: OutputConsoleMessage;
 
   constructor() { }
 
-  ngOnInit(): void { }
-
-}
+  ngOnInit(): void { }// ngOnInit
+}// LexerOutputComponent

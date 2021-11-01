@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { LexicalToken } from 'src/app/services/compiler/models/lexical_token';
 import { OutputConsoleMessage } from 'src/app/services/compiler/models/output_console_message';
 
 @Component({
@@ -9,6 +8,8 @@ import { OutputConsoleMessage } from 'src/app/services/compiler/models/output_co
 })
 export class OutputComponent implements OnInit {
   @Input() lexerOutput: Array<OutputConsoleMessage>;
+  @Input() parserOutput: Array<OutputConsoleMessage>;
+
   constructor() { }
 
   ngOnInit(): void {
