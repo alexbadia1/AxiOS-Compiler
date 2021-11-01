@@ -1,0 +1,181 @@
+.mat-sidenav-container {
+    height: 93.5%;
+    width: 100%;
+}
+
+.nav-links {
+    width: 10%;
+    height: 100%;
+}
+
+.menu-spacer {
+    flex: 3 3 auto;
+  }
+
+.menu-spacer-small {
+    flex: 1 1 auto;
+}
+
+.text-blue {
+    // color: #ff7eb6;
+    color: rgba(59, 130, 246, 0.5);
+}
+
+//////////////////////////////////////////
+// Grid Layout
+//////////////////////////////////////////
+.mat-grid-list {
+    height: 100%;
+    width: 100%;
+    background-color: #1e1e1e;
+}
+
+.material-grid-tile-navbar, .material-grid-tile-code-editor {
+    border-right: solid 2px #cccccc33
+}
+
+//////////////////////////////////////////
+// Material Sidebar Styling
+//////////////////////////////////////////
+.side-navbar-tile-div {
+    width: 100%;
+    height: 100%;
+
+    // Stack links in a list
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    // For cross axis alignment
+    align-items: center;
+
+    background-color: rgba(60, 60, 60, 1);
+}
+
+// Side Navbar Side Content
+.sidenav-side-content {
+    height: 100%;
+    width: 7.5%;
+    background-color: rgba(60, 60, 60, 1);
+}
+
+ul, li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    background-color: transparent;
+}
+
+// Side Navbar Main Content
+.main-content {
+    height: 100%;
+    width: 100%;
+    background-color: #1e1e1e;
+}
+
+.side-navbar-tile-div {
+    width: 100%;
+    height: 100%;
+}
+
+
+////////////////////////////////////////////
+// Split View Styling
+////////////////////////////////////////////
+:host {
+    as-split {
+
+        .as-split-area {
+            background-color: transparent;
+
+            & > p {
+                padding: 5px;
+            }
+        }
+
+        ::ng-deep .as-split-gutter {
+            background-color: #cccccc33 !important;
+            position: relative;
+        }
+
+        ::ng-deep .as-split-gutter-icon {
+            height: 10px;
+            background-image: none !important;
+            background-color: rgba(59, 130, 246, 1.0);
+            transition: opacity 0.3s;
+            opacity: 0;
+            position: absolute;
+        }
+
+        ::ng-deep .as-split-gutter.as-dragged .as-split-gutter-icon,
+        ::ng-deep .as-split-gutter-icon:hover {
+            opacity: 0.8;
+        }
+
+            &.as-vertical {
+                ::ng-deep .as-split-gutter-icon {
+                height: 5px !important;
+                top: -4px;
+                bottom: 0px;
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////
+// Tab View Styling
+////////////////////////////////////////////
+::ng-deep {
+    .mat-tab-list .mat-tab-label {
+        // Line height of each tab
+        line-height: 1.25rem;
+        height: 1.25rem;
+        min-width: 0px;
+        width: min-content;
+
+        // Offset the bottom border by a bit
+        margin-top: 5px;
+        margin-bottom: 1px;
+
+        // Bttom bar is as long at this
+        padding: 2px;
+
+        // Use margin to space
+        margin-left: 1rem;
+        margin-right: 1rem;
+
+
+        color:#3d3d3d;
+        background-color: transparent;
+        border: none;
+        opacity: 1;
+
+        font-size: 12.0;
+        font-weight: normal;
+    }
+
+    .mat-tab-list .mat-tab-labels  .mat-tab-label-active {
+        color:white;
+        background: transparent;
+        font-size: 12.0;
+        font-weight: normal;
+    }
+
+    .mat-tab-labels {
+        border-bottom: none;
+    }
+
+    .mat-tab-group.mat-primary .mat-ink-bar {
+        background-color: transparent;
+        box-sizing: border-box;
+        border-bottom: 2px solid white;
+    }
+
+    .mat-tab-nav-bar, .mat-tab-header {
+        border-bottom: none;
+    }
+}
+  
