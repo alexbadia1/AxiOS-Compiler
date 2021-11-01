@@ -1,0 +1,5 @@
+<ul *ngFor = "let msg of lexerOutput">
+    <li class = "lexer-output-li">
+        {{msg.source}}  <span class={{msg.type}}>{{msg.type}}</span>  -  {{msg.message}}
+    </li>
+</ul>

@@ -58,7 +58,14 @@
             <!-- Compiler Output -->
             <as-split-area [size]="30" [minSize]="20">
               <mat-tab-group animationDuration="0ms" [dynamicHeight]="false">
-                <mat-tab label="Lexer"> Lexer </mat-tab>
+                <mat-tab label="Lexer">
+                  <ul>
+                    <li *ngFor="let prog of programs" style="overflow: hidden;">
+                      <!-- {{prog.lexerOutput}} -->
+                      <app-lexer-output [lexerOutput]="prog.lexerOutput" [tokens] = "prog.cleanTokenStream"></app-lexer-output>
+                    </li>
+                  </ul>
+                </mat-tab>
                 <mat-tab label="Parser"> Parser </mat-tab>
                 <mat-tab label="CST">
                   <ul>

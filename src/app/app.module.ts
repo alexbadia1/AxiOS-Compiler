@@ -18,6 +18,8 @@ import { CstComponent } from './cst/cst.component';
 import { NodeComponent } from './node/node.component';
 import { DragScrollModule } from 'ngx-drag-scroll';
 import { CliComponent } from './cli/cli.component';
+import { LexerOutputComponent } from './components/compiler/lexer-output/lexer-output.component';
+import { OutputComponent } from './components/compiler/output/output.component';
 
 
 
@@ -29,6 +31,8 @@ import { CliComponent } from './cli/cli.component';
     CstComponent,
     NodeComponent,
     CliComponent,
+    LexerOutputComponent,
+    OutputComponent,
   ],
   imports: [
     BrowserModule,
