@@ -26,10 +26,10 @@ export class CstComponent implements OnInit {
     if (this.program.isValid) {
       this.toHtml(this.program.cst.root, this.program.id);
     }// if
-  }// 
+  }// ngAfterViewInit
 
   private toHtml(root: CustomNode, programId: number) {
-    // Makes this work on angular!
+    // Makes this work on angular, due to race condition!
     var docFrag: DocumentFragment = document.createDocumentFragment();
 
     // Initialize the result string.
@@ -47,7 +47,6 @@ export class CstComponent implements OnInit {
     li.innerHTML = `<a onclick="highlightSubtree(${programId}, 0, 'CST')" name = "node-anchor-tag" style="cursor: pointer;">${root.name}</a>`;
     ul.appendChild(li);
     tree_div.appendChild(ul);
-
     this.traverse_tree(root, programId, docFrag);
     this.cstDiv.appendChild(docFrag);
   }// toHtml
@@ -95,6 +94,8 @@ export class CstComponent implements OnInit {
           if (curr.name!.length >= 1 || curr.name!.length <= 3) {
             li.style.paddingLeft = "1.5rem";
           }// if
+
+          // Docoument fragment is faster, as to avoid a race condition when appending an element then looking for it quickly after...
           docFrag.getElementById(`cst_p${programId}_li_node_id_${curr.parent_node.id}`.trim())!.appendChild(ul);
         }// if
 
@@ -110,6 +111,7 @@ export class CstComponent implements OnInit {
             li.style.paddingLeft = "1.5rem";
           }// if
 
+          // Docoument fragment is faster, as to avoid a race condition when appending an element then looking for it quickly after...
           docFrag.getElementById(`cst_p${programId}_ul_node_id_${curr.parent_node.children_nodes[0].id}`)!.appendChild(li);
         }// else
 

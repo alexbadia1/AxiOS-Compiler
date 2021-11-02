@@ -1,8 +1,8 @@
 import { NODE_TYPE_BRANCH } from "../global";
-import { LexicalToken } from "./lexical_token";
-import { CustomNode } from './node';
+import { CustomNode } from "./node";
+import { ScopeTable } from "./scope_table";
 
-export class ConcreteSyntaxTree {
+export class ScopeTree {
     constructor(
         /**
          * Root node of the tree.
@@ -18,7 +18,7 @@ export class ConcreteSyntaxTree {
          * Program this tree belongs to
          */
         public program: number = -1,
-
+    
         /**
          * Number of nodes in the tree
          */
@@ -26,12 +26,24 @@ export class ConcreteSyntaxTree {
     ) { }//constructor
 
     // Add a node: kind in {branch, leaf}.
-    public add_node(new_name: string | null, kind: string, lex_token: LexicalToken | null) {
+    public add_node(new_name: string, kind: string, scope_table: ScopeTable | null = null) {
         this._node_count++
+
         // Construct the node object.
         let new_node = new CustomNode(new_name, this._node_count, kind);
-        new_node.setToken(lex_token);
+        scope_table!.id = this._node_count;
 
+        if (this.current_node !== null) {
+            scope_table!.parent_scope_table  = this.current_node.getScopeTable();
+        }// if
+
+        else {
+            scope_table!.parent_scope_table = null;
+        }// else
+
+        // Set new node's metadata
+        new_node.setScopeTable(scope_table);
+        
         // Check to see if it needs to be the root node.
         if ((this.root == null) || (!this.root)) {
             this.root = new_node;

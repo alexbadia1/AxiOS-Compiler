@@ -2,18 +2,18 @@ import { CustomNode } from "./node";
 
 export class VariableMetaData{
     constructor(
-        public type: string,
+        public type: string | null,
         public isUsed: boolean,
         public isInitialized: boolean,
         public lineNumber: number,
         public linePosition: number,
-        public node: CustomNode,
+        public node: CustomNode | null,
     ){}
 }// class
 
-export class ScopeTableModel {
+export class ScopeTable {
     public id: number = 0;
-    public parent_scope_table: ScopeTableModel | null = null;
+    public parent_scope_table: ScopeTable | null = null;
     private _map: Map<string, VariableMetaData> = new Map();
 
     constructor(){ }// constructor
@@ -25,7 +25,8 @@ export class ScopeTableModel {
      * @param value variable metadata object indicating type and usage
      * @returns false if there was a collision
      */
-    public put(key: string, value: VariableMetaData): boolean {
+    public put(key: string | null, value: VariableMetaData): boolean {
+        if (key == null) { return false; }
         if (!this._map.has(key)) {
             this._map.set(key, value);
             return true;
@@ -40,7 +41,8 @@ export class ScopeTableModel {
      * @param key unique key value for hash table
      * @returns Variable etadata object, null if not
      */
-     public get(key: string): VariableMetaData | null | undefined{
+     public get(key: string | null): VariableMetaData | null | undefined{
+        if (key == null) { return null; }
         if (this._map.has(key)) {
             return this._map.get(key);
         }// if
@@ -52,7 +54,8 @@ export class ScopeTableModel {
         return Array.from(this._map.entries());
     }// entries
 
-    public has(key: string): boolean{
+    public has(key: string | null): boolean{
+        if (key == null) { return false; }
         return this._map.has(key);
     }// has
     

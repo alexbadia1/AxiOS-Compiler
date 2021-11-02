@@ -1,8 +1,12 @@
 import { NODE_TYPE_BRANCH } from "../global";
 import { LexicalToken } from "./lexical_token";
-import { CustomNode } from './node';
+import { CustomNode } from "./node";
+import { ScopeTable } from "./scope_table";
+import { ScopeTree } from "./scope_tree";
 
-export class ConcreteSyntaxTree {
+export class AbstractSyntaxTree {
+    public scope_tree: ScopeTree;
+
     constructor(
         /**
          * Root node of the tree.
@@ -12,7 +16,7 @@ export class ConcreteSyntaxTree {
         /**
          * Current node in the tree
          */
-        public current_node: CustomNode | null = null,
+        public current_node: CustomNode | null= null,
 
         /**
          * Program this tree belongs to
@@ -25,12 +29,23 @@ export class ConcreteSyntaxTree {
         private _node_count: number = -1,
     ) { }//constructor
 
-    // Add a node: kind in {branch, leaf}.
-    public add_node(new_name: string | null, kind: string, lex_token: LexicalToken | null) {
+    /**
+     * 
+     * Adds a node to the n-array tree. 
+     * Updates the current node to the newly added node.
+     *
+     * @param new_name Name of the node, could be a string or lexeme
+     * @param kind Root, Branch, or Leaf Node?
+     */
+    public add_node(new_name: string | null, kind: string, hasError: boolean = false, hasWarning: boolean = false, lex_token: LexicalToken | null = null, scope_table: ScopeTable | null = null) {
         this._node_count++
+
         // Construct the node object.
         let new_node = new CustomNode(new_name, this._node_count, kind);
+        new_node.errorFlag = hasError;
+        new_node.warningFlag = hasWarning;
         new_node.setToken(lex_token);
+        new_node.setScopeTable(scope_table);
 
         // Check to see if it needs to be the root node.
         if ((this.root == null) || (!this.root)) {
@@ -53,6 +68,8 @@ export class ConcreteSyntaxTree {
             // ... update the CURrent node pointer to ourselves.
             this.current_node = new_node;
         }// if
+
+        return this.current_node;
     }// add_node
 
     /**

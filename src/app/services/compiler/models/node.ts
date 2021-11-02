@@ -1,8 +1,8 @@
 import { LexicalToken } from "./lexical_token";
-import { ScopeTableModel } from "./scope_table";
+import { ScopeTable } from "./scope_table";
 
 export class CustomNode {
-    private _scope_table: ScopeTableModel | null = null;
+    private _scope_table: ScopeTable | null = null;
     private _token: LexicalToken | null = null;
     public errorFlag: boolean = false;
     public warningFlag: boolean = false;
@@ -35,11 +35,11 @@ export class CustomNode {
     ) { }// constructor
 
 
-    public setScopeTable(new_scope_table: ScopeTableModel): void {
+    public setScopeTable(new_scope_table: ScopeTable | null): void {
         this._scope_table = new_scope_table;
     }// setData
 
-    public getScopeTable(): ScopeTableModel | null {
+    public getScopeTable(): ScopeTable | null {
         return this._scope_table;
     }// getData
 

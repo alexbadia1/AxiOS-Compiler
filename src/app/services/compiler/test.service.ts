@@ -1316,7 +1316,7 @@ export class TestService {
     new Map<string, string>([["PRINT_STATEMENTS_TESTS", this.PRINT_STATEMENTS_TESTS]]),
     new Map<string, string>([["WHILE_STATEMENTS_TEST", this.WHILE_STATEMENTS_TEST]]),
     new Map<string, string>([["IF_STATEMENTS_TEST", this.IF_STATEMENTS_TEST]]),
-    new Map<string, string>([["SCOPE_TREE_TEST", this.INCOMPLETE_EXPRESSIONS]]),
+    new Map<string, string>([["SCOPE_TREE_TEST", this.SCOPE_TREE_TEST]]),
     new Map<string, string>([["SIMPLE_MISSING_VARIABLES", this.INCOMPLETE_EXPRESSIONS]]),
     new Map<string, string>([["CHRONOS_NESTED_EVERYTHING", this.CHRONOS_NESTED_EVERYTHING]]),
     new Map<string, string>([["ANDREW_B_INFINTIE_LOOP", this.ANDREW_B_INFINTIE_LOOP]]),

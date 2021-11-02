@@ -1,16 +1,44 @@
-import { Component, OnInit } from '@angular/core';
-import { MonacoStandaloneCodeEditor } from '@materia-ui/ngx-monaco-editor';
-import { CompilerService } from '../services/compiler.service';
-import { Subject } from "rxjs";
-import { Program } from '../services/compiler/models/program';
-import { TestService } from '../services/compiler/test.service';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { NestedTreeControl } from "@angular/cdk/tree";
+import { Component, OnInit } from "@angular/core";
+import { MatTreeNestedDataSource } from "@angular/material/tree";
+import { MonacoStandaloneCodeEditor } from "@materia-ui/ngx-monaco-editor";
+import { CompilerService } from "../services/compiler.service";
+import { PROGRAMS } from "../services/compiler/global";
+import { Program } from "../services/compiler/models/program";
+import { TestService } from "../services/compiler/test.service";
 
+
+const COMPILER_TEST = "COMPILER_TEST";
+const OPERATING_SYSTEM_TEST = "OPERATING_SYSTEM_TEST";
+const codePrompt: string =
+  `/*Long Test Case - Everything Except Boolean Declaration */
+{
+  /* Int Declaration */
+  int a
+  int b
+  a = 0
+  b=0
+  /* While Loop */
+  while (a != 3) {
+    print(a)
+    while (b != 3) {
+      print(b)
+      b = 1 + b
+      if (b == 2) {
+        /* Print Statement */
+        print("there is no spoon" /* This will do nothing */ )
+      }
+    }
+    b = 0
+    a = 1+a
+  }
+}
+$`;
 
 interface TestNode {
   name: string;
   data?: string;
+  type?: string;
   children?: TestNode[];
 }
 
@@ -23,8 +51,6 @@ interface TestNode {
 
 
 export class DashboardComponent implements OnInit {
-  programs: Array<Program> = [];
-  compiling: boolean = false;
   /**
    * Monaco Code Editor Plugin
    */
@@ -34,106 +60,74 @@ export class DashboardComponent implements OnInit {
     language: '',
     fontSize: 13
   };
-  code: string = 
-  `/*Long Test Case - Everything Except Boolean Declaration */
-  {
-    /* Int Declaration */
-    int a
-    int b
-    a = 0
-    b=0
-    /* While Loop */
-    while (a != 3) {
-      print(a)
-      while (b != 3) {
-        print(b)
-        b = 1 + b
-        if (b == 2) {
-          /* Print Statement */
-          print("there is no spoon" /* This will do nothing */ )
-        }
-      }
-      b = 0
-      a = 1+a
-    }
-  }
-  $`;
-  originalCode: string = 'function x() { // TODO }';
+  code: string = codePrompt;
+  originalCode: string = codePrompt;
 
   /**
-   * Sidebar [open | close] state
+   * Sidebar [Open | Close] State
    */
   public opened: boolean = false;
 
   /**
-   * Compiler will send updates as each phase is passed
+   * Compile Button [Show | Hide] State
+   * AND Progress Icon [Show | Hide] State
    */
-  private compilerSubject = new Subject();
+  public compiling: boolean = false;
 
   /**
-   * Test Cases
+   * Binding data
    */
-  treeControl = new NestedTreeControl<TestNode>(node => node.children);
+  programs: Array<Program> = [];
   dataSource = new MatTreeNestedDataSource<TestNode>();
-
-  defaultTestCases: Array<Map<string, string>> = [];
-  lexerTestCases: Array<Map<string, string>> = [];
-  parserTestCases: Array<Map<string, string>> = [];
-  semanticAnalysisTestCases: Array<Map<string, string>> = [];
-  codeGenerationTestCases: Array<Map<string, string>> = [];
+  treeControl = new NestedTreeControl<TestNode>(node => node.children);
 
   constructor(
     private compilerService: CompilerService,
     private testService: TestService,
   ) {
-
-    // Load test cases from services and bind to 
-    this.semanticAnalysisTestCases = this.testService.semanticAnalysisTests;
-    this.codeGenerationTestCases = this.testService.codeGenerationTests;
-    
     // Create a root Compiler 'directory'
     let compilerTestNode: TestNode = {
       name: "Compiler Tests",
       children: [
-        {name: "Lexer", children: []},
-        {name: "Parser", children: []},
-        {name: "Semantic Analysis", children: []},
-        {name: "Code Generation", children: []},
+        { name: "Lexer", children: [] },
+        { name: "Parser", children: [] },
+        { name: "Semantic Analysis", children: [] },
+        { name: "Code Generation", children: [] },
       ]
     } // compilerTestNode
 
     // Load default test cases at root 'directory'
     for (let c of this.testService.defaultTests) {
       for (let k of c.keys()) {
-        compilerTestNode.children?.push({name: k.toLowerCase(), data: c.get(k)})
+        compilerTestNode.children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST})
       } // for
     }// for
 
     // Load Lexer test cases in Lexer 'directory'
     for (let c of this.testService.lexerTests) {
       for (let k of c.keys()) {
-        compilerTestNode.children![0].children?.push({name: k.toLowerCase(), data: c.get(k)})
+        compilerTestNode.children![0].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
     // Load Parser test cases in Parser 'directory'
     for (let c of this.testService.parserTests) {
       for (let k of c.keys()) {
-        compilerTestNode.children![1].children?.push({name: k.toLowerCase(), data: c.get(k)})
+        compilerTestNode.children![1].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
     // Load Semantic Analysis test cases in Semantic Analysis 'directory'
     for (let c of this.testService.semanticAnalysisTests) {
       for (let k of c.keys()) {
-        compilerTestNode.children![2].children?.push({name: k.toLowerCase(), data: c.get(k)})
+        compilerTestNode.children![2].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
     // Load Code Generation test cases in Code Generation 'directory'
     for (let c of this.testService.codeGenerationTests) {
       for (let k of c.keys()) {
-        compilerTestNode.children![3].children?.push({name: k.toLowerCase(), data: c.get(k)})
+        compilerTestNode.children![3].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
@@ -175,19 +169,23 @@ export class DashboardComponent implements OnInit {
     if (this.editor == null) { this.compiling = false; return; }
 
     // Editor loaded, let user compile!
-    let copmilerGenerator: AsyncGenerator<any, void, unknown> = await this.compilerService.compile(this.editor.getValue());
+    let compilerGenerator: AsyncGenerator<any, void, unknown> = await this.compilerService.compile(this.editor.getValue());
 
-    // Step 1: Lex
-    let lexerOutput: Map<string, any> = (await copmilerGenerator.next()).value;
-    this.compilerSubject.next(lexerOutput);
+    // Lex
+    let lexerOutput: Map<string, any> = (await compilerGenerator.next()).value;
+    console.log(lexerOutput)
 
-    // Step 2: Parse
-    let parserOutput: Map<string, any> = (await copmilerGenerator.next()).value;
-    this.compilerSubject.next(parserOutput);
+    // Parse
+    let parserOutput: Map<string, any> = (await compilerGenerator.next()).value;
     console.log(parserOutput)
 
-    this.programs = parserOutput.get('programs');
+    // Semantic Analysis
+    let semanticAnalysisOutput: Map<string, any> = (await compilerGenerator.next()).value;
+    console.log(semanticAnalysisOutput)
 
+    // Code Generation
+
+    this.programs = semanticAnalysisOutput.get(PROGRAMS);
     this.compiling = false;
     // Output
   }// onCompileButtonClick

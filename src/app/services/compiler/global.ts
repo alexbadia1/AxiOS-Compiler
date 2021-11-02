@@ -21,6 +21,10 @@ export const ERROR: string = "ERROR";
 export const WARNING: string = "WARNING";
 export const INFO: string = "INFO";
 
+// KEYS used for lexer, parse, semantic analysis and code generation phases' return values
+export const PROGRAMS: string = "PROGRAMS";
+export const OUTPUT: string = "OUTPUT";
+
 /**
  * Lexical Tokens
  */

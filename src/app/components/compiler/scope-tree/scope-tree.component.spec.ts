@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NodeComponent } from './node.component';
+import { ScopeTreeComponent } from './scope-tree.component';
 
-describe('NodeComponent', () => {
-  let component: NodeComponent;
-  let fixture: ComponentFixture<NodeComponent>;
+describe('ScopeTreeComponent', () => {
+  let component: ScopeTreeComponent;
+  let fixture: ComponentFixture<ScopeTreeComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NodeComponent ]
+      declarations: [ ScopeTreeComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NodeComponent);
+    fixture = TestBed.createComponent(ScopeTreeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

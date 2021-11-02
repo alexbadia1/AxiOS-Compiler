@@ -1,5 +1,8 @@
+import { AbstractSyntaxTree } from "./abstract_syntax_tree";
+import { ConcreteSyntaxTree } from "./concrete_syntax_tree";
 import { LexicalToken } from "./lexical_token";
 import { OutputConsoleMessage } from "./output_console_message";
+import { ScopeTree } from "./scope_tree";
 
 export class Program {
     constructor(
@@ -11,7 +14,10 @@ export class Program {
         public errorTokenStream: Array<LexicalToken> = [],
         public lexerOutput: Array<OutputConsoleMessage> = [],
         public parserOutput: Array<OutputConsoleMessage> = [],
-        public cst: any = [],
+        public semanticAnalysisOutput: Array<OutputConsoleMessage> = [],
+        public cst: ConcreteSyntaxTree = new ConcreteSyntaxTree(),
+        public ast: AbstractSyntaxTree = new AbstractSyntaxTree(),
+        public scopeTree: ScopeTree = new ScopeTree(),
         public stacktrace: Array<any> = [],
     ) { }
 }// Program
