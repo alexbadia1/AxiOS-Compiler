@@ -1,6 +1,35 @@
+.flex-row {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.nightingale {
+    display: flex;
+    flex: 48;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.divider {
+    display: flex;
+    flex: 6;
+}
+
+.axios {
+    display: flex;
+    flex: 48;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .mat-sidenav-container {
     height: 93.5%;
     width: 100%;
+}
+
+mat-spinner::ng-deep circle {
+    stroke: #228B22;
 }
 
 .nav-links {
@@ -18,7 +47,13 @@
 
 .text-blue {
     // color: #ff7eb6;
+    font-size: 24px;
     color: rgba(59, 130, 246, 0.5);
+}
+
+.text-nightingale-pink {
+    font-size: 24px;
+    color: rgb(255, 102, 122, .725);
 }
 
 //////////////////////////////////////////
@@ -55,7 +90,7 @@
 // Side Navbar Side Content
 .sidenav-side-content {
     height: 100%;
-    width: 7.5%;
+    min-width: 10%; // Be careful not to override auto-sizing
     background-color: rgba(60, 60, 60, 1);
 }
 
@@ -179,3 +214,79 @@ button {
     }
 }
   
+.mat-tree-node {
+    font-size: .7rem;
+    height: min-content;
+    min-height: min-content;
+    margin: 0;
+    color: white;
+    background-color: rgba(60, 60, 60, 1);
+}
+.example-tree-invisible {
+    font-size: .7rem;
+    display: none;
+}
+  
+.example-tree ul, .example-tree li {
+    font-size: .7rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    list-style-type: none;
+    background-color: rgba(60, 60, 60, 1);
+}
+  
+/*
+* This padding sets alignment of the nested nodes.
+*/
+.example-tree .mat-nested-tree-node div[role=group] {
+    font-size: .7rem;
+    padding-top: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: rgba(60, 60, 60, 1) !important;
+}
+
+/*
+* Padding for leaf nodes.
+* Leaf nodes need to have padding so as to align with other non-leaf nodes
+* under the same parent.
+*/
+.example-tree div[role=group] > .mat-tree-node {
+    font-size: .7rem;
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: rgba(60, 60, 60, 1) !important;
+}
+
+/* Scroll Bar */
+
+/* width */
+::ng-deep ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+/* Track */
+::ng-deep ::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+
+/* Handle */
+::ng-deep ::-webkit-scrollbar-thumb {
+    background: rgba(187, 187, 187, .3);
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::ng-deep ::-webkit-scrollbar-thumb:hover {
+    background: rgba(187, 187, 187, .4);
+    border-radius: 10px;
+}
+::ng .mat-tab-body {
+    overflow: scroll !important;
+}
+
+.mat-tab-body, .mat-tab-body.mat-tab-body-active {
+    height: 100%;
+    overflow: scroll !important;
+}

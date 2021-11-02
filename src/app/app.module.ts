@@ -21,9 +21,8 @@ import { CliComponent } from './cli/cli.component';
 import { LexerOutputComponent } from './components/compiler/lexer-output/lexer-output.component';
 import { OutputComponent } from './components/compiler/output/output.component';
 import { AstComponent } from './components/compiler/ast/ast.component';
-
-
-
+import {MatTreeModule} from '@angular/material/tree';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -49,7 +48,9 @@ import { AstComponent } from './components/compiler/ast/ast.component';
     AngularSplitModule,
     MatButtonModule,
     MatTabsModule,
-    DragScrollModule
+    DragScrollModule,
+    MatTreeModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

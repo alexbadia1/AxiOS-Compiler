@@ -1,27 +1,73 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<mat-toolbar style="background-color: #161616; height: 6.5%;">
-  <span class="text-blue">AxiOS</span>
-  <span class="menu-spacer"></span>
-  <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon"
-    (click)="onCompileButtonClick()">
-    <mat-icon>done</mat-icon>
-  </button>
-  <span class="menu-spacer-small"></span>
-  <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
-    <mat-icon>power_settings_new</mat-icon>
-  </button>
-  <span class="menu-spacer-small"></span>
+<mat-toolbar style="background-color: #161616; height: 6.5%; border-bottom: black solid 1px;">
+  <div class="flex-row">
+    <div class="nightingale">
+      <span class="text-nightingale-pink">Nightingale</span>
+      <button mat-icon-button *ngIf="(compiling) == false" class="example-icon favorite-icon"
+        aria-label="Example icon-button with heart icon" (click)="onCompileButtonClick()" style="color: #228B22;">
+        <mat-icon>done</mat-icon>
+      </button>
+      <div *ngIf="(compiling) == true" style="transform: translateX(-50%);">
+        <mat-spinner [diameter]="22.5"></mat-spinner>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="axios">
+      <span class="text-blue">AxiOS</span>
+      <div>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+          <mat-icon>power_settings_new</mat-icon>
+        </button>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+          <mat-icon>power_settings_new</mat-icon>
+        </button>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+          <mat-icon>power_settings_new</mat-icon>
+        </button>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+          <mat-icon>power_settings_new</mat-icon>
+        </button>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+          <mat-icon>power_settings_new</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
 </mat-toolbar>
 
 <mat-sidenav-container class="mat-sidenav-container">
   <mat-sidenav class="sidenav-side-content" [(opened)]="opened" mode="over">
-    Sidenav content
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+      <!-- This is the tree node template for leaf nodes -->
+      <!-- There is inline padding applied to this node using styles.
+        This padding value depends on the mat-icon-button width. -->
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle style="margin-top: 0;">
+        <button mat-icon-button style="width: min-content; font-size: .7rem;" (click)="onTestClick(node.data)">
+          {{node.name}}
+        </button>
+      </mat-tree-node>
+
+      <!-- This is the tree node template for expandable nodes -->
+      <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+        <div class="mat-tree-node">
+          <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+            </mat-icon>
+          </button>
+          {{node.name}}
+        </div>
+        <!-- There is inline padding applied to this div using styles.
+              This padding value depends on the mat-icon-button width.  -->
+        <div [class.example-tree-invisible]="!treeControl.isExpanded(node)" role="group">
+          <ng-container matTreeNodeOutlet></ng-container>
+        </div>
+      </mat-nested-tree-node>
+    </mat-tree>
   </mat-sidenav>
 
   <mat-sidenav-content class="main-content">
-
-
     <!-- Sidenav -->
     <mat-grid-list class="mat-grid-list" cols="100" rowHeight="fit" color="secondary">
       <mat-grid-tile class="material-grid-tile-navbar" [colspan]="4" [rowspan]="1">
@@ -32,6 +78,8 @@
                 <mat-icon class="text-blue">open_in_browser</mat-icon>
               </button>
             </li>
+          </ul>
+          <ul>
             <li>
               <a href="https://www.linkedin.com/in/alex-badia/">
                 <button mat-icon-button color="accent" class="example-icon" aria-label="Tests">
@@ -56,27 +104,31 @@
             </as-split-area>
 
             <!-- Compiler Output -->
-            <as-split-area [size]="30" [minSize]="20">
+            <as-split-area [size]="30" [minSize]="20" style="overflow-y: scroll;">
               <mat-tab-group animationDuration="0ms" [dynamicHeight]="false">
                 <mat-tab label="Summary">
-                  <ul>
-                    <li *ngFor="let prog of programs" style="overflow: hidden;">
+                  <ul style="margin-left: 15px;">
+                    <li *ngFor="let prog of programs">
                       <app-output [lexerOutput]="prog.lexerOutput" [parserOutput]="prog.parserOutput"></app-output>
                     </li>
                   </ul>
                 </mat-tab>
+
+                <!-- Lexer Output -->
                 <mat-tab label="Lex">
-                  <ul>
+                  <ul style="margin-left: 15px;">
                     <li *ngFor="let prog of programs" style="overflow: hidden;">
                       <app-lexer-output [header]="prog.lexerOutput[0]" [footer]="prog.lexerOutput[1]"
                         [tokens]="prog.cleanTokenStream"></app-lexer-output>
                     </li>
                   </ul>
                 </mat-tab>
+
+                <!-- Parser Output -->
                 <mat-tab label="Parse">
                   <ul>
                     <li *ngFor="let prog of programs" style="overflow: hidden;">
-                      <h1 style="font-size: .7rem; color: white;">
+                      <h1 style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;">
                         Program {{prog.id}}
                         <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
                         <span *ngIf="prog.isValid == true">Concrete Syntax Tree:</span>
@@ -88,8 +140,12 @@
                     </li>
                   </ul>
                 </mat-tab>
+
+                <!-- Semantic Analysis Output -->
                 <mat-tab label="Semantic Analysis"> Semantic Analysis </mat-tab>
                 <mat-tab label="Scope Tree"> Scope Tree </mat-tab>
+
+                <!-- Code Generation Output -->
                 <mat-tab label="6502a Op Codes"> Terminal </mat-tab>
               </mat-tab-group>
             </as-split-area>
