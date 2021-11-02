@@ -184,8 +184,10 @@ export class DashboardComponent implements OnInit {
     console.log(semanticAnalysisOutput)
 
     // Code Generation
+    let codeGenerationOutput: Map<string, any> = (await compilerGenerator.next()).value;
+    console.log(codeGenerationOutput)
 
-    this.programs = semanticAnalysisOutput.get(PROGRAMS);
+    this.programs = codeGenerationOutput.get(PROGRAMS);
     this.compiling = false;
     // Output
   }// onCompileButtonClick
