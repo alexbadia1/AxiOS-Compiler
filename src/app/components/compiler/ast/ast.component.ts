@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { CustomNode } from 'src/app/services/compiler/models/node';
-import { Program } from 'src/app/services/compiler/models/program';
+import { CustomNode } from 'src/app/services/compiler/src/models/node';
+import { Program } from 'src/app/services/compiler/src/models/program';
 
 @Component({
   selector: 'app-ast',

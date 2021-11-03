@@ -3,10 +3,10 @@ import { Component, OnInit } from "@angular/core";
 import { MatTreeNestedDataSource } from "@angular/material/tree";
 import { MonacoStandaloneCodeEditor } from "@materia-ui/ngx-monaco-editor";
 import { fromEvent, Observable } from "rxjs";
-import { CompilerService } from "../services/compiler.service";
-import { PROGRAMS } from "../services/compiler/global";
-import { Program } from "../services/compiler/models/program";
-import { TestService } from "../services/compiler/test.service";
+import { CompilerService } from "../services/compiler/compiler.service";
+import { PROGRAMS } from "../services/compiler/src/global";
+import { Program } from "../services/compiler/src/models/program";
+import { TestService } from "../services/compiler/src/test.service";
 import { OperatingSystemService } from "../services/operating-system/operating-system.service";
 
 

@@ -4,6 +4,7 @@ import { LexicalToken } from './models/lexical_token';
 import { OutputConsoleMessage } from './models/output_console_message';
 import { Program } from './models/program';
 
+
 @Injectable()
 export class LexerService {
   public numPrograms: number = 0;

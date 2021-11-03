@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { CustomNode } from '../../../services/compiler/models/node';
-import { Program } from '../../../services/compiler/models/program';
+import { CustomNode } from '../../../services/compiler/src/models/node';
+import { Program } from '../../../services/compiler/src/models/program';
 
 @Component({
   selector: 'app-cst',

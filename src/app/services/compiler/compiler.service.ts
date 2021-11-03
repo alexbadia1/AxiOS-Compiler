@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { CodeGenerationService } from './compiler/code-generation.service';
-import { PROGRAMS } from './compiler/global';
-import { LexerService } from './compiler/lexer.service';
-import { ParserService } from './compiler/parser.service';
-import { SemanticAnalysisService } from './compiler/semantic-analysis.service';
+import { CodeGenerationService } from './src/code-generation.service';
+import { PROGRAMS } from './src/global';
+import { LexerService } from './src/lexer.service';
+import { ParserService } from './src/parser.service';
+import { SemanticAnalysisService } from './src/semantic-analysis.service';
 
 @Injectable({
   providedIn: 'root'

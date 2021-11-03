@@ -8,6 +8,7 @@ import { Program } from './models/program';
 import { ScopeTable, VariableMetaData } from './models/scope_table';
 import { ScopeTree } from './models/scope_tree';
 
+
 @Injectable()
 export class SemanticAnalysisService {
   private _error_count: number = 0;

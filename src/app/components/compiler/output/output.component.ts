@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { OutputConsoleMessage } from 'src/app/services/compiler/models/output_console_message';
+import { OutputConsoleMessage } from 'src/app/services/compiler/src/models/output_console_message';
 
 @Component({
   selector: 'app-output',
