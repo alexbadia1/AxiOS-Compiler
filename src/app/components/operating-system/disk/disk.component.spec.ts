@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CliComponent } from './cli.component';
+import { DiskComponent } from './disk.component';
 
-describe('CliComponent', () => {
-  let component: CliComponent;
-  let fixture: ComponentFixture<CliComponent>;
+describe('DiskComponent', () => {
+  let component: DiskComponent;
+  let fixture: ComponentFixture<DiskComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CliComponent ]
+      declarations: [ DiskComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CliComponent);
+    fixture = TestBed.createComponent(DiskComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

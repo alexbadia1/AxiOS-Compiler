@@ -1,8 +1,9 @@
 import { NestedTreeControl } from "@angular/cdk/tree";
-import { Component, OnInit } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { MatTreeNestedDataSource } from "@angular/material/tree";
 import { MonacoStandaloneCodeEditor } from "@materia-ui/ngx-monaco-editor";
 import { fromEvent, Observable } from "rxjs";
+import { ConsoleComponent } from "../components/operating-system/console/console.component";
 import { CompilerService } from "../services/compiler/compiler.service";
 import { PROGRAMS } from "../services/compiler/src/global";
 import { Program } from "../services/compiler/src/models/program";
@@ -158,12 +159,12 @@ export class DashboardComponent implements OnInit {
   hasChild = (_: number, node: TestNode) => !!node.children && node.children.length > 0;
 
   ngOnInit(): void {
-    this.canvas = document.getElementById('divLog')!;
+    this.canvas = document.getElementById('appConsole')!;
 
     if (this.canvas != null) {
       this.keyBoard = fromEvent<KeyboardEvent>(this.canvas, 'keydown');
     } // if
-   }// ngOnInit
+  }// ngOnInit
 
   editorInit(editor: MonacoStandaloneCodeEditor): void {
     // Get editor instance
@@ -210,10 +211,17 @@ export class DashboardComponent implements OnInit {
   }// onCompileButtonClick
 
   hostBtnStartOS_click(buttonId: string) {
-    this.isActive = !this.isActive;
+    if (this.isActive) {
+      this.osService.end();
+    } // if
 
-    // Activate Input Streams 
-    this.osService.setKeyboardSubscription(this.keyBoard);
+    else {
+      // Activate Input Streams 
+      this.osService.setKeyboardSubscription(this.keyBoard);
+    } // else
+
+    // Flip State
+    this.isActive = !this.isActive;
   } // hostBtnStartOS_click
 
   hostBtnHaltOS_click(buttonId: string) {

@@ -75,9 +75,9 @@
                onclick="TSOS.Control.hostBtnNextStep_click(this); document.getElementById('divLog--status').innerText = 'Single Step Mode: Next Step';">
          </div> -->
 
-         
+
          <!-- Host Log -->
-         <div id="divLog" style = "margin-left: .5rem;" height = "100%" width = "100%">
+         <div id="divLog" style="margin-left: .5rem;" height="100%" width="100%">
             <label>Host Log</label>
             <br>
             <label id="divLog--time">
@@ -90,21 +90,14 @@
             <br>
             <label> Status: <label id=divLog--status>AxiOS Dead</label></label>
             <br>
-               <textarea name="taHostLog" id="taHostLog" rows="21" cols="48"
-                  style='width: 98.75%; height: 100%; resize: none; background-color: transparent; color:#d4d4d4; border: none;'></textarea>
+            <textarea name="taHostLog" id="taHostLog" rows="21" cols="48"
+               style='width: 98.75%; height: 100%; resize: none; background-color: transparent; color:#d4d4d4; border: none;'></textarea>
          </div>
-        
+
       </div>
 
 
       <div class="item item--2">
-         <!-- Increase the height of the console just to fit the Black Lives Matter Message-->
-         <!-- Changes in height must be in increments of the line height, about 21px -->
-         <div id="divConsole" style="width:99%; height:585px; padding-right: .25rem; padding-bottom: .25rem;">
-            <canvas id="display" width="830px" height="585px" tabindex="3">
-            </canvas>
-         </div>
-
          <!-- Source img https://windowsreport.com/bsod-error-0x000000ea/-->
          <!-- I know using absolute positioning is a bit "crude"-->
          <div id="bsod"
@@ -116,63 +109,9 @@
 
 
       <div class="item item--3" max-height="585px">
-
-         CPU
-
-         <!--CPU Information-->
-         <div id="visual--cpu" style="width: 100%;">
-         <table id="visual--cpu--table" style="width: 100%; border-top: 1px solid #bbbbbb; border-bottom: 1px solid #bbbbbb;">
-            <tr>
-               <th><span> PC </span></th>
-               <th><span> IR </span></th>
-               <th><span> ACC </span></th>
-               <th><span> X </span></th>
-               <th><span> Y </span></th>
-               <th><span> Z </span></th>
-            </tr>
-            <tr>
-               <th><span id="cpu--pc"> - </span></th>
-               <th><span id="cpu--ir"> - </span></th>
-               <th><span id="cpu--acc"> - </span></th>
-               <th><span id="cpu--x"> - </span></th>
-               <th><span id="cpu--y"> - </span></th>
-               <th><span id="cpu--z"> - </span></th>
-            </tr>
-         </table>
-      </div>
-         <!--Process Control Block Information-->
-         Processes
-         <div id="visual--pcb">
-            <table id="visual--pcb--table" style="width: 100%;">
-               <tr>
-                  <th><span> PID </span></th>
-                  <th><span> PC </span></th>
-                  <th><span> IR </span></th>
-                  <th><span> ACC </span></th>
-                  <th><span> X </span></th>
-                  <th><span> Y </span></th>
-                  <th><span> Z </span></th>
-                  <th><span> Priority </span></th>
-                  <th><span> State </span></th>
-                  <th><span> Location </span></th>
-               </tr>
-               <tr>
-                  <th><span id="pcb--pid"> - </span></th>
-                  <th><span id="pcb--pc"> - </span></th>
-                  <th><span id="pcb--ir"> - </span></th>
-                  <th><span id="pcb--acc"> - </span></th>
-                  <th><span id="pcb--x"> - </span></th>
-                  <th><span id="pcb--y"> - </span></th>
-                  <th><span id="pcb--z"> - </span></th>
-                  <th><span id="pcb--priority"> - </span></th>
-                  <th><span id="pcb--state"> - </span></th>
-                  <th><span id="pcb--location"> - </span></th>
-               </tr>
-            </table>
-         </div>
          Memory
          <div style="width: 99.275%; border: 1px solid #bbbbbb;">
-            <div id = "visual--memory--container">
+            <div id="visual--memory--container">
                <!-- Functionality over fancy styling stuff for now... probably gonna switch this entire index.html to a simple flex layout 
             but now that I'm thinking about this, maybe a more modern grid layout. -->
                <Table id="visual--memory--table" style="width: 100%;"></Table>
@@ -198,7 +137,7 @@
             Disk
          </label>
          <!--Disk-->
-         <div id = 'visual--disk--table--container'>
+         <div id='visual--disk--table--container'>
          </div>
       </div>
    </div>
@@ -211,4 +150,5 @@
       Ted Codd, Stevie Ray Vaughan, and Ian Fleming.
    </p>
 </body>
+
 </html>

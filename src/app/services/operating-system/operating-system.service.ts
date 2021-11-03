@@ -10,6 +10,7 @@ export class OperatingSystemService {
 
   constructor() { } // constructor
 
+  // This is our keyboard device driver.
   public setKeyboardSubscription(obs: Observable<KeyboardEvent>) {
     console.log(obs);
     if (this.keyboardSubscription == null) {
@@ -22,7 +23,12 @@ export class OperatingSystemService {
     } // if
   } // setMouseMovementSubscription
 
-  public cancelSubscriptions() {
+  private cancelSubscriptions() {
     this.keyboardSubscription?.unsubscribe();
+    this.keyboardSubscription = null; 
   } // cancelSubscriptions
+
+  public end() {
+    this.cancelSubscriptions();
+  } // close
 } // OperatingSystemService

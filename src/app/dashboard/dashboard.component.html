@@ -16,19 +16,24 @@
     <div class="axios">
       <span class="text-blue">AxiOS</span>
       <div>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnStartOS" (click)="hostBtnStartOS_click('btnStartOS')">
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnStartOS"
+          (click)="hostBtnStartOS_click('btnStartOS')">
           <mat-icon>power_settings_new</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnHaltOS" (click)="hostBtnHaltOS_click('btnStartOS')">
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnHaltOS"
+          (click)="hostBtnHaltOS_click('btnStartOS')">
           <mat-icon>power_settings_new</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnReset" (click)="hostBtnReset_click('btnReset')">
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnReset"
+          (click)="hostBtnReset_click('btnReset')">
           <mat-icon>power_settings_new</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnSingleStepMode" (click)="hostBtnSingleStep_click('btnSingleStepMode')">
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon"
+          id="btnSingleStepMode" (click)="hostBtnSingleStep_click('btnSingleStepMode')">
           <mat-icon>power_settings_new</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnNextStep" (click)="hostBtnNextStep_click('btnNextStep')">
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnNextStep"
+          (click)="hostBtnNextStep_click('btnNextStep')">
           <mat-icon>power_settings_new</mat-icon>
         </button>
       </div>
@@ -101,9 +106,9 @@
             </as-split-area>
 
             <!-- Compiler Output -->
-            <as-split-area [size]="30" [minSize]="20" style="overflow-y: scroll;">
-              <mat-tab-group animationDuration="0ms" [dynamicHeight]="false">
-                <mat-tab label="Summary">
+            <as-split-area [size]="30" [minSize]="20" style="overflow-y: hidden;">
+              <mat-tab-group animationDuration="0ms" [dynamicHeight]="false" style="height: 100%;">
+                <mat-tab label="SUMMARY">
                   <ul style="margin-left: 15px;">
                     <li *ngFor="let prog of programs">
                       <app-output [lexerOutput]="prog.lexerOutput" [parserOutput]="prog.parserOutput"></app-output>
@@ -112,66 +117,74 @@
                 </mat-tab>
 
                 <!-- Lexer Output -->
-                <mat-tab label="Lex">
-                  <ul style="margin-left: 15px;">
-                    <li *ngFor="let prog of programs" style="overflow: hidden;">
-                      <app-lexer-output [header]="prog.lexerOutput[0]" [footer]="prog.lexerOutput[1]"
-                        [tokens]="prog.cleanTokenStream"></app-lexer-output>
-                    </li>
-                  </ul>
+                <mat-tab label="LEX">
+                  <div style="height: 100%; width: 100%; overflow: scroll;">
+                    <ul style="margin-left: 15px;">
+                      <li *ngFor="let prog of programs" style="overflow: hidden;">
+                        <app-lexer-output [header]="prog.lexerOutput[0]" [footer]="prog.lexerOutput[1]"
+                          [tokens]="prog.cleanTokenStream"></app-lexer-output>
+                      </li>
+                    </ul>
+                  </div>
                 </mat-tab>
 
                 <!-- Parser Output -->
-                <mat-tab label="Parse">
-                  <ul>
-                    <li *ngFor="let prog of programs" style="overflow: hidden;">
-                      <h1 style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;">
-                        Program {{prog.id}}
-                        <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
-                        <span *ngIf="prog.isValid == true">Concrete Syntax Tree:</span>
-                      </h1>
-                      <drag-scroll *ngIf="prog.isValid == true"
-                        style="width: 99.5%; height: 500px; overflow: hidden; cursor: move;">
-                        <app-cst [program]="prog"></app-cst>
-                      </drag-scroll>
-                    </li>
-                  </ul>
+                <mat-tab label="PARSE">
+                  <div style="height: 100%; width: 100%; overflow: scroll;">
+                    <ul>
+                      <li *ngFor="let prog of programs" style="overflow: hidden;">
+                        <h1 style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;">
+                          Program {{prog.id}}
+                          <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
+                          <span *ngIf="prog.isValid == true">Concrete Syntax Tree:</span>
+                        </h1>
+                        <drag-scroll *ngIf="prog.isValid == true"
+                          style="width: 100%; height: min-content; cursor: move;">
+                          <app-cst [program]="prog"></app-cst>
+                        </drag-scroll>
+                      </li>
+                    </ul>
+                  </div>
                 </mat-tab>
 
                 <!-- Semantic Analysis Output -->
-                <mat-tab label="Semantic Analysis">
-                  <ul>
-                    <li *ngFor="let prog of programs" style="overflow: hidden;">
-                      <h1 style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;">
-                        Program {{prog.id}}
-                        <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
-                        <span *ngIf="prog.isValid == true">Abstract Syntax Tree:</span>
-                      </h1>
-                      <drag-scroll *ngIf="prog.isValid == true"
-                        style="width: 99.5%; height: 500px; overflow: hidden; cursor: move;">
-                        <app-ast [program]="prog"></app-ast>
-                      </drag-scroll>
-                    </li>
-                  </ul>
+                <mat-tab label="SEMANTIC ANALYSIS">
+                  <div style="height: 100%; width: 100%; overflow: scroll;">
+                    <ul>
+                      <li *ngFor="let prog of programs" style="overflow: hidden;">
+                        <h1 style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;">
+                          Program {{prog.id}}
+                          <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
+                          <span *ngIf="prog.isValid == true">Abstract Syntax Tree:</span>
+                        </h1>
+                        <drag-scroll *ngIf="prog.isValid == true"
+                          style="width: 100%; height: min-content; overflow: hidden; cursor: move;">
+                          <app-ast [program]="prog"></app-ast>
+                        </drag-scroll>
+                      </li>
+                    </ul>
+                  </div>
                 </mat-tab>
-                <mat-tab label="Scope Tree">
-                  <ul>
-                    <li *ngFor="let prog of programs" style="overflow: hidden;">
-                      <h1 style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;">
-                        Program {{prog.id}}
-                        <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
-                        <span *ngIf="prog.isValid == true">Scope Tree:</span>
-                      </h1>
-                      <drag-scroll *ngIf="prog.isValid == true"
-                        style="width: 99.5%; height: 500px; overflow: hidden; cursor: move;">
-                        <app-scope-tree [program]="prog"></app-scope-tree>
-                      </drag-scroll>
-                    </li>
-                  </ul>
+                <mat-tab label="SCOPE TREE">
+                  <div style="height: 100%; width: 100%; overflow: scroll;">
+                    <ul>
+                      <li *ngFor="let prog of programs" style="overflow: hidden;">
+                        <h1 style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;">
+                          Program {{prog.id}}
+                          <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
+                          <span *ngIf="prog.isValid == true">Scope Tree:</span>
+                        </h1>
+                        <drag-scroll *ngIf="prog.isValid == true"
+                          style="width: 100%; height: min-content; overflow: hidden; cursor: move;">
+                          <app-scope-tree [program]="prog"></app-scope-tree>
+                        </drag-scroll>
+                      </li>
+                    </ul>
+                  </div>
                 </mat-tab>
 
                 <!-- Code Generation Output -->
-                <mat-tab label="6502a Op Codes"> Terminal </mat-tab>
+                <mat-tab label="6502a OP CODES"> Terminal </mat-tab>
               </mat-tab-group>
             </as-split-area>
           </as-split>
@@ -180,7 +193,51 @@
 
       <!-- Operating System -->
       <mat-grid-tile [colspan]="48" [rowspan]="1">
-        <app-operating-system style="width: 100%; height: 100%;"></app-operating-system>
+        <as-split class="split-example ex-b" direction="vertical" [gutterSize]="1.25" [disabled]="false">
+
+          <!-- Canvas CMD -->
+          <as-split-area [size]="70" [minSize]="20">
+            <app-console id="appConsole"></app-console>
+          </as-split-area>
+
+          <!-- OS Details -->
+          <as-split-area id="osBottomSplitArea" [size]="30" [minSize]="20">
+            <mat-tab-group animationDuration="0ms" [dynamicHeight]="true" style="height: 100%;">
+              <!-- 6502a Input -->
+              <mat-tab label="6502a INPUT">
+                <div style="height: 100%; width: 100%; overflow: scroll;">
+                  <app-program-input></app-program-input>
+                </div>
+              </mat-tab>
+
+              <!-- CPU, Processes and Memory -->
+              <mat-tab label="CPU/MEMORY">
+                <div style="height: 100%; width: 100%; overflow: scroll;">
+                  <app-cpu></app-cpu>
+                  <app-memory></app-memory>
+                </div>
+              </mat-tab>
+
+              <mat-tab label="CPU/PROCESSES">
+                <div style="height: 100%; width: 100%; overflow: scroll;">
+                  <app-cpu></app-cpu>
+                  <app-processes></app-processes>
+                </div>
+              </mat-tab>
+
+              <!-- Disk -->
+              <mat-tab label="DISK">
+
+              </mat-tab>
+
+              <!-- Host Log -->
+              <mat-tab label="HOST LOG">
+
+              </mat-tab>
+            </mat-tab-group>
+          </as-split-area>
+        </as-split>
+        <!-- <app-operating-system style="width: 100%; height: 100%;"></app-operating-system> -->
       </mat-grid-tile>
     </mat-grid-list>
   </mat-sidenav-content>

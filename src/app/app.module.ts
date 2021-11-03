@@ -16,7 +16,6 @@ import { AngularSplitModule } from 'angular-split';
 import {MatTabsModule} from '@angular/material/tabs';
 import { CstComponent } from './components/compiler/cst/cst.component';
 import { DragScrollModule } from 'ngx-drag-scroll';
-import { CliComponent } from './cli/cli.component';
 import { LexerOutputComponent } from './components/compiler/lexer-output/lexer-output.component';
 import { OutputComponent } from './components/compiler/output/output.component';
 import { AstComponent } from './components/compiler/ast/ast.component';
@@ -24,18 +23,31 @@ import {MatTreeModule} from '@angular/material/tree';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { ScopeTreeComponent } from './components/compiler/scope-tree/scope-tree.component';
 import { OperatingSystemComponent } from './components/operating-system/operating-system.component';
+import { CpuComponent } from './components/operating-system/cpu/cpu.component';
+import { ProcessesComponent } from './components/operating-system/processes/processes.component';
+import { MemoryComponent } from './components/operating-system/memory/memory.component';
+import { DiskComponent } from './components/operating-system/disk/disk.component';
+import { HostLogComponent } from './components/operating-system/host-log/host-log.component';
+import { ProgramInputComponent } from './components/operating-system/program-input/program-input.component';
+import { ConsoleComponent } from './components/operating-system/console/console.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
     CstComponent,
-    CliComponent,
     LexerOutputComponent,
     OutputComponent,
     AstComponent,
     ScopeTreeComponent,
     OperatingSystemComponent,
+    CpuComponent,
+    ProcessesComponent,
+    MemoryComponent,
+    DiskComponent,
+    HostLogComponent,
+    ProgramInputComponent,
+    ConsoleComponent,
   ],
   imports: [
     BrowserModule,

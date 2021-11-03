@@ -1,0 +1,14 @@
+.cpu--wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 1px;
+    background-color: transparent;
+}
+  
+.box {
+    background-color: transparent;
+    color: white;
+    border: 1px solid #cccccc33;
+    font-size: .7rem;
+    text-align: center;
+}

@@ -68,6 +68,11 @@ mat-spinner::ng-deep circle {
 .material-grid-tile-navbar, .material-grid-tile-code-editor {
     border-right: solid 2px #cccccc33
 }
+.material-grid-tile-cpu, .material-grid-tile-processes, .material-grid-tile-memory {
+    height: 100%;
+    width: 100%;
+    background-color: #1e1e1e;
+}
 
 //////////////////////////////////////////
 // Material Sidebar Styling
@@ -188,14 +193,14 @@ button {
         border: none;
         opacity: 1;
 
-        font-size: .8rem;
+        font-size: .7rem;
         font-weight: normal;
     }
 
     .mat-tab-list .mat-tab-labels  .mat-tab-label-active {
         color:white;
         background: transparent;
-        font-size: .8rem;
+        font-size: .7rem;
         font-weight: normal;
     }
 
@@ -211,6 +216,14 @@ button {
 
     .mat-tab-nav-bar, .mat-tab-header {
         border-bottom: none;
+    }
+
+    .mat-tab-body-wrapper {
+        height: 100%;
+    }
+
+    .mat-tab-body.mat-tab-body-active {
+        height: 100%;
     }
 }
   

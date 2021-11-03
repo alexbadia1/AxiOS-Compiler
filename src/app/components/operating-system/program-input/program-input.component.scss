@@ -1,0 +1,18 @@
+#taProgramInput {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15px;
+    width: 90%;
+    height: calc(100% - 20); 
+    resize: none !important; 
+    overflow-y: scroll; 
+    word-wrap: break-word; 
+    color: white; 
+    background: transparent; 
+    outline: none !important;
+    border: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+}
