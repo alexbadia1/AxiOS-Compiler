@@ -2,10 +2,12 @@ import { NestedTreeControl } from "@angular/cdk/tree";
 import { Component, OnInit } from "@angular/core";
 import { MatTreeNestedDataSource } from "@angular/material/tree";
 import { MonacoStandaloneCodeEditor } from "@materia-ui/ngx-monaco-editor";
+import { fromEvent, Observable } from "rxjs";
 import { CompilerService } from "../services/compiler.service";
 import { PROGRAMS } from "../services/compiler/global";
 import { Program } from "../services/compiler/models/program";
 import { TestService } from "../services/compiler/test.service";
+import { OperatingSystemService } from "../services/operating-system/operating-system.service";
 
 
 const COMPILER_TEST = "COMPILER_TEST";
@@ -63,6 +65,9 @@ export class DashboardComponent implements OnInit {
   code: string = codePrompt;
   originalCode: string = codePrompt;
 
+  private canvas: HTMLElement;
+  private keyBoard: Observable<KeyboardEvent>;
+
   /**
    * Sidebar [Open | Close] State
    */
@@ -75,6 +80,11 @@ export class DashboardComponent implements OnInit {
   public compiling: boolean = false;
 
   /**
+   * Power Button [Green | Red] State
+   */
+  public isActive: boolean = false;
+
+  /**
    * Binding data
    */
   programs: Array<Program> = [];
@@ -84,6 +94,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private compilerService: CompilerService,
     private testService: TestService,
+    private osService: OperatingSystemService,
   ) {
     // Create a root Compiler 'directory'
     let compilerTestNode: TestNode = {
@@ -99,7 +110,7 @@ export class DashboardComponent implements OnInit {
     // Load default test cases at root 'directory'
     for (let c of this.testService.defaultTests) {
       for (let k of c.keys()) {
-        compilerTestNode.children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST})
+        compilerTestNode.children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
@@ -146,7 +157,13 @@ export class DashboardComponent implements OnInit {
 
   hasChild = (_: number, node: TestNode) => !!node.children && node.children.length > 0;
 
-  ngOnInit(): void { }// ngOnInit
+  ngOnInit(): void {
+    this.canvas = document.getElementById('divLog')!;
+
+    if (this.canvas != null) {
+      this.keyBoard = fromEvent<KeyboardEvent>(this.canvas, 'keydown');
+    } // if
+   }// ngOnInit
 
   editorInit(editor: MonacoStandaloneCodeEditor): void {
     // Get editor instance
@@ -173,22 +190,45 @@ export class DashboardComponent implements OnInit {
 
     // Lex
     let lexerOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(lexerOutput)
+    console.log(lexerOutput);
 
     // Parse
     let parserOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(parserOutput)
+    console.log(parserOutput);
 
     // Semantic Analysis
     let semanticAnalysisOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(semanticAnalysisOutput)
+    console.log(semanticAnalysisOutput);
 
     // Code Generation
     let codeGenerationOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(codeGenerationOutput)
+    console.log(codeGenerationOutput);
 
     this.programs = codeGenerationOutput.get(PROGRAMS);
     this.compiling = false;
     // Output
   }// onCompileButtonClick
+
+  hostBtnStartOS_click(buttonId: string) {
+    this.isActive = !this.isActive;
+
+    // Activate Input Streams 
+    this.osService.setKeyboardSubscription(this.keyBoard);
+  } // hostBtnStartOS_click
+
+  hostBtnHaltOS_click(buttonId: string) {
+
+  } // hostBtnHaltOS_click
+
+  hostBtnReset_click(buttonId: string) {
+
+  } // hostBtnReset_click
+
+  hostBtnSingleStep_click(buttonId: string) {
+
+  } // hostBtnSingleStep_click
+
+  hostBtnNextStep_click(buttonId: string) {
+
+  } // hostBtnNextStep_click
 }// DashboardComponent

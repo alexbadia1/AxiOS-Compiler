@@ -99,6 +99,7 @@ export class CodeGenerationService {
 
         // Finished code generation for current program
         finally {
+          console.log(this._current_executable_image.memory());
           prog.codeGenerationOutput.push(
             new OutputConsoleMessage(
               CODE_GENERATION,
