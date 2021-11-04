@@ -4,11 +4,10 @@ canvas {
     margin-left: auto;
     margin-right: auto;
     display: inline-block;
+    position: absolute;
     width: 99%;
     height: 69%;
-
-    position: absolute;
     top: 1%;
     left: 50%;
-    transform: translate(-50%, -1%);   
+    transform: translate(-50%, -1%);
 }

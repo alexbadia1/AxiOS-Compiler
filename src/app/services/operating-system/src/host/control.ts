@@ -33,37 +33,26 @@ export class Control {
     public static hostInit(): void {
         // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
 
-        // Get a global reference to the canvas.  TODO: Should we move this stuff into a Display Device Driver?
+        // Get a global reference to the canvas.
+        //
+        // TODO: Should we move this stuff into a Display Device Driver?
         Globals._Canvas = <HTMLCanvasElement>document.getElementById('display');
 
         // Get a global reference to the drawing context.
         Globals._DrawingContext = Globals._Canvas.getContext("2d");
 
-        /// Get gloabal reference to the input log
+        // Get global reference to the input log
         Globals._taProgramInput = document.getElementById("taProgramInput");
 
-        /// Get global reference for visual memory
-        Globals._visualMemory = document.getElementById("visual--memory--table");
-
-        /// Get global reference for visual cpu
-        Globals._visualCpu = document.getElementById("visual--cpu--table");
-
         /// Get global reference for visual pcb
-        Globals._visualPcb = document.getElementById("visual--pcb--table");
-
-        /// Get global reference for visual pcb
-        Globals._visualResidentList = document.getElementById("visual--pcb");
+        Globals._visualResidentList = document.getElementById("processes--div");
 
         // Enable the added-in canvas text functions (see canvastext.ts for provenance and details).
         CanvasTextFunctions.enable(Globals._DrawingContext);   // Text functionality is now built in to the HTML5 canvas. But this is old-school, and fun, so we'll keep it.
 
         // Clear the log text box.
         // Use the TypeScript cast to HTMLInputElement
-        (<HTMLInputElement>document.getElementById("taHostLog")).value = "";
-
-        // Set focus on the start button.
-        // Use the TypeScript cast to HTMLInputElement
-        (<HTMLInputElement>document.getElementById("btnStartOS")).focus();
+        // (<HTMLInputElement>document.getElementById("taHostLog")).value = "";
 
         // Check for our testing and enrichment core, which
         // may be referenced here (from index.html) as function Glados().
@@ -91,8 +80,8 @@ export class Control {
         var str: string = "({ clock:" + clock + ", source:" + source + ", msg:" + msg + ", now:" + now + " })" + "\n";
 
         // Update the log console.
-        var taLog = <HTMLInputElement>document.getElementById("taHostLog");
-        taLog.value = str + taLog.value;
+        // var taLog = <HTMLInputElement>document.getElementById("taHostLog");
+        // taLog.value = str + taLog.value;
 
         // TODO in the future: Optionally update a log database or some streaming service.
     }/// hostLog
@@ -101,22 +90,7 @@ export class Control {
     //
     // Host Events
     //
-    public static hostBtnStartOS_click(btn: any): void {
-        // Disable the (passed-in) start button...
-        btn.disabled = true;
-        document.getElementById('btnStartOS')!.style.backgroundColor = "#143e6c";
-
-        // .. enable the Halt and Reset buttons ...
-        /// and the single step buttons
-        (<HTMLButtonElement>document.getElementById("btnHaltOS")).disabled = false;
-        (<HTMLButtonElement>document.getElementById("btnHaltOS")).style.backgroundColor = "#007acc";
-
-        (<HTMLButtonElement>document.getElementById("btnReset")).disabled = false;
-        (<HTMLButtonElement>document.getElementById("btnReset")).style.backgroundColor = "#007acc";
-
-        (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).disabled = false;
-        (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).style.backgroundColor = "#007acc";
-
+    public static hostBtnStartOS_click(): void {
         // .. set focus on the OS console display ...
         document.getElementById("display")!.focus();
 
@@ -148,9 +122,6 @@ export class Control {
         // ... then set the host clock pulse ...
         Globals._hardwareClockID = setInterval(Devices.hostClockPulse, Globals.CPU_CLOCK_INTERVAL);
         // .. and call the OS Kernel Bootstrap routine.
-
-        /// Change Status to Alive BEFORE GlaDos, so nothing is overwritten
-        document.getElementById('divLog--status')!.innerText = 'AxiOS Alive';
 
         Globals._Kernel = new Kernel();
         Globals._Kernel.krnBootstrap();  // _GLaDOS.afterStartup() will get called in there, if configured.
@@ -218,76 +189,32 @@ export class Control {
         Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.NEXT_STEP_IRQ, []));
     }/// hostBtnNextStep_click
 
-    public static initializeVisualMemory() {
-        /// Increment by 8 on order to create a row every 8 bytes
-        for (var physicalAddressRow: number = 0; physicalAddressRow < Globals._MemoryAccessor.mainMemorySize() / 8; ++physicalAddressRow) {
-            var row = Globals._visualMemory.insertRow(physicalAddressRow); /// This multiplication works since all volumes are the cam size
-
-            /// Write to 8 cells
-            for (var cellInRow: number = 0; cellInRow < 9; ++cellInRow) {
-                if (cellInRow === 0) {
-                    /// Add the row header
-
-                    /// Formating the row headers
-                    ///
-                    /// Using 8 to calculate the correct decimal starting value of the row
-                    var decimalTemp: number = physicalAddressRow * 8;
-
-                    /// Convert decimal number to a hex base decimal string
-                    var hexTemp: string = decimalTemp.toString(16);
-
-                    /// Add left 0 padding
-                    var formattedHexTemp: string = "000" + hexTemp;
-                    formattedHexTemp = formattedHexTemp.substr(formattedHexTemp.length - 3).toUpperCase();
-
-                    /// Add the '0x' universal prefix for base 16 numbers
-                    formattedHexTemp = `0x${formattedHexTemp}`;
-
-                    /// Finally put memory into it
-                    row.insertCell(cellInRow).innerHTML = formattedHexTemp;
-                }/// if
-                else {
-                    /// Add the actual data
-                    row.insertCell(cellInRow).innerHTML = Globals._Memory.getAddress(physicalAddressRow + cellInRow).read();
-                }/// else
-            }/// for
-        }/// for
-    }/// intializeVisualMemory
-
     public static updateVisualMemory() {
-        var physicalAddress: number = 0;
-        /// Increment by 8 on order to create a row every 8 bytes
-        for (var currentRow: number = 0; currentRow < Globals._MemoryAccessor.mainMemorySize() / 8; ++currentRow) {
-            /// Write to 8 cells
-            for (var cellInRow: number = 0; cellInRow < 8; ++cellInRow) {
-                /// Plus one because we don't want to overwrite the row header
-                Globals._visualMemory.rows[currentRow].cells[cellInRow + 1].innerHTML = Globals._Memory.getAddress(physicalAddress).read();
-                physicalAddress++;
-            }/// for
-        }/// for
+        for (let physicalAddress: number = 0; physicalAddress < Globals._MemoryAccessor.mainMemorySize(); ++physicalAddress) {
+            document.getElementById(`memory--location--${physicalAddress}`)!.innerHTML = Globals._Memory.getAddress(physicalAddress).read();
+        } // for
     }/// updateVisualMemory
 
     public static updateVisualCpu() {
-        Globals._visualCpu.rows[1].cells[0].innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
-        Globals._visualCpu.rows[1].cells[1].innerHTML = Globals._CPU.IR;
-        Globals._visualCpu.rows[1].cells[2].innerHTML = Globals._CPU.Acc;
-        Globals._visualCpu.rows[1].cells[3].innerHTML = Globals._CPU.Xreg;
-        Globals._visualCpu.rows[1].cells[4].innerHTML = Globals._CPU.Yreg;
-        Globals._visualCpu.rows[1].cells[5].innerHTML = Globals._CPU.Zflag;
+        document.getElementById("cpu--pc")!.innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
+        document.getElementById("cpu--ir")!.innerHTML = Globals._CPU.IR;
+        document.getElementById("cpu--acc")!.innerHTML = Globals._CPU.Acc;
+        document.getElementById("cpu--x")!.innerHTML = Globals._CPU.Xreg;
+        document.getElementById("cpu--y")!.innerHTML = Globals._CPU.Yreg;
+        document.getElementById("cpu--z")!.innerHTML = Globals._CPU.Zflag.toString();
     }/// updateVisualCpu
 
     public static updateVisualPcb() {
-        /// Visual Updates
-        Globals._visualPcb.rows[1].cells[0].innerHTML = Globals._CPU.localPCB!.processID;
-        Globals._visualPcb.rows[1].cells[1].innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
-        Globals._visualPcb.rows[1].cells[2].innerHTML = Globals._CPU.IR;
-        Globals._visualPcb.rows[1].cells[3].innerHTML = Globals._CPU.Acc;
-        Globals._visualPcb.rows[1].cells[4].innerHTML = Globals._CPU.Xreg;
-        Globals._visualPcb.rows[1].cells[5].innerHTML = Globals._CPU.Yreg;
-        Globals._visualPcb.rows[1].cells[6].innerHTML = Globals._CPU.Zflag;
-        Globals._visualPcb.rows[1].cells[7].innerHTML = Globals._CPU.localPCB!.priority;
-        Globals._visualPcb.rows[1].cells[8].innerHTML = Globals._CPU.localPCB!.processState;
-        Globals._visualPcb.rows[1].cells[9].innerHTML = Globals._CPU.localPCB!.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB!.volumeIndex + 1}`;
+        document.getElementById("pcb--pid")!.innerHTML = Globals._CPU.localPCB!.processID.toString();
+        document.getElementById("pcb--pc")!.innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
+        document.getElementById("pcb--ir")!.innerHTML = Globals._CPU.IR;
+        document.getElementById("pcb--acc")!.innerHTML = Globals._CPU.Acc;
+        document.getElementById("pcb--x")!.innerHTML = Globals._CPU.Xreg;
+        document.getElementById("pcb--y")!.innerHTML = Globals._CPU.Yreg;
+        document.getElementById("pcb--z")!.innerHTML = Globals._CPU.Zflag.toString();
+        document.getElementById("pcb--priority")!.innerHTML = Globals._CPU.localPCB!.priority.toString();
+        document.getElementById("pcb--state")!.innerHTML = Globals._CPU.localPCB!.processState;
+        document.getElementById("pcb--location")!.innerHTML = Globals._CPU.localPCB!.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB!.volumeIndex + 1}`;
     }/// updateVisualPcb
 
     public static visualizeInstructionRegister(newInsruction: string) {
@@ -404,7 +331,7 @@ export class Control {
 
             /// Again, don't add a comma after the last pid
             if (i !== Globals._Scheduler.processesMetaData.length - 1) {
-               Globals._StdOut.putText(", ");
+                Globals._StdOut.putText(", ");
             }/// if
         }///for
         Globals._StdOut.advanceLine();
@@ -464,75 +391,84 @@ export class Control {
     }/// dumpScheduleMetaData
 
     public static createVisualResidentList(pcb: any): void {
-        /// Create a table with two rows
-        var table = document.createElement('table');
-        table.setAttribute("id", "tempTable");
-        table.style.width = "100%";
-        table.style.borderTop = "1px solid #bbbbbb";
-        var rowWithHeaders = document.createElement('tr');
-        var rowWithValues = document.createElement('tr');
+        // Boiler plate
+        let wrapper = document.createElement('div');
+        wrapper.className = "pcb--wrapper--data"
 
-        table.appendChild(rowWithHeaders);
-        table.appendChild(rowWithValues);
+        // Process ID
+        let pid = document.createElement('div');
+        pid.className = "box";
+        pid.innerHTML = pcb.processID.toString();
+        wrapper.appendChild(pid);
 
-        /// Create cells with text
-        for (var cellNum: number = 0; cellNum < 10; ++cellNum) {
-            /// Create the header cell
-            var headerCell = document.createElement('td');
-            var innerHtmlHeaderCell = document.createTextNode("");
+        // Program Counter
+        let pc = document.createElement('div');
+        pc.className = "box";
+        pc.innerHTML = this.formatToHexWithPadding(pcb.programCounter);
+        wrapper.appendChild(pc);
 
-            /// Create value cell
-            var valueCell = document.createElement('td');
-            var innerHtmlValueCell = document.createTextNode("");
+        // Instruction Register
+        let ir = document.createElement('div')
+        ir.className = "box";
+        ir.innerHTML = pcb.instructionRegister;
+        wrapper.appendChild(ir);
 
-            /// Append the cells and their values
-            valueCell.appendChild(innerHtmlValueCell);
-            headerCell.appendChild(innerHtmlHeaderCell);
-            rowWithValues.appendChild(valueCell);
-            rowWithHeaders.appendChild(headerCell);
-        }/// for
+        // Accumulator
+        let acc = document.createElement('div')
+        acc.className = "box";
+        acc.innerHTML = pcb.accumulator;
+        wrapper.appendChild(acc);
 
-        Globals._visualResidentList.appendChild(table);
+        // X Register
+        let x = document.createElement('div')
+        x.className = "box";
+        x.innerHTML = pcb.xRegister;
+        wrapper.appendChild(x);
 
-        table.rows[0].cells[0].innerHTML = "PID";
-        table.rows[1].cells[0].innerHTML = pcb.processID.toString();
+        // Y Register
+        let y = document.createElement('div')
+        y.className = "box";
+        y.innerHTML = pcb.yRegister;
+        wrapper.appendChild(y);
 
-        table.rows[0].cells[1].innerHTML = "PC";
-        table.rows[1].cells[1].innerHTML = this.formatToHexWithPadding(pcb.programCounter);
+        // Z Flag
+        let z = document.createElement('div')
+        z.className = "box";
+        z.innerHTML = pcb.zFlag.toString();
+        wrapper.appendChild(z);
 
-        table.rows[0].cells[2].innerHTML = "IR";
-        table.rows[1].cells[2].innerHTML = pcb.instructionRegister;
+        // Priority
+        let priority = document.createElement('div')
+        priority.className = "box";
+        priority.innerHTML = pcb.priority.toString();
+        wrapper.appendChild(priority);
 
-        table.rows[0].cells[2].innerHTML = "ACC";
-        table.rows[1].cells[3].innerHTML = pcb.accumulator;
+        // State
+        let state = document.createElement('div')
+        state.className = "box";
+        state.innerHTML = pcb.processState;
+        wrapper.appendChild(state);
 
-        table.rows[0].cells[4].innerHTML = "X";
-        table.rows[1].cells[4].innerHTML = pcb.xRegister;
+        // Location
+        let location = document.createElement('div')
+        location.className = "box";
+        location.innerHTML = pcb.volumeIndex === -1 ? `Disk` : `Seg ${pcb.volumeIndex + 1}`;
+        wrapper.appendChild(location);
 
-        table.rows[0].cells[5].innerHTML = "Y";
-        table.rows[1].cells[5].innerHTML = pcb.yRegister;
-
-        table.rows[0].cells[6].innerHTML = "Z";
-        table.rows[1].cells[6].innerHTML = pcb.zFlag.toString();
-
-        table.rows[0].cells[7].innerHTML = "Priority";
-        table.rows[1].cells[7].innerHTML = pcb.priority.toString();
-
-        table.rows[0].cells[8].innerHTML = "State";
-        table.rows[1].cells[8].innerHTML = pcb.processState;
-
-        table.rows[0].cells[9].innerHTML = "Location";
-        table.rows[1].cells[9].innerHTML = pcb.volumeIndex === -1 ? `Disk` : `Seg ${pcb.volumeIndex + 1}`;
-    }/// dumpResidentList
+        // Append to processes list
+        let processesList = document.getElementById('processes--div');
+        processesList!.appendChild(wrapper);
+    } // createVisualResidentList
 
     public static visualizeResidentList() {
         /// Visually refreshing the "Ready Queue" requires deleting the pre-existing tables.
         /// Obviously on the first iteration there will be no pre-existing tables, so just catch the error
         /// and continue building the table.
         try {
-            for (var i = 0; i < Globals._ResidentList.size - 1; ++i) {
-                document.getElementById("tempTable")!.parentNode!.removeChild(document.getElementById("tempTable")!);
-            }/// for
+            let processes: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName("pcb--wrapper--data") as HTMLCollectionOf<HTMLDivElement>;
+            Array.prototype.forEach.call(processes, function (el) {
+                el!.parentNode!.removeChild(el);
+            });
         }/// try
         catch (e) {
             Globals._Kernel.krnTrace(e as string);

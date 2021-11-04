@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 interface MemoryMap {
-  octal: string,
+  hex: string,
   locations: Array<number>
 } // memory
 
@@ -17,14 +17,13 @@ export class MemoryComponent implements OnInit {
   ngOnInit(): void {
     // Generate memory
     let tmp: Array<number> = [];
-    for (let i: number = 0; i < 256; ++i) {
-      if (i != 0) {
-        tmp.push(i);
-      } // if
+    for (let i: number = 0; i <= 768; ++i) {
       if (i % 8 == 0 && i != 0) {
-        this.memory.push({octal: (i-8).toString(8).padStart(3, "0"), locations: tmp})
+        this.memory.push({hex: (i-8).toString(16).padStart(3, "0"), locations: tmp})
         tmp = [];
       } // if
+
+      tmp.push(i);
     }// for
   } // ngOnInit
 } // MemoryComponent

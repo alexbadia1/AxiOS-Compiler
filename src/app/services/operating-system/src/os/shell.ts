@@ -662,6 +662,7 @@ export class Shell {
                     break;
                 case "recover":
                     Globals._StdOut.putText("recover <filename>: attempts to recover the delted file");
+                    break;
                 default:
                     Globals._StdOut.putText("No manual entry for " + args[0] + ".");
             }/// switch

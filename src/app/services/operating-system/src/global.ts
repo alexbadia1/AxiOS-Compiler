@@ -130,12 +130,9 @@ export class Globals {
    public static _Canvas: HTMLCanvasElement;          // Initialized in Control.hostInit().
    public static _DrawingContext: any;                // = _Canvas.getContext("2d");  // Assigned here for type safety, but re-initialized in Control.hostInit() for OCD and logic.
    public static _taProgramInput: any;
-   public static _visualMemory: any;         /// global variable for the memory table
-   public static _visualCpu: any; /// global variable for the CPU table
-   public static _visualPcb: any; /// global variable for the PCB table
-   public static _visualResidentList: any; /// global variable for the residentlis
+   public static _visualResidentList: any;            // global variable for the residentlis
    public static _DefaultFontFamily: string = "sans"; // Ignored, I think. The was just a place-holder in 2008, but the HTML canvas may have use for it.
-   public static _DefaultFontSize: number = 13;
+   public static _DefaultFontSize: number = 10;
    public static _FontHeightMargin: number = 4;       // Additional space added to font size when advancing a line.
 
    public static _Trace: boolean = true;              // Default the OS trace to be on.

@@ -1,7 +1,7 @@
 <div style="padding-left: 15px; padding-top: 15px;">
     <div class="box" > Main Memory </div>
     <div *ngFor = "let memMap of memory" class="memory--wrapper">
-        <div id="memmory--location--header--memMap.decimal" class="box">{{memMap.octal}}</div>
-        <div *ngFor = "let num of memMap.locations" is = "memory--location--(num)" class="box">00</div>
+        <div id="memory--location--header--memMap.decimal" class="box">{{memMap.hex}}</div>
+        <div *ngFor = "let num of memMap.locations" id="memory--location--{{num}}" class="box">00</div>
     </div>
 </div>

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
+import { Control } from './src/host/control';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +10,11 @@ export class OperatingSystemService {
   public keys: Array<string> = [];
 
   constructor() { } // constructor
+
+  public startAxiOS () {
+    Control.hostInit();
+    Control.hostBtnStartOS_click();
+  } //startAxiOS
 
   // This is our keyboard device driver.
   public setKeyboardSubscription(obs: Observable<KeyboardEvent>) {

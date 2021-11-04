@@ -258,8 +258,6 @@ export class DashboardComponent implements OnInit {
 
     // Turn Off on AxiOS
     if (this.isPoweredOn) {
-      this.osService.end();
-
       // Update GUI
       this.axiosStatus = "Offline";
       this.btnHaltOS.disabled = true;
@@ -279,7 +277,7 @@ export class DashboardComponent implements OnInit {
     else {
       // Activate Input Streams
       this.axiosStatus = "Online - Okay";
-      this.osService.setKeyboardSubscription(this.keyBoard);
+      this.osService.startAxiOS();
 
       // Activate halt OS button
       this.btnHaltOS.disabled = false;
