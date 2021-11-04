@@ -15,4 +15,4 @@ export class ResidentList {
         this.size = 0;
         this.residentList = [];
     } /// init
-}/// ProcessControlBlockQueue
+}/// ResidentList

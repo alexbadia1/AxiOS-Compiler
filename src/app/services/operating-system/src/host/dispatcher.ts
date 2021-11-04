@@ -16,14 +16,14 @@ export class Dispatcher {
         ///     let the terminated current process get overwritten by the next process
         ///     dequeud from the ready queue, WITHOUT re-queueing the terminated current process
         ///     effectivley "removing" the terminated current process
-        if (Globals._Scheduler.currentProcess.processState !== "Terminated") {
+        if (Globals._Scheduler.currentProcess!.processState !== "Terminated") {
             /// Save current process cpu context
             this.saveOldContextFromCPU(Globals._Scheduler.currentProcess);
 
-            Globals._Kernel.krnTrace(`Releasing process ${Globals._Scheduler.currentProcess.processID} to cpu.`);
+            Globals._Kernel.krnTrace(`Releasing process ${Globals._Scheduler.currentProcess!.processID} to cpu.`);
 
             /// Enqueue the current process to end of Ready Queue
-            Globals._Scheduler.currentProcess.processState = "Ready";
+            Globals._Scheduler.currentProcess!.processState = "Ready";
             Globals._Scheduler.readyQueue.enqueueInterruptOrPcb(Globals._Scheduler.currentProcess);
         }/// if
 
@@ -38,8 +38,8 @@ export class Dispatcher {
             Globals._Scheduler.currentProcess = Globals._Scheduler.readyQueue.dequeueInterruptOrPcb();
 
             /// Load CPU context with new process context
-            if (Globals._Scheduler.currentProcess.processState !== "Terminated") {
-                Globals._Scheduler.currentProcess.processState = "Running";
+            if (Globals._Scheduler.currentProcess!.processState !== "Terminated") {
+                Globals._Scheduler.currentProcess!.processState = "Running";
             }/// if
             this.setNewProcessToCPU(Globals._Scheduler.currentProcess);
         }/// if

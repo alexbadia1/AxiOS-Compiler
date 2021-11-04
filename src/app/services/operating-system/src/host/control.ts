@@ -210,12 +210,12 @@ export class Control {
             /// Visually show user that single step mode is OFF
             (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).value = "Single Step ON";
         }/// else
-        Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.SINGLE_STEP_IRQ, []));
+        Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.SINGLE_STEP_IRQ, []));
     }/// hostBtnSingleStep_click
 
     public static hostBtnNextStep_click(btn: any): void {
         /// Process single step interrupt
-        Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.NEXT_STEP_IRQ, []));
+        Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.NEXT_STEP_IRQ, []));
     }/// hostBtnNextStep_click
 
     public static initializeVisualMemory() {
@@ -278,22 +278,22 @@ export class Control {
 
     public static updateVisualPcb() {
         /// Visual Updates
-        Globals._visualPcb.rows[1].cells[0].innerHTML = Globals._CPU.localPCB.processID;
+        Globals._visualPcb.rows[1].cells[0].innerHTML = Globals._CPU.localPCB!.processID;
         Globals._visualPcb.rows[1].cells[1].innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
         Globals._visualPcb.rows[1].cells[2].innerHTML = Globals._CPU.IR;
         Globals._visualPcb.rows[1].cells[3].innerHTML = Globals._CPU.Acc;
         Globals._visualPcb.rows[1].cells[4].innerHTML = Globals._CPU.Xreg;
         Globals._visualPcb.rows[1].cells[5].innerHTML = Globals._CPU.Yreg;
         Globals._visualPcb.rows[1].cells[6].innerHTML = Globals._CPU.Zflag;
-        Globals._visualPcb.rows[1].cells[7].innerHTML = Globals._CPU.localPCB.priority;
-        Globals._visualPcb.rows[1].cells[8].innerHTML = Globals._CPU.localPCB.processState;
-        Globals._visualPcb.rows[1].cells[9].innerHTML = Globals._CPU.localPCB.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB.volumeIndex + 1}`;
+        Globals._visualPcb.rows[1].cells[7].innerHTML = Globals._CPU.localPCB!.priority;
+        Globals._visualPcb.rows[1].cells[8].innerHTML = Globals._CPU.localPCB!.processState;
+        Globals._visualPcb.rows[1].cells[9].innerHTML = Globals._CPU.localPCB!.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB!.volumeIndex + 1}`;
     }/// updateVisualPcb
 
     public static visualizeInstructionRegister(newInsruction: string) {
         /// Instruction Register
         Globals._CPU.IR = newInsruction;
-        Globals._CPU.localPCB.instructionRegister = newInsruction;
+        Globals._CPU.localPCB!.instructionRegister = newInsruction;
     }/// visualizeInstructionRegister
 
 
@@ -535,7 +535,7 @@ export class Control {
             }/// for
         }/// try
         catch (e) {
-            Globals._Kernel.krnTrace(e);
+            Globals._Kernel.krnTrace(e as string);
             Globals._Kernel.krnTrace("No resident list to delete.");
         }/// catch
         for (var index: number = 0; index < Globals._Scheduler.readyQueue.getSize(); ++index) {
@@ -562,7 +562,7 @@ export class Control {
         table.setAttribute("id", "visual--disk--table");
         table.style.border = "none";
         /// Check to see if disk is formatted
-        if (!Globals._krnDiskDriver.formatted) {
+        if (!Globals._krnDiskDriver!.formatted) {
             Globals._Kernel.krnTrace('Not formatted');
             return;
         }/// if

@@ -188,7 +188,7 @@ export class Scheduler {
             if (this.readyQueue.getSize() > 0) {
                 Globals._Kernel.krnTrace(`Process ${this.currentProcess!.processID} quantum reached, issuing context switch...`);
                 /// Queue interrupt for context switch
-                Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
+                Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
 
                 /// Reset the starting burst for the next new process
                 this.startBurst = Globals._CPU_BURST;
@@ -213,7 +213,7 @@ export class Scheduler {
             Globals._Kernel.krnTrace(`Another process was found in Ready Queue, issuing context switch...`);
 
             /// Queue interrupt for context switch
-            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
+            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
 
             /// Grab the procress' output, time spent executing, time spent waiting, turnaround time
             Globals._Kernel.krnTrace(`Collecting process ${this.currentProcess!.processID} metadata before context switch.`);

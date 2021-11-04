@@ -42,9 +42,9 @@ export class Console {
     }/// This is getting to tiring
 
     public handleInput(): void {
-        while (Globals._KernelInputQueue.getSize() > 0) {
+        while (Globals._KernelInputQueue!.getSize() > 0) {
             // Get the next character from the kernel input queue.
-            var chr = Globals._KernelInputQueue.dequeue();
+            var chr = Globals._KernelInputQueue!.dequeue();
             // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
             ///
             /// Pause the cpu
@@ -60,7 +60,7 @@ export class Console {
             else if (chr === '^C') {
                 if (Globals._CPU.isExecuting) {
                     /// Queue an interrupt for termination of the program
-                    Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.KILL_ALL_PROCESSES_IRQ, []));
+                    Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.KILL_ALL_PROCESSES_IRQ, []));
                     this.eraseText();
                     this.putText("^c");
                 }/// if

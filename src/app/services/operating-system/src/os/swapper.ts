@@ -26,7 +26,7 @@ export class Swapper {
         /// Load program from disk into free memory segment
         ///
         /// First read the actual program data from the disk
-        this.programRolledInFromDisk = Globals._krnDiskDriver.read(programFromDisk.swapFileName).toUpperCase();
+        this.programRolledInFromDisk = Globals._krnDiskDriver!.read(programFromDisk.swapFileName!).toUpperCase();
 
         /// MAX_SIMPLE_VOLUME-CAPACITY * 2 since each pair is 1 Byte and we allow 256 Bytes
         for (var pos: number = 0; pos < Globals.MAX_SIMPLE_VOLUME_CAPACITY * 2; pos += 2) {
@@ -66,7 +66,7 @@ export class Swapper {
         }/// if
 
         /// Delete the swap file from the disk...
-        Globals._krnDiskDriver.deleteFile(programFromDisk.swapFileName);
+        Globals._krnDiskDriver!.deleteFile(programFromDisk.swapFileName!);
     }/// rollIn
 
     public rollOut(programFromMemory: ProcessControlBlock): number {
@@ -79,9 +79,9 @@ export class Swapper {
         }/// for
 
         /// Try to create a swap file
-        if (!Globals._krnDiskDriver.create(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}${programFromMemory.processID}`).startsWith('Cannot create')) {
+        if (!Globals._krnDiskDriver!.create(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}${programFromMemory.processID}`).startsWith('Cannot create')) {
             /// Try to write to the swap file
-            if (!Globals._krnDiskDriver.write(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}${programFromMemory.processID}`, this.programRolledOutFromMemory).startsWith('Cannot write')) {
+            if (!Globals._krnDiskDriver!.write(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}${programFromMemory.processID}`, this.programRolledOutFromMemory).startsWith('Cannot write')) {
                 /// File successfully rolled out
 
                 /// Unlock the memory segemnt for the rolled in program
@@ -92,7 +92,7 @@ export class Swapper {
 
                 /// Update the location of the PCB
                 programFromMemory.volumeIndex = -1;
-                programFromMemory.swapFileName = `${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}${programFromMemory.processID}`;
+                programFromMemory.swapFileName = `${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}${programFromMemory.processID}`;
 
                 /// Clear memory
                 /// Actually, memory should be overwritten during roll in, with the rest of the remaining "left over" bytes being filled in with 0's

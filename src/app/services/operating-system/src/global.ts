@@ -5,7 +5,21 @@
    This code references page numbers in our text book:
    Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
    ------------ */
+import { Cpu } from "./host/cpu";
+import { Disk } from "./host/disk";
+import { Dispatcher } from "./host/dispatcher";
+import { Memory } from "./host/memory";
+import { MemoryAccessor } from "./host/memoryAccessor";
 import { Console } from "./os/console";
+import { DeviceDriverDisk } from "./os/deviceDriverDisk";
+import { DeviceDriverKeyboard } from "./os/deviceDriverKeyboard";
+import { Kernel } from "./os/kernel";
+import { PriorityQueue } from "./os/priorityQueue";
+import { Queue } from "./os/queue";
+import { ResidentList } from "./os/residentList";
+import { Scheduler } from "./os/scheduler";
+import { Shell } from "./os/shell";
+import { Swapper } from "./os/swapper";
 
 export class Globals {
    constructor () { } // constructor
@@ -130,7 +144,7 @@ export class Globals {
    public static _Kernel: Kernel;
    public static _KernelInterruptPriorityQueue: PriorityQueue | null = null;
    public static _KernelInputQueue: Queue | null = null;
-   public static _KernelBuffers = null;
+   public static _KernelBuffers: any = null;
 
    // Standard input and output
    public static _StdIn: Console;

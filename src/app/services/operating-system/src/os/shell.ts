@@ -744,7 +744,7 @@ export class Shell {
                     if (Globals._MemoryManager.firstFit() === -1) {
 
                         /// Try to write to the disk instead, remember it must be formatted first!
-                        if (Globals._krnDiskDriver.formatted) {
+                        if (Globals._krnDiskDriver!.formatted) {
                             /// Create a Process Control Block
                             var newProcessControlBlock: ProcessControlBlock = new ProcessControlBlock();
 
@@ -756,24 +756,24 @@ export class Shell {
                             Globals._ResidentList.size++;
 
                             /// Create a swap file for said pcb
-                            newProcessControlBlock.swapFileName = `${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}${newProcessControlBlock.processID}`;
+                            newProcessControlBlock.swapFileName = `${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}${newProcessControlBlock.processID}`;
 
                             /// Now try to actually create the swap file and write to it if there's enough room
                             ///
                             /// Asyncronously...
                             ///     Future<void> shellLoad() async {
-                            ///         Future<boolean> result = await Globals._KernelInterruptPriorityQueue.enqueue(new Interrupt(DISK_IRQ, ['create', args[0]]));
+                            ///         Future<boolean> result = await Globals._KernelInterruptPriorityQueue!.enqueue(new Interrupt(DISK_IRQ, ['create', args[0]]));
                             ///         return result;
                             ///     }/// shellLoad
                             /// 
                             /// Ya know, I might actually try to re do this in an asyncronous fashion in Dart and create a fultter app for it...
                             var diskDriverResult: string = '';
-                            diskDriverResult = Globals._krnDiskDriver.create(newProcessControlBlock.swapFileName);
+                            diskDriverResult = Globals._krnDiskDriver!.create(newProcessControlBlock.swapFileName);
                             Globals._StdOut.putText(`  ${diskDriverResult}`);
                             Globals._StdOut.advanceLine();
                             /// File created for program
                             if (!diskDriverResult.startsWith('Cannot create')) {
-                                diskDriverResult = Globals._krnDiskDriver.write(newProcessControlBlock.swapFileName, userInput);
+                                diskDriverResult = Globals._krnDiskDriver!.write(newProcessControlBlock.swapFileName, userInput);
                                 Globals._StdOut.putText(`  Program Succesfully ${diskDriverResult}`);
                                 Globals._StdOut.advanceLine();
 
@@ -984,7 +984,7 @@ export class Shell {
                     ///     > run 1
                     /// No matter what order, should still schedule the processes in round robin fashion...
                     /// Use Single Step to see what's "really" happening...
-                    Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.RUN_PROCESS_IRQ, [curr, args[0]]));
+                    Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.RUN_PROCESS_IRQ, [curr, args[0]]));
                 }/// else
             }/// try
             catch (e) {
@@ -1079,13 +1079,13 @@ export class Shell {
             ///     > runall
             /// No matter what order, should still schedule the processes in round robin fashion...
             /// Use Single Step to see what's "really" happening...
-            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.RUN_ALL_PROCESSES_IRQ, []));
+            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.RUN_ALL_PROCESSES_IRQ, []));
         }/// else
     }/// runall
 
     /// ps - display the PID and state of all processes
     public shellPs() {
-        Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.PS_IRQ, []));
+        Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.PS_IRQ, []));
     }///ps
 
     /// kill <pid> - kills one process (specified by process ID)
@@ -1105,7 +1105,7 @@ export class Shell {
                 ///     > killall
                 /// No matter what order, should still kill the processes
                 /// Use Single Step to see what's "really" happening...
-                Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.KILL_PROCESS_IRQ, [args]));
+                Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.KILL_PROCESS_IRQ, [args]));
             }/// else
         }/// if
 
@@ -1118,7 +1118,7 @@ export class Shell {
 
     /// killall - kill all processes
     public shellKillAll() {
-        Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.KILL_ALL_PROCESSES_IRQ, []));
+        Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.KILL_ALL_PROCESSES_IRQ, []));
     }/// kill all processes
 
     /// quantum <int> - let the user set the Round Robin Quantum (measured in CPU cycles)
@@ -1147,7 +1147,7 @@ export class Shell {
                     /// Could process as interrupt to allow for changing the quantum mid cycle...
                     /// Actually just don't allow it, too much brain damage already...
                     /// interrupt it is
-                    Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.CHANGE_QUANTUM_IRQ, [oldDecimalQuanta, parseInt(trimmedStringQuanta, 10)]));
+                    Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.CHANGE_QUANTUM_IRQ, [oldDecimalQuanta, parseInt(trimmedStringQuanta, 10)]));
                 }/// else-if
 
                 /// Invalid Quantum
@@ -1195,12 +1195,12 @@ export class Shell {
         /// OR
         /// 1 argument === -quick || -full format
         if (args.length === 0) {
-            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['format', 'no-arg']));
+            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['format', 'no-arg']));
         }/// if
 
         else if (args.length === 1) {
             if (args[0] === '-full' || args[0] === '-quick') {
-                Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['format', args[0].toLowerCase()]));
+                Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['format', args[0].toLowerCase()]));
             }/// if
 
             else {
@@ -1235,10 +1235,10 @@ export class Shell {
 
             else {
                 /// Prevent swap file names and hidden file names from being used
-                if (!args[0].startsWith(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`)) {
+                if (!args[0].startsWith(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`)) {
                     /// Minus 4 Bytes of the block metadata (containing the pointer and what not)
                     if (args[0].length < Globals.BLOCK_SIZE_LIMIT - Globals.FILE_META_DATA_LENGTH) {
-                        Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['create', args[0]]));
+                        Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['create', args[0]]));
                     }/// if
 
                     else {
@@ -1266,7 +1266,7 @@ export class Shell {
         /// No arguments given so skip hidden files
         if (args.length === 0) {
             /// TODO: create disk interrupt to list files
-            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['list', 'no-arg']));
+            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['list', 'no-arg']));
         }/// if
 
         /// Make sure only one argument is given
@@ -1275,7 +1275,7 @@ export class Shell {
             /// Make sure one arg is "-l" for hidden files
             if (args[0] === "-l") {
                 /// TODO: create disk interrupt to list files
-                Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['list', args[0]]));
+                Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['list', args[0]]));
             }/// if
 
             else {
@@ -1298,7 +1298,7 @@ export class Shell {
         if (args.length === 1) {
 
             /// Create read interrupt
-            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['read', args[0]]));
+            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['read', args[0]]));
         }/// if
 
         /// More than or less than one argument was given
@@ -1323,7 +1323,7 @@ export class Shell {
                 /// Not a swap file, safe to write too
                 if (!fileName!.startsWith('.!')) {
                     /// Create write interrupt
-                    Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['write', [fileName, formattedArgs.replace(/["]/g, "").trim()]]));
+                    Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['write', [fileName, formattedArgs.replace(/["]/g, "").trim()]]));
                 }/// if
 
                 /// Swap file
@@ -1351,9 +1351,9 @@ export class Shell {
         if (args.length === 1) {
 
             /// Not a swap file, safe to delete
-            if (!args[0].startsWith(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`)) {
+            if (!args[0].startsWith(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`)) {
                 /// Create delete interrupt
-                Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['delete', args[0]]));
+                Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['delete', args[0]]));
             }/// if
 
             /// Swap file
@@ -1375,10 +1375,10 @@ export class Shell {
             var filename: string = args[0].trim().replace(" ", "");
 
             /// Not a swap file
-            if (!filename.startsWith(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`)) {
+            if (!filename.startsWith(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`)) {
 
                 /// No interrupt needed as long as no one else but the user is recovering non-swap files...
-                Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals._krnDiskDriver.recoverDirectoryFile(filename)}`);
+                Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals._krnDiskDriver!.recoverDirectoryFile(filename)}`);
                 Globals._StdOut.advanceLine();
             }/// if
 
@@ -1398,7 +1398,7 @@ export class Shell {
 
     public shellDefrag(args: any) {
         if (args.length === 0) {
-            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['defrag']));
+            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.DISK_IRQ, ['defrag']));
         }/// else 
         else {
             Globals._StdOut.putText(`${Globals.INDENT_STRING}Usage: defrag Expected 0 arguments, but got ${args.length}`);
@@ -1420,13 +1420,13 @@ export class Shell {
         if (args.length === 1) {
             switch (args[0]) {
                 case Globals.ROUND_ROBIN:
-                    Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.SET_SCHEDULE_ALGORITHM, [Globals.ROUND_ROBIN]));
+                    Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.SET_SCHEDULE_ALGORITHM, [Globals.ROUND_ROBIN]));
                     break;
                 case Globals.FIRST_COME_FIRST_SERVE:
-                    Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.SET_SCHEDULE_ALGORITHM, [Globals.FIRST_COME_FIRST_SERVE]));
+                    Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.SET_SCHEDULE_ALGORITHM, [Globals.FIRST_COME_FIRST_SERVE]));
                     break;
                 case Globals.PRIORITY:
-                    Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.SET_SCHEDULE_ALGORITHM, [Globals.PRIORITY]));
+                    Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.SET_SCHEDULE_ALGORITHM, [Globals.PRIORITY]));
                     break;
                 default:
                     Globals._StdOut.putText(`${Globals.INDENT_STRING}Invalid Schedulng Algorithm, try:`);
@@ -1456,22 +1456,22 @@ export class Shell {
             }/// if
 
             /// Don't allow swap files to be renamed
-            if (!oldFileName.startsWith(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`)) {
-                var newFileNameInHex: string = Globals._krnDiskDriver.englishToHex(newFileName).toUpperCase();
+            if (!oldFileName.startsWith(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`)) {
+                var newFileNameInHex: string = Globals._krnDiskDriver!.englishToHex(newFileName).toUpperCase();
                 /// make sure data is not too big
                 if (newFileNameInHex.length < 100) {
 
                     /// New name is not a swap file name
-                    if (!newFileName.startsWith(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`)) {
+                    if (!newFileName.startsWith(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`)) {
 
                         /// Interrupt not necessary, unless anyone other than the user is renaming the file...
-                        Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals._krnDiskDriver.rename(oldFileName, newFileNameInHex)}`);
+                        Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals._krnDiskDriver!.rename(oldFileName, newFileNameInHex)}`);
                         Globals._StdOut.advanceLine();
                     }/// if
 
                     /// New filename cannot be a swap file name
                     else {
-                        Globals._StdOut.putText(`${Globals.INDENT_STRING}New filename cnnot start with${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`);
+                        Globals._StdOut.putText(`${Globals.INDENT_STRING}New filename cnnot start with${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`);
                         Globals._StdOut.advanceLine();
                     }/// else
                 }/// if
@@ -1511,11 +1511,11 @@ export class Shell {
 
             else {
                 /// Prevent swap file names and hidden file names from being used
-                if (!oldFile.startsWith(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`) && !newFile.startsWith(`${Globals._krnDiskDriver.hiddenFilePrefix}${Globals._krnDiskDriver.swapFilePrefix}`)) {
+                if (!oldFile.startsWith(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`) && !newFile.startsWith(`${Globals._krnDiskDriver!.hiddenFilePrefix}${Globals._krnDiskDriver!.swapFilePrefix}`)) {
 
                     /// Minus 4 Bytes of the block metadata (containing the pointer and what not)
                     if (args[0].length < Globals.BLOCK_SIZE_LIMIT - Globals.FILE_META_DATA_LENGTH) {
-                        Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals._krnDiskDriver.copyDirectoryFile(oldFile, newFile)}`);
+                        Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals._krnDiskDriver!.copyDirectoryFile(oldFile, newFile)}`);
                         Globals._StdOut.advanceLine();
                     }/// if
 

@@ -55,7 +55,7 @@ export class Devices {
             /// TODO: Check to see if this will work: event.getModifierState("CapsLock")
             var params = new Array(event.which, event.shiftKey, event.ctrlKey, event.altKey);
             // Enqueue this interrupt on the kernel interrupt queue so that it gets to the Interrupt handler.
-            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.KEYBOARD_IRQ, params));
+            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.KEYBOARD_IRQ, params));
         } // if
     } // hostOnKeypress
 } // Devices

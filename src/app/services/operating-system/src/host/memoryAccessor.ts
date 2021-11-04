@@ -32,12 +32,12 @@ export class MemoryAccessor {
             Globals._Kernel.krnTrace("Memory Upper Bound Limit Reached, Cannot Read Out of Bounds Address!");
 
             /// Terminate Program (don't forget to update the PCB process state)
-            if (Globals._CPU.localPCB.processState !== "Terminated") {
+            if (Globals._CPU.localPCB!.processState !== "Terminated") {
                 /// "Program" memory bounds violation, just kill the program for now...
                 /// By changing the current process state to "Terminated", the following 
                 /// _Scheduler.roundRobinCheck() in Kernel will clean up _CPU process.
-                Globals._CPU.localPCB.processState = "Terminated";
-                Globals._Scheduler.currentProcess.processState = "Terminated";
+                Globals._CPU.localPCB!.processState = "Terminated";
+                Globals._Scheduler.currentProcess!.processState = "Terminated";
             }/// if
 
         }///else-if
@@ -47,12 +47,12 @@ export class MemoryAccessor {
             Globals._Kernel.krnTrace("Memory Lower Bound Limit Reached, Cannot Read Out of Bounds Address!");
 
             /// Terminate Program (don't forget to update the PCB process state)
-            if (Globals._CPU.localPCB.processState !== "Terminated") {
+            if (Globals._CPU.localPCB!.processState !== "Terminated") {
                 /// "Program" memory bounds violation, just kill the program for now...
                 /// By changing the current process state to "Terminated", the following 
                 /// _Scheduler.roundRobinCheck() in Kernel will clean up _CPU process.
-                Globals._CPU.localPCB.processState = "Terminated";
-                Globals._Scheduler.currentProcess.processState = "Terminated";
+                Globals._CPU.localPCB!.processState = "Terminated";
+                Globals._Scheduler.currentProcess!.processState = "Terminated";
             }/// if
 
         }///else-if
@@ -81,12 +81,12 @@ export class MemoryAccessor {
             Globals._OsShell.putPrompt();
 
             /// Terminate Program (don't forget to update the PCB process state)
-            if (Globals._CPU.localPCB.processState !== "Terminated") {
+            if (Globals._CPU.localPCB!.processState !== "Terminated") {
                 /// "Program" memory bounds violation, just kill the program for now...
                 /// By changing the current process state to "Terminated", the following 
                 /// _Scheduler.roundRobinCheck() in Kernel will clean up _CPU process.
-                Globals._CPU.localPCB.processState = "Terminated";
-                Globals._Scheduler.currentProcess.processState = "Terminated";
+                Globals._CPU.localPCB!.processState = "Terminated";
+                Globals._Scheduler.currentProcess!.processState = "Terminated";
             }/// if
         }///else-if
         else if ((physicalAddress < newVolume.physicalBase) || (newLogicalAddress < 0)) {
@@ -97,12 +97,12 @@ export class MemoryAccessor {
             Globals._OsShell.putPrompt();
 
             /// Terminate Program (don't forget to update the PCB process state)
-            if (Globals._CPU.localPCB.processState !== "Terminated") {
+            if (Globals._CPU.localPCB!.processState !== "Terminated") {
                 /// "Program" memory bounds violation, just kill the program for now...
                 /// By changing the current process state to "Terminated", the following 
                 /// _Scheduler.roundRobinCheck() in Kernel will clean up _CPU process.
-                Globals._CPU.localPCB.processState = "Terminated";
-                Globals._Scheduler.currentProcess.processState = "Terminated";
+                Globals._CPU.localPCB!.processState = "Terminated";
+                Globals._Scheduler.currentProcess!.processState = "Terminated";
             }/// if
         }///else-if
         else {

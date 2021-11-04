@@ -36,7 +36,7 @@ export class Disk {
         this.createMasterBootRecord();
 
         /// Reclaim all ID's
-        Globals._krnDiskDriver.idAllocator = new IdAllocator();
+        Globals._krnDiskDriver!.idAllocator = new IdAllocator();
     }/// init
 
     public createSessionBlock(newTrackNum: number, newSectorNum: number, newBlockNum: number) {
@@ -68,7 +68,7 @@ export class Disk {
         var nextBlockPointer: string = Globals.BLOCK_NULL_POINTER;
 
         /// Remaining 60 Bytes are for the raw data
-        var data: string = Globals._krnDiskDriver.englishToHex("Master Partition Table, Master Signature, Master Boot Code");
+        var data: string = Globals._krnDiskDriver!.englishToHex("Master Partition Table, Master Signature, Master Boot Code");
 
         /// Value part of key|value in session storage
         var value = isOccupied + nextBlockPointer + data;

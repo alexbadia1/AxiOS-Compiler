@@ -12,6 +12,11 @@
             ~
    ---------------------------------- */
 
+import { Defragment } from "../defragment";
+import { Globals } from "../global";
+import { Control } from "../host/control";
+import { DeviceDriver } from "./deviceDriver";
+
 // Extends DeviceDriver
 export class DeviceDriverDisk extends DeviceDriver {
     constructor(
@@ -46,7 +51,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         /// More...?
     }/// krnDiskDriverEntry
 
-    public krnDiskDispatchFunctions(params) {
+    public krnDiskDispatchFunctions(params: any) {
         var result: string = '';
         var diskOperation: string = params[0];
         switch (diskOperation) {
@@ -76,16 +81,16 @@ export class DeviceDriverDisk extends DeviceDriver {
                 result = this.defrag();
                 break;
             default:
-                _Kernel.krnTrace(`Failed to perform disk ${params[0]} operation`);
-                _StdOut.putText(`Failed to perform disk ${params[0]} operation`);
+                Globals._Kernel.krnTrace(`Failed to perform disk ${params[0]} operation`);
+                Globals._StdOut.putText(`Failed to perform disk ${params[0]} operation`);
                 break;
         }/// switch
 
         /// Show results denoting the success or failure of the driver operation on disk
         if (result !== '') {
-            _StdOut.putText(`${result}`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._StdOut.putText(`${result}`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// if
 
         return result;
@@ -105,42 +110,42 @@ export class DeviceDriverDisk extends DeviceDriver {
                 success = this.quickFormat();
                 break;
             case 'no-arg':
-                _Disk.init();
+                Globals._Disk.init();
                 this.formatted = true;
                 success = true;
                 break;
             default:
-                _Kernel.krnTrace(`Failed disk format (Type: ${type.replace('-', '').trim()})`);
-                _StdOut.putText(`Cannot perform format (Type: ${type.replace('-', '').trim()})`);
-                _StdOut.advanceLine();
-                _OsShell.putPrompt();
+                Globals._Kernel.krnTrace(`Failed disk format (Type: ${type.replace('-', '').trim()})`);
+                Globals._StdOut.putText(`Cannot perform format (Type: ${type.replace('-', '').trim()})`);
+                Globals._StdOut.advanceLine();
+                Globals._OsShell.putPrompt();
                 break;
         }/// switch 
 
         if (success) {
-            _StdOut.putText(`Hard drive successfully formatted!`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._StdOut.putText(`Hard drive successfully formatted!`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// if
-        TSOS.Control.updateVisualDisk();
+        Control.updateVisualDisk();
         // else {
-        //     _StdOut.putText(`Failed to format (Type: ${type.replace('-', '').trim()})`);
-        //     _StdOut.advanceLine();
-        //     _OsShell.putPrompt();
+        //     Globals._StdOut.putText(`Failed to format (Type: ${type.replace('-', '').trim()})`);
+        //     Globals._StdOut.advanceLine();
+        //     Globals._OsShell.putPrompt();
         // }// else
     }/// format
 
     private fullFormat(): boolean {
         if (this.formatted) {
             /// Same as Disk.init() except skip the master boot record
-            for (var trackNum: number = 0; trackNum < TRACK_LIMIT; ++trackNum) {
-                for (var sectorNum: number = 0; sectorNum < SECTOR_LIMIT; ++sectorNum) {
-                    for (var blockNum: number = 0; blockNum < BLOCK_LIMIT; ++blockNum) {
-                        _Disk.createSessionBlock(trackNum, sectorNum, blockNum);
+            for (var trackNum: number = 0; trackNum < Globals.TRACK_LIMIT; ++trackNum) {
+                for (var sectorNum: number = 0; sectorNum < Globals.SECTOR_LIMIT; ++sectorNum) {
+                    for (var blockNum: number = 0; blockNum < Globals.BLOCK_LIMIT; ++blockNum) {
+                        Globals._Disk.createSessionBlock(trackNum, sectorNum, blockNum);
                     }/// for
                 }/// for
             }/// for
-            _Kernel.krnTrace(`Disk formatted (Type: Full Format)`);
+            Globals._Kernel.krnTrace(`Disk formatted (Type: Full Format)`);
 
             /// Reclaim all ID's
             this.idAllocator = new IdAllocator();
@@ -148,10 +153,10 @@ export class DeviceDriverDisk extends DeviceDriver {
             return true;
         }/// if
         else {
-            _Kernel.krnTrace(`Failed disk format (Type: Full Format), missing master boot record`);
-            _StdOut.putText(`Full Format can only be used to REFORMAT the drive, please initially format the drive.`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._Kernel.krnTrace(`Failed disk format (Type: Full Format), missing master boot record`);
+            Globals._StdOut.putText(`Full Format can only be used to REFORMAT the drive, please initially format the drive.`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
             return false;
         }/// else
     }/// fullFormat
@@ -161,15 +166,15 @@ export class DeviceDriverDisk extends DeviceDriver {
         /// of data could possibly be null if '-quick' format is called as the "first" format...
         if (this.formatted) {
             /// Change the first four bytes back to 00's
-            for (var trackNum: number = 0; trackNum < TRACK_LIMIT; ++trackNum) {
-                for (var sectorNum: number = 0; sectorNum < SECTOR_LIMIT; ++sectorNum) {
-                    for (var blockNum: number = 0; blockNum < BLOCK_LIMIT; ++blockNum) {
+            for (var trackNum: number = 0; trackNum < Globals.TRACK_LIMIT; ++trackNum) {
+                for (var sectorNum: number = 0; sectorNum < Globals.SECTOR_LIMIT; ++sectorNum) {
+                    for (var blockNum: number = 0; blockNum < Globals.BLOCK_LIMIT; ++blockNum) {
 
                         var currentKey: string =
-                            `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
+                            `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
 
                         /// Skip already quick formatted blocks
-                        if (sessionStorage.getItem(currentKey).substring(0, 8) === "00000000") {
+                        if (sessionStorage.getItem(currentKey)!.substring(0, 8) === "00000000") {
                             continue;
                         }/// if
 
@@ -181,10 +186,10 @@ export class DeviceDriverDisk extends DeviceDriver {
                         /// Reset the first 8 nums to zero
                         else {
                             /// Get session value
-                            var value: string = sessionStorage.getItem(currentKey);
+                            var value: string | null = sessionStorage.getItem(currentKey);
 
                             /// Replace the first 4 bytes (8 characters) with 00's
-                            value = "8000" + BLOCK_NULL_POINTER + value.substring(10, value.length);
+                            value = "8000" + Globals.BLOCK_NULL_POINTER + value!.substring(10, value!.length);
 
                             /// Write the change back to the list
                             sessionStorage.setItem(currentKey, value);
@@ -194,16 +199,16 @@ export class DeviceDriverDisk extends DeviceDriver {
             }/// for
             /// Reclaim all ID's
             this.idAllocator = new IdAllocator();
-            _Kernel.krnTrace(`Disk formatted (Type: Quick Format)`);
+            Globals._Kernel.krnTrace(`Disk formatted (Type: Quick Format)`);
             this.formatted = true;
             return true;
         }/// if
 
         else {
-            _Kernel.krnTrace(`Failed disk format (Type: Quick Format), missing master boot record`);
-            _StdOut.putText(`Quick Format can only be used to REFORMAT the drive, please initially format the drive.`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._Kernel.krnTrace(`Failed disk format (Type: Quick Format), missing master boot record`);
+            Globals._StdOut.putText(`Quick Format can only be used to REFORMAT the drive, please initially format the drive.`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
             return false;
         }/// else
     }/// quickFormat
@@ -233,11 +238,11 @@ export class DeviceDriverDisk extends DeviceDriver {
                     if (availableFileDataKey != null) {
 
                         /// Preserve and deleted files being overwritten for later recovery
-                        if (parseInt(this.getBlockFlag(availableDirKey), 16) > NEGATIVE_ZERO) {
+                        if (parseInt(this.getBlockFlag(availableDirKey), 16) > Globals.NEGATIVE_ZERO) {
                             this.preserveFileIntegrity(availableDirKey);
                         }/// if
 
-                        if (parseInt(this.getBlockFlag(availableDirKey), 16) > NEGATIVE_ZERO) {
+                        if (parseInt(this.getBlockFlag(availableDirKey), 16) > Globals.NEGATIVE_ZERO) {
                             this.preserveFileIntegrity(availableFileDataKey);
                         }/// if
 
@@ -247,7 +252,7 @@ export class DeviceDriverDisk extends DeviceDriver {
                         var newFileIDString: string = Control.formatToHexWithPaddingTwoBytes(newFileID);
                         this.setBlockFlag(availableDirKey, newFileIDString);
                         this.setBlockForwardPointer(availableDirKey, availableFileDataKey);
-                        this.setBlockDate(availableDirKey, Control.formatToHexWithPaddingSevenBytes(_Kernel.getCurrentDateTime()));
+                        this.setBlockDate(availableDirKey, Control.formatToHexWithPaddingSevenBytes(Globals._Kernel.getCurrentDateTime()));
                         this.setBlockSize(availableDirKey, '0080'); /// 128 in hexadecimal
                         this.setDirectoryBlockData(availableDirKey, paddedFileNameInHex);
 
@@ -256,35 +261,35 @@ export class DeviceDriverDisk extends DeviceDriver {
                         this.setDataBlockData(availableFileDataKey, this.dirBlock.defaultDataBlockZeros);
                         this.setBlockForwardPointer(availableFileDataKey, availableDirKey);
 
-                        _Kernel.krnTrace('File sucessfully created!');
-                        TSOS.Control.updateVisualDisk();
+                        Globals._Kernel.krnTrace('File sucessfully created!');
+                        Control.updateVisualDisk();
                         msg = `C:\\AXIOS\\${fileName} sucessfully created!`;
                     }/// if
 
                     /// No space in data partition
                     else {
-                        _Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, all file data blocks are in use!`);
+                        Globals._Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, all file data blocks are in use!`);
                         msg = `Cannot create C:\\AXIOS\\${fileName}, all file data blocks are in use!`;
                     }/// else
                 }/// if
 
                 /// No space in directory
                 else {
-                    _Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, all file header blocks are in use!`);
+                    Globals._Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, all file header blocks are in use!`);
                     msg = `Cannot create C:\\AXIOS\\${fileName}, all file header blocks are in use!`;
                 }/// else
             }/// if
 
             /// Ran out of file ID's
             else {
-                _Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, ran out of ID's to allocate!`);
+                Globals._Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, ran out of ID's to allocate!`);
                 msg = `Cannot create C:\\AXIOS\\${fileName}, ran out of ID's to allocate!`;
             }/// else
         }/// if
 
         /// File already exists
         else {
-            _Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, filename is already in use!`);
+            Globals._Kernel.krnTrace(`Cannot create C:\\AXIOS\\${fileName}, filename is already in use!`);
             msg = `Cannot create C:\\AXIOS\\${fileName}, filename already in use!`;
         }/// else
 
@@ -304,18 +309,18 @@ export class DeviceDriverDisk extends DeviceDriver {
             return `Cannot rename ${oldFileName}`;
         }/// else
 
-        TSOS.Control.updateVisualDisk();
+        Control.updateVisualDisk();
         return `${oldFileName} renamed to ${this.hexToEnglish(newFileNameInHex)}`;
     }/// rename
 
     public list(type: string): void {
         var isEmpty: boolean = true;
-        _StdOut.advanceLine();
+        Globals._StdOut.advanceLine();
         /// Iterate through the directory portion of the list and print out based on the argument passed
         for (var trackNum: number = this.dirBlock.baseTrack; trackNum <= this.dirBlock.limitTrack; ++trackNum) {
             for (var sectorNum: number = this.dirBlock.baseSector; sectorNum <= this.dirBlock.limitSector; ++sectorNum) {
                 for (var blockNum: number = this.dirBlock.baseBlock; blockNum <= this.dirBlock.limitBlock; ++blockNum) {
-                    var currentKey: string = `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
+                    var currentKey: string = `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
                     if (!this.isAvailable(currentKey)) {
                         var fileName: string = this.hexToEnglish(this.getDirectoryBlockData(currentKey));
                         var fileFlag: number = parseInt(this.getBlockFlag(currentKey));
@@ -326,7 +331,7 @@ export class DeviceDriverDisk extends DeviceDriver {
                         var suffix: string = '';
 
                         /// Formatting the date
-                        if (!_TwentyFourHourClock) {
+                        if (!Globals._TwentyFourHourClock) {
                             hours = parseInt(fileDate.substring(8, 10), 16) === 24 ?
                                 (parseInt(fileDate.substring(8, 10), 16) / 24).toString()
                                 : (parseInt(fileDate.substring(8, 10), 16) % 12).toString();
@@ -370,17 +375,17 @@ export class DeviceDriverDisk extends DeviceDriver {
 
 
                         /// Only print out hidden file if type is '-l'
-                        if (fileName.startsWith(`${this.hiddenFilePrefix}`) && type === '-l' && fileFlag < NEGATIVE_ZERO) {
+                        if (fileName.startsWith(`${this.hiddenFilePrefix}`) && type === '-l' && fileFlag < Globals.NEGATIVE_ZERO) {
                             /// Print out file name
-                            ///: _StdOut.putText(`${INDENT_STRING}${INDENT_STRING}${sessionStorage.getItem(currentKey).substring(8)}.txt`);
-                            _StdOut.putText(`${INDENT_STRING}${INDENT_STRING}${fileName}${INDENT_STRING}${fileDate}${INDENT_STRING}${fileSize}${fileSizeSuffix}`);
-                            _StdOut.advanceLine();
+                            ///: Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals.INDENT_STRING}${sessionStorage.getItem(currentKey).substring(8)}.txt`);
+                            Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals.INDENT_STRING}${fileName}${Globals.INDENT_STRING}${fileDate}${Globals.INDENT_STRING}${fileSize}${fileSizeSuffix}`);
+                            Globals._StdOut.advanceLine();
                             isEmpty = false;
                         }/// if
 
-                        else if (!fileName.startsWith(`${this.hiddenFilePrefix}`) && fileFlag < NEGATIVE_ZERO) {
-                            _StdOut.putText(`${INDENT_STRING}${INDENT_STRING}${fileName}${INDENT_STRING}${fileDate}${INDENT_STRING}${fileSize}${fileSizeSuffix}`);
-                            _StdOut.advanceLine();
+                        else if (!fileName.startsWith(`${this.hiddenFilePrefix}`) && fileFlag < Globals.NEGATIVE_ZERO) {
+                            Globals._StdOut.putText(`${Globals.INDENT_STRING}${Globals.INDENT_STRING}${fileName}${Globals.INDENT_STRING}${fileDate}${Globals.INDENT_STRING}${fileSize}${fileSizeSuffix}`);
+                            Globals._StdOut.advanceLine();
                             isEmpty = false;
                         }/// if
                     }/// if
@@ -389,10 +394,10 @@ export class DeviceDriverDisk extends DeviceDriver {
         }/// for
 
         if (isEmpty) {
-            _StdOut.putText(`  No files found`);
-            _StdOut.advanceLine();
+            Globals._StdOut.putText(`  No files found`);
+            Globals._StdOut.advanceLine();
         }/// if
-        _OsShell.putPrompt();
+        Globals._OsShell.putPrompt();
     }/// list
 
     public read(fileName: string): string {
@@ -401,13 +406,13 @@ export class DeviceDriverDisk extends DeviceDriver {
 
         /// File found
         if (targetFileKey !== '') {
-            // _StdOut.advanceLine();
-            // _StdOut.putText(`File Location: ${targetFileKey}`);
-            // _StdOut.advanceLine();
-            // _StdOut.putText(`File Flag/ID: ${parseInt(this.getBlockFlag(targetFileKey), 16)}`);
-            // _StdOut.advanceLine();
-            // _StdOut.putText(`File Header Data: ${sessionStorage.getItem(targetFileKey)}`);
-            // _StdOut.advanceLine();
+            // Globals._StdOut.advanceLine();
+            // Globals._StdOut.putText(`File Location: ${targetFileKey}`);
+            // Globals._StdOut.advanceLine();
+            // Globals._StdOut.putText(`File Flag/ID: ${parseInt(this.getBlockFlag(targetFileKey), 16)}`);
+            // Globals._StdOut.advanceLine();
+            // Globals._StdOut.putText(`File Header Data: ${sessionStorage.getItem(targetFileKey)}`);
+            // Globals._StdOut.advanceLine();
             var fileContents: string = '';
 
             /// Start at first file block
@@ -416,14 +421,14 @@ export class DeviceDriverDisk extends DeviceDriver {
             /// Keep following the links from block to block until the end of the file
             while (currentPointer !== targetFileKey) {
                 /// Since i haven't made the table yet...
-                // _StdOut.advanceLine();
-                // _StdOut.putText(`Location: ${currentPointer}`);
-                // _StdOut.advanceLine();
-                // _StdOut.putText(`Session Storage: ${sessionStorage.getItem(currentPointer)}`);
-                // _StdOut.advanceLine();
-                // _StdOut.putText(`Forward Pointer: ${this.getBlockForwardPointer(currentPointer)}`);
-                // _StdOut.advanceLine();
-                // _OsShell.putPrompt();
+                // Globals._StdOut.advanceLine();
+                // Globals._StdOut.putText(`Location: ${currentPointer}`);
+                // Globals._StdOut.advanceLine();
+                // Globals._StdOut.putText(`Session Storage: ${sessionStorage.getItem(currentPointer)}`);
+                // Globals._StdOut.advanceLine();
+                // Globals._StdOut.putText(`Forward Pointer: ${this.getBlockForwardPointer(currentPointer)}`);
+                // Globals._StdOut.advanceLine();
+                // Globals._OsShell.putPrompt();
 
                 /// Translate non-swap files only
                 fileContents += isSwapFile ? this.getDataBlockData(currentPointer) : this.hexToEnglish(this.getDataBlockData(currentPointer));
@@ -458,16 +463,16 @@ export class DeviceDriverDisk extends DeviceDriver {
             var fileID: number = parseInt(this.getBlockFlag(targetFileKey), 16);
             var currentSize = 0;
             var fileSize = parseInt(this.getBlockSize(targetFileKey), 16);
-            var chunks: string[] = dataInHex.match(new RegExp('.{1,' + (2 * DATA_BLOCK_DATA_LIMIT) + '}', 'g'));
+            var chunks: string[] = dataInHex.match(new RegExp('.{1,' + (2 * Globals.DATA_BLOCK_DATA_LIMIT) + '}', 'g'))!;
             var needMoreSpace: boolean = false;
 
             if ((fileSize - 64) / 64 < chunks.length) {
                 needMoreSpace = true;
             }/// if
 
-            // _StdOut.putText(`Need more space: ${(fileSize - 64) / 64 >= chunks.length}`);
+            // Globals._StdOut.putText(`Need more space: ${(fileSize - 64) / 64 >= chunks.length}`);
             if (needMoreSpace) {
-                freeSpaceKeys = this.getAvailableBlocksFromDataPartition(chunks.length);
+                freeSpaceKeys = this.getAvailableBlocksFromDataPartition(chunks.length)!;
                 if (freeSpaceKeys != null) {
                     moreSpaceFound = true;
                 }/// if
@@ -486,7 +491,7 @@ export class DeviceDriverDisk extends DeviceDriver {
                     currentOverwriteBlockKey = this.getBlockForwardPointer(previousBlockKey);
 
                     /// Grab next free chunk and add right hand padding
-                    var currentPaddedChunk: string = chunks.shift().padEnd(DATA_BLOCK_DATA_LIMIT * 2, '0');
+                    var currentPaddedChunk: string = chunks.shift()!.padEnd(Globals.DATA_BLOCK_DATA_LIMIT * 2, '0');
 
                     /// Set previous block to point to this current free block
                     /// Don't forget the previous block is now "in use" as well
@@ -513,26 +518,26 @@ export class DeviceDriverDisk extends DeviceDriver {
                     var tempCurrentOverwriteBlockKey = this.getBlockForwardPointer(previousBlockKeyContinued);
 
                     /// I will be damned if this works...
-                    this.setBlockForwardPointer(previousBlockKeyContinued, BLOCK_NULL_POINTER);
-                    this.setBlockFlag(tempCurrentOverwriteBlockKey, Control.formatToHexWithPaddingTwoBytes(NEGATIVE_ZERO));
+                    this.setBlockForwardPointer(previousBlockKeyContinued, Globals.BLOCK_NULL_POINTER);
+                    this.setBlockFlag(tempCurrentOverwriteBlockKey, Control.formatToHexWithPaddingTwoBytes(Globals.NEGATIVE_ZERO));
                     this.setDataBlockData(tempCurrentOverwriteBlockKey, this.dirBlock.defaultDataBlockZeros);
-                    Control.hostLog(`Reclaimed block ${tempCurrentOverwriteBlockKey}, set flag to ${Control.formatToHexWithPaddingTwoBytes(NEGATIVE_ZERO)}`);
-                    // _StdOut.putText(`Updated block ${tempCurrentOverwriteBlockKey} flag to ${Control.formatToHexWithPaddingTwoBytes(NEGATIVE_ZERO)}`);
-                    // _StdOut.advanceLine();
+                    Control.hostLog(`Reclaimed block ${tempCurrentOverwriteBlockKey}, set flag to ${Control.formatToHexWithPaddingTwoBytes(Globals.NEGATIVE_ZERO)}`);
+                    // Globals._StdOut.putText(`Updated block ${tempCurrentOverwriteBlockKey} flag to ${Control.formatToHexWithPaddingTwoBytes(NEGATIVE_ZERO)}`);
+                    // Globals._StdOut.advanceLine();
 
                     previousBlockKeyContinued = tempCurrentOverwriteBlockKey;
 
                     temp += 64;
                 }/// while
                 if (temp === fileSize - 64) {
-                    this.setBlockForwardPointer(previousBlockKeyContinued, BLOCK_NULL_POINTER);
+                    this.setBlockForwardPointer(previousBlockKeyContinued, Globals.BLOCK_NULL_POINTER);
                 }/// if
 
 
                 if (chunks.length === 0) {
                     this.setBlockForwardPointer(currentOverwriteBlockKey, targetFileKey);
                     this.setBlockSize(targetFileKey, Control.formatToHexWithPaddingTwoBytes(currentSize + 64));
-                    TSOS.Control.updateVisualDisk();
+                    Control.updateVisualDisk();
                     return (`Wrote to: C:\\AXIOS\\${fileName}`);
                 }/// if
             }/// if
@@ -543,15 +548,15 @@ export class DeviceDriverDisk extends DeviceDriver {
 
                 while (chunks.length > 0) {
                     /// Grab next free block
-                    var currentBlockKey: string = freeSpaceKeys.shift();
+                    var currentBlockKey: string = freeSpaceKeys.shift()!;
 
-                    if (parseInt(this.getBlockFlag(currentBlockKey), 16) > NEGATIVE_ZERO) {
+                    if (parseInt(this.getBlockFlag(currentBlockKey), 16) > Globals.NEGATIVE_ZERO) {
                         this.preserveFileIntegrity(currentBlockKey);
                     }/// if
 
                     /// Grab next free chunk
                     /// Add right hand padding
-                    var currentPaddedChunk: string = chunks.shift().padEnd(DATA_BLOCK_DATA_LIMIT * 2, '0');
+                    var currentPaddedChunk: string = chunks.shift()!.padEnd(Globals.DATA_BLOCK_DATA_LIMIT * 2, '0');
 
                     /// Set previous block to point to this current free block
                     /// Don't forget the previous block is now "in use" as well
@@ -571,9 +576,9 @@ export class DeviceDriverDisk extends DeviceDriver {
                 }/// while
 
                 if (chunks.length === 0) {
-                    this.setBlockForwardPointer(currentBlockKey, targetFileKey);
+                    this.setBlockForwardPointer(currentBlockKey!, targetFileKey);
                     this.setBlockSize(targetFileKey, Control.formatToHexWithPaddingTwoBytes(currentSize + 64));
-                    TSOS.Control.updateVisualDisk();
+                    Control.updateVisualDisk();
                     return (`Wrote to: C:\\AXIOS\\${fileName}`);
                 }/// if
             }/// if
@@ -607,8 +612,8 @@ export class DeviceDriverDisk extends DeviceDriver {
             /// Recover the positive ID
             this.idAllocator.deallocatePositiveID(parseInt(this.getBlockFlag(targetFileKey), 16));
 
-            // _StdOut.putText(`Recovered ID: ${parseInt(this.getBlockFlag(targetFileKey), 16)}`);
-            // _StdOut.advanceLine();
+            // Globals._StdOut.putText(`Recovered ID: ${parseInt(this.getBlockFlag(targetFileKey), 16)}`);
+            // Globals._StdOut.advanceLine();
 
             /// Deleted file ID successfully allocated
             if (deletedFileID != -1) {
@@ -619,7 +624,7 @@ export class DeviceDriverDisk extends DeviceDriver {
             /// Ran out of deleted file ID's
             else {
                 msg = `Deleted C:\\AXIOS\\${fileName}`;
-                deletedFileID = Control.formatToHexWithPaddingTwoBytes(NEGATIVE_ZERO);
+                deletedFileID = Control.formatToHexWithPaddingTwoBytes(Globals.NEGATIVE_ZERO);
             }/// else
 
             /// "Delete" by making the directory block available, hopefully this will
@@ -639,13 +644,13 @@ export class DeviceDriverDisk extends DeviceDriver {
                 /// Get next block
                 currentPointer = this.getBlockForwardPointer(currentPointer);
             }/// while
-            TSOS.Control.updateVisualDisk();
+            Control.updateVisualDisk();
             return msg;
         }/// if
 
         /// File NOT found
         else {
-            _Kernel.krnTrace(`Cannot delete C:\\AXIOS\\${fileName}`);
+            Globals._Kernel.krnTrace(`Cannot delete C:\\AXIOS\\${fileName}`);
             return `Cannot delete C:\\AXIOS\\${fileName}`;
         }/// else
     }/// delete
@@ -655,7 +660,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         /// Search for deleted file in directory
         var targetFileKey: string = this.fileNameExists(filename);
 
-        var copyFileNameKey: string = this.fileNameExists(copyFileNameKey);
+        var copyFileNameKey: string = this.fileNameExists(copyFileNameKey!);
 
         /// File found
         if (targetFileKey !== '' && copyFileNameKey === '') {
@@ -664,8 +669,8 @@ export class DeviceDriverDisk extends DeviceDriver {
             if (!success.startsWith('Cannot create')) {
                 var content: string = this.read(filename);
 
-                // _StdOut.putText(`${content}`);
-                // _StdOut.advanceLine();
+                // Globals._StdOut.putText(`${content}`);
+                // Globals._StdOut.advanceLine();
                 if (!content.startsWith('Cannot access') && content.trim().replace(' ', '').length !== 0) {
                     if (!this.write(copyFilename, content).startsWith('Cannot write'))
                         return `Copied ${filename} to ${copyFilename}`;
@@ -730,7 +735,7 @@ export class DeviceDriverDisk extends DeviceDriver {
                 var defaultFileNameWithPadding: string = defaultFileNameInHex + this.dirBlock.defaultDirectoryBlockZeros.substring(defaultFileNameInHex.length);
                 this.setDirectoryBlockData(targetFileKey, defaultFileNameWithPadding);
 
-                TSOS.Control.updateVisualDisk();
+                Control.updateVisualDisk();
                 return `Recovered file ${deletedFileName}, now called: "undeleted-${newID}". `;
             }/// if
 
@@ -748,17 +753,17 @@ export class DeviceDriverDisk extends DeviceDriver {
 
     // public recoverOrphans() {}
 
-    public getFirstAvailableBlockFromDataPartition(): string {
-        var firstDeletedBlock: string = null;
+    public getFirstAvailableBlockFromDataPartition(): string | null{
+        var firstDeletedBlock: string | null = null;
         /// Only need to search the "file data" portion of the disk
         for (var trackNum: number = this.fileDataBlock.baseTrack; trackNum <= this.fileDataBlock.limitTrack; ++trackNum) {
             for (var sectorNum: number = this.fileDataBlock.baseSector; sectorNum <= this.fileDataBlock.limitSector; ++sectorNum) {
                 for (var blockNum: number = this.fileDataBlock.baseBlock; blockNum <= this.fileDataBlock.limitBlock; ++blockNum) {
-                    var currentKey: string = `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
+                    var currentKey: string = `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
                     if (this.isAvailable(currentKey)) {
                         return currentKey;
                     }/// if
-                    if (firstDeletedBlock === null && parseInt(this.getBlockFlag(currentKey), 16) > NEGATIVE_ZERO) {
+                    if (firstDeletedBlock === null && parseInt(this.getBlockFlag(currentKey), 16) > Globals.NEGATIVE_ZERO) {
                         firstDeletedBlock = currentKey;
                     }/// if
                 }/// for
@@ -773,16 +778,16 @@ export class DeviceDriverDisk extends DeviceDriver {
     }/// getFirstAvailableBlockFromDataPartition
 
     public getFirstAvailableBlockFromDirectoryPartition() {
-        var firstDeletedBlock: string = null;
+        var firstDeletedBlock: string | null = null;
         /// Only need to search the "file header" portion of the disk
         for (var trackNum: number = this.dirBlock.baseTrack; trackNum <= this.dirBlock.limitTrack; ++trackNum) {
             for (var sectorNum: number = this.dirBlock.baseSector; sectorNum <= this.dirBlock.limitSector; ++sectorNum) {
                 for (var blockNum: number = this.dirBlock.baseBlock; blockNum <= this.dirBlock.limitBlock; ++blockNum) {
-                    var currentKey: string = `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
+                    var currentKey: string = `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
                     if (this.isAvailable(currentKey)) {
                         return currentKey;
                     }/// if
-                    if (firstDeletedBlock === null && parseInt(this.getBlockFlag(currentKey), 16) > NEGATIVE_ZERO) {
+                    if (firstDeletedBlock === null && parseInt(this.getBlockFlag(currentKey), 16) > Globals.NEGATIVE_ZERO) {
                         firstDeletedBlock = currentKey;
                     }/// if
                 }/// for
@@ -796,17 +801,17 @@ export class DeviceDriverDisk extends DeviceDriver {
         }/// else
     }/// getFirstAvailableBlockFromDirectoryPartition
 
-    public getAvailableBlocksFromDirectoryPartition(numBlocksNeeded: number): string[] {
+    public getAvailableBlocksFromDirectoryPartition(numBlocksNeeded: number): string[] | null {
         var availableBlocks: string[] = [];
         var availableDeletedBlocks: string[] = [];
         for (var trackNum: number = this.dirBlock.baseTrack; trackNum <= this.dirBlock.limitTrack; ++trackNum) {
             for (var sectorNum: number = this.dirBlock.baseSector; sectorNum <= this.dirBlock.limitSector; ++sectorNum) {
                 for (var blockNum: number = this.dirBlock.baseBlock; blockNum <= this.dirBlock.limitBlock; ++blockNum) {
-                    var currentKey: string = `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
+                    var currentKey: string = `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
                     if (this.isAvailable(currentKey)) {
                         availableBlocks.push(currentKey);
                     }/// if
-                    else if (parseInt(this.getBlockFlag(currentKey), 16) > NEGATIVE_ZERO) {
+                    else if (parseInt(this.getBlockFlag(currentKey), 16) > Globals.NEGATIVE_ZERO) {
                         availableDeletedBlocks.push(currentKey);
                     }/// if
                 }/// for
@@ -819,7 +824,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         else {
             if (availableBlocks.length + availableDeletedBlocks.length >= numBlocksNeeded) {
                 while (availableDeletedBlocks.length > 0) {
-                    availableBlocks.push(availableDeletedBlocks.shift());
+                    availableBlocks.push(availableDeletedBlocks.shift()!);
                 }/// for
                 return availableBlocks;
             }/// if
@@ -831,7 +836,7 @@ export class DeviceDriverDisk extends DeviceDriver {
     }/// getAvailableBlocksFromDirectoryPartition
 
 
-    public getAvailableBlocksFromDataPartition(numBlocksNeeded: number): string[] {
+    public getAvailableBlocksFromDataPartition(numBlocksNeeded: number): string[] | null{
         var availableBlocks: string[] = [];
         var availableDeletedBlocks: string[] = [];
 
@@ -839,11 +844,11 @@ export class DeviceDriverDisk extends DeviceDriver {
         for (var trackNum: number = this.fileDataBlock.baseTrack; trackNum <= this.fileDataBlock.limitTrack; ++trackNum) {
             for (var sectorNum: number = this.fileDataBlock.baseSector; sectorNum <= this.fileDataBlock.limitSector; ++sectorNum) {
                 for (var blockNum: number = this.fileDataBlock.baseBlock; blockNum <= this.fileDataBlock.limitBlock; ++blockNum) {
-                    var currentKey: string = `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
+                    var currentKey: string = `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
                     if (this.isAvailable(currentKey)) {
                         availableBlocks.push(currentKey);
                     }/// if
-                    else if (parseInt(this.getBlockFlag(currentKey), 16) > NEGATIVE_ZERO) {
+                    else if (parseInt(this.getBlockFlag(currentKey), 16) > Globals.NEGATIVE_ZERO) {
                         availableDeletedBlocks.push(currentKey);
                     }/// if
                 }/// for
@@ -857,7 +862,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         else {
             if (availableBlocks.length + availableDeletedBlocks.length >= numBlocksNeeded) {
                 while (availableDeletedBlocks.length > 0) {
-                    availableBlocks.push(availableDeletedBlocks.shift());
+                    availableBlocks.push(availableDeletedBlocks.shift()!);
                 }/// for
                 return availableBlocks;
             }/// if
@@ -873,8 +878,8 @@ export class DeviceDriverDisk extends DeviceDriver {
         for (var trackNum: number = this.dirBlock.baseTrack; trackNum <= this.dirBlock.limitTrack; ++trackNum) {
             for (var sectorNum: number = this.dirBlock.baseSector; sectorNum <= this.dirBlock.limitSector; ++sectorNum) {
                 for (var blockNum: number = this.dirBlock.baseBlock; blockNum <= this.dirBlock.limitBlock; ++blockNum) {
-                    var currentKey: string = `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
-                    if (this.hexToEnglish(this.getDirectoryBlockData(currentKey)) === targetFileNameInEnglish && parseInt(this.getBlockFlag(currentKey), 16) < NEGATIVE_ZERO) {
+                    var currentKey: string = `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
+                    if (this.hexToEnglish(this.getDirectoryBlockData(currentKey)) === targetFileNameInEnglish && parseInt(this.getBlockFlag(currentKey), 16) < Globals.NEGATIVE_ZERO) {
                         return currentKey;
                     }/// if
                 }/// for
@@ -888,8 +893,8 @@ export class DeviceDriverDisk extends DeviceDriver {
         for (var trackNum: number = this.dirBlock.baseTrack; trackNum <= this.dirBlock.limitTrack; ++trackNum) {
             for (var sectorNum: number = this.dirBlock.baseSector; sectorNum <= this.dirBlock.limitSector; ++sectorNum) {
                 for (var blockNum: number = this.dirBlock.baseBlock; blockNum <= this.dirBlock.limitBlock; ++blockNum) {
-                    var currentKey: string = `${TSOS.Control.formatToHexWithPadding(trackNum)}${TSOS.Control.formatToHexWithPadding(sectorNum)}${TSOS.Control.formatToHexWithPadding(blockNum)}`;
-                    if (this.hexToEnglish(this.getDirectoryBlockData(currentKey)) === targetFileNameInEnglish && parseInt(this.getBlockFlag(currentKey), 16) > NEGATIVE_ZERO) {
+                    var currentKey: string = `${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`;
+                    if (this.hexToEnglish(this.getDirectoryBlockData(currentKey)) === targetFileNameInEnglish && parseInt(this.getBlockFlag(currentKey), 16) > Globals.NEGATIVE_ZERO) {
                         return currentKey;
                     }/// if
                 }/// for
@@ -900,10 +905,10 @@ export class DeviceDriverDisk extends DeviceDriver {
 
     public defrag(): string {
         if (this.formatted) {
-            if (!_CPU.isExecuting) {
-                if (!_SingleStepMode) {
-                    TSOS.Defragment.defragment();
-                    TSOS.Control.updateVisualDisk();
+            if (!Globals._CPU.isExecuting) {
+                if (!Globals._SingleStepMode) {
+                    Defragment.defragment();
+                    Control.updateVisualDisk();
                 }/// if 
                 else {
                     `Cannot defragment the disk while in single step mode! Again, ran out of time for this...`;
@@ -930,14 +935,14 @@ export class DeviceDriverDisk extends DeviceDriver {
         }/// if
     }/// preserveDeletedFile
 
-    public findPreviousBlock(targetBlockKey: string): string {
+    public findPreviousBlock(targetBlockKey: string): string | null {
         var current: string = targetBlockKey;
-        if (_krnDiskDriver.getBlockForwardPointer(targetBlockKey) === BLOCK_NULL_POINTER) {
+        if (Globals._krnDiskDriver!.getBlockForwardPointer(targetBlockKey) === Globals.BLOCK_NULL_POINTER) {
             return null;
         }/// if
         /// Iterate through link list until we find the node that points to the node we change
-        while (_krnDiskDriver.getBlockForwardPointer(current) != targetBlockKey) {
-            current = _krnDiskDriver.getBlockForwardPointer(current);
+        while (Globals._krnDiskDriver!.getBlockForwardPointer(current) != targetBlockKey) {
+            current = Globals._krnDiskDriver!.getBlockForwardPointer(current);
         }/// while
 
         return current;
@@ -955,8 +960,8 @@ export class DeviceDriverDisk extends DeviceDriver {
         var success = false;
         /// Make sure flag is two bytes, so 4 string characters
         if (flag.length <= 4) {
-            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey);
-            sessionStorageValue = flag + sessionStorageValue.substring(FLAG_INDEXES.end + 1);
+            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey)!;
+            sessionStorageValue = flag + sessionStorageValue.substring(Globals.FLAG_INDEXES.end + 1);
             sessionStorage.setItem(sessionStorageKey, sessionStorageValue);
             success = true;
         }/// if
@@ -968,8 +973,8 @@ export class DeviceDriverDisk extends DeviceDriver {
         var success = false;
         /// Make sure forward pointer is 3 bytes, so 6 string characters
         if (pointer.length <= 6) {
-            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey);
-            sessionStorageValue = sessionStorageValue.substring(FLAG_INDEXES.start, FLAG_INDEXES.end + 1) + pointer + sessionStorageValue.substring(POINTER_INDEXES.end + 1);
+            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey)!;
+            sessionStorageValue = sessionStorageValue.substring(Globals.FLAG_INDEXES.start, Globals.FLAG_INDEXES.end + 1) + pointer + sessionStorageValue.substring(Globals.POINTER_INDEXES.end + 1);
             sessionStorage.setItem(sessionStorageKey, sessionStorageValue);
             success = true;
         }/// if
@@ -981,9 +986,9 @@ export class DeviceDriverDisk extends DeviceDriver {
         var success = false;
         /// Make sure date is 8 bytes, so 16 string characters
         if (date.length <= 16) {
-            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey);
-            sessionStorageValue = sessionStorageValue.substring(0, DATE_INDEXES.start) +
-                date + sessionStorageValue.substring(DATE_INDEXES.end + 1);
+            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey)!;
+            sessionStorageValue = sessionStorageValue.substring(0, Globals.DATE_INDEXES.start) +
+                date + sessionStorageValue.substring(Globals.DATE_INDEXES.end + 1);
             sessionStorage.setItem(sessionStorageKey, sessionStorageValue);
             success = true;
         }/// if
@@ -994,9 +999,9 @@ export class DeviceDriverDisk extends DeviceDriver {
         var success = false;
         /// Make sure size is 2 bytes, so 4 string characters
         if (size.length <= 4) {
-            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey);
-            sessionStorageValue = sessionStorageValue.substring(0, FILE_SIZE_INDEXES.start) +
-                size + sessionStorageValue.substring(FILE_SIZE_INDEXES.end + 1);
+            var sessionStorageValue: string = sessionStorage.getItem(sessionStorageKey)!;
+            sessionStorageValue = sessionStorageValue.substring(0, Globals.FILE_SIZE_INDEXES.start) +
+                size + sessionStorageValue.substring(Globals.FILE_SIZE_INDEXES.end + 1);
             sessionStorage.setItem(sessionStorageKey, sessionStorageValue);
             success = true;
         }/// if
@@ -1007,7 +1012,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         /// Make sure data is  only 50 Bytes, so 100 string characters
         if (newBlockData.length <= 100) {
             var sessionStorageValue = sessionStorage.getItem(sessionStorageKey);
-            sessionStorageValue = sessionStorageValue.substring(0, DIRECTORY_DATA_INDEXES.start) + newBlockData;
+            sessionStorageValue = sessionStorageValue!.substring(0, Globals.DIRECTORY_DATA_INDEXES.start) + newBlockData;
             sessionStorage.setItem(sessionStorageKey, sessionStorageValue);
             return true;
         }/// if
@@ -1018,7 +1023,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         /// Make sure data is  only 59 Bytes, so 118 string characters
         if (newBlockData.length <= 118) {
             var sessionStorageValue = sessionStorage.getItem(sessionStorageKey);
-            sessionStorageValue = sessionStorageValue.substring(0, DATA_DATA_INDEXES.start) + newBlockData;
+            sessionStorageValue = sessionStorageValue!.substring(0, Globals.DATA_DATA_INDEXES.start) + newBlockData;
             sessionStorage.setItem(sessionStorageKey, sessionStorageValue);
             return true;
         }/// if
@@ -1026,19 +1031,19 @@ export class DeviceDriverDisk extends DeviceDriver {
     }/// getBlockData
 
     public getBlockFlag(sessionStorageKey: string): string {
-        return sessionStorage.getItem(sessionStorageKey).substring(FLAG_INDEXES.start, FLAG_INDEXES.end + 1);
+        return sessionStorage.getItem(sessionStorageKey)!.substring(Globals.FLAG_INDEXES.start, Globals.FLAG_INDEXES.end + 1);
     }/// getBlockFlag
 
     public getBlockForwardPointer(sessionStorageKey: string): string {
-        return sessionStorage.getItem(sessionStorageKey).substring(POINTER_INDEXES.start, POINTER_INDEXES.end + 1);
+        return sessionStorage.getItem(sessionStorageKey)!.substring(Globals.POINTER_INDEXES.start, Globals.POINTER_INDEXES.end + 1);
     }/// getBlockNextPointer
 
     private getBlockDate(sessionStorageKey: string) {
-        return sessionStorage.getItem(sessionStorageKey).substring(DATE_INDEXES.start, DATE_INDEXES.end + 1);
+        return sessionStorage.getItem(sessionStorageKey)!.substring(Globals.DATE_INDEXES.start, Globals.DATE_INDEXES.end + 1);
     }/// getBlockDate
 
     private getBlockSize(sessionStorageKey: string) {
-        return sessionStorage.getItem(sessionStorageKey).substring(FILE_SIZE_INDEXES.start, FILE_SIZE_INDEXES.end + 1);
+        return sessionStorage.getItem(sessionStorageKey)!.substring(Globals.FILE_SIZE_INDEXES.start, Globals.FILE_SIZE_INDEXES.end + 1);
     }/// getBlockSize
 
     private getDirectoryBlockData(sessionStorageKey: string): string {
@@ -1047,7 +1052,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         /// return isSwapFile ? sessionStorageValue.substring(8) : sessionStorageValue.substring(8).replace('00', '');
 
         /// Return this for now..
-        return sessionStorage.getItem(sessionStorageKey).substring(DIRECTORY_DATA_INDEXES.start, DIRECTORY_DATA_INDEXES.end + 1);
+        return sessionStorage.getItem(sessionStorageKey)!.substring(Globals.DIRECTORY_DATA_INDEXES.start, Globals.DIRECTORY_DATA_INDEXES.end + 1);
     }/// getDirectoryBlockData
 
     private getDataBlockData(sessionStorageKey: string): string {
@@ -1056,7 +1061,7 @@ export class DeviceDriverDisk extends DeviceDriver {
         /// return isSwapFile ? sessionStorageValue.substring(8) : sessionStorageValue.substring(8).replace('00', '');
 
         /// Return this for now..
-        return sessionStorage.getItem(sessionStorageKey).substring(DATA_DATA_INDEXES.start, DATA_DATA_INDEXES.end + 1);
+        return sessionStorage.getItem(sessionStorageKey)!.substring(Globals.DATA_DATA_INDEXES.start, Globals.DATA_DATA_INDEXES.end + 1);
     }/// getDirectoryBlockData
 
     public englishToHex(englishWord: string): string {
@@ -1096,21 +1101,21 @@ export class DeviceDriverDisk extends DeviceDriver {
 
 export class Partition {
     constructor(
-        public name,
-        public baseTrack,
-        public baseSector,
-        public baseBlock,
-        public limitTrack,
-        public limitSector,
-        public limitBlock,
+        public name: any,
+        public baseTrack: any,
+        public baseSector: any,
+        public baseBlock: any,
+        public limitTrack: any,
+        public limitSector: any,
+        public limitBlock: any,
         public defaultDataBlockZeros: string = '',
         public defaultDirectoryBlockZeros: string = '',
     ) {
-        for (var byte: number = 0; byte < DATA_BLOCK_DATA_LIMIT; ++byte) {
+        for (var byte: number = 0; byte < Globals.DATA_BLOCK_DATA_LIMIT; ++byte) {
             this.defaultDataBlockZeros += "00";
         }// for
 
-        for (var bytes: number = 0; bytes < DIRECTORY_BLOCK_DATA_LIMIT; ++bytes) {
+        for (var bytes: number = 0; bytes < Globals.DIRECTORY_BLOCK_DATA_LIMIT; ++bytes) {
             this.defaultDirectoryBlockZeros += "00";
         }// for
     }/// constructor
@@ -1157,13 +1162,13 @@ export class IdAllocator {
      */
     public allocatePositiveID() {
         var id = this.availableFilePositiveID.pop();
-        this.usedFilePositiveID.push(id);
+        this.usedFilePositiveID.push(id!);
         return id === undefined ? -1 : id;
     }/// allocatePositiveID
 
     public allocateNegativeID() {
         var id = this.availableFileNegativeID.pop();
-        this.usedFileNegativeID.push(id);
+        this.usedFileNegativeID.push(id!);
         return id === undefined ? -1 : id;
     }/// allocateNegaiveID
     /**

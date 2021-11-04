@@ -5,6 +5,19 @@
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
 
+import { Globals } from "../global";
+import { Control } from "../host/control";
+import { Devices } from "../host/devices";
+import { Disk } from "../host/disk";
+import { Console } from "./console";
+import { DeviceDriverDisk } from "./deviceDriverDisk";
+import { DeviceDriverKeyboard } from "./deviceDriverKeyboard";
+import { MemoryManager } from "./memoryManager";
+import { PriorityQueue } from "./priorityQueue";
+import { ProcessControlBlock } from "./processControlBlock";
+import { Queue } from "./queue";
+import { Shell } from "./shell";
+
 
 export class Kernel {
     ///
@@ -18,52 +31,52 @@ export class Kernel {
         /// Initialize our global queues.
         /// 
         /// A (currently) priority queue for interrupt requests (IRQs).
-        _KernelInterruptPriorityQueue = new PriorityQueue();
+        Globals._KernelInterruptPriorityQueue = new PriorityQueue();
 
         /// Buffers... for kernel
-        _KernelBuffers = new Array();
+        Globals._KernelBuffers = new Array();
 
         /// Where device input lands before being processed out somewhere.
-        _KernelInputQueue = new Queue();
+        Globals._KernelInputQueue = new Queue();
 
         /// Initialize the console.
         /// The command line interface / console I/O device.
-        _Console = new Console();
-        _Console.init();
+        Globals._Console = new Console();
+        Globals._Console.init();
 
-        /// Initialize standard input and output to the _Console.
-        _StdIn = _Console;
-        _StdOut = _Console;
+        /// Initialize standard input and output to the Globals._Console.
+        Globals._StdIn = Globals._Console;
+        Globals._StdOut = Globals._Console;
 
         /// Load the Keyboard Device Driver
         this.krnTrace("Loading the keyboard device driver.");
 
         /// "Construct" the "actual" KeyboardDevice Drives.
-        _krnKeyboardDriver = new DeviceDriverKeyboard();
+        Globals._krnKeyboardDriver = new DeviceDriverKeyboard();
 
         /// Call the driverEntry() initialization routine.
-        _krnKeyboardDriver.driverEntry();
-        this.krnTrace(_krnKeyboardDriver.status);
+        Globals._krnKeyboardDriver.driverEntry();
+        this.krnTrace(Globals._krnKeyboardDriver.status);
 
         /// Load the Disk Device Driver
         this.krnTrace("Loading the disk device driver");
 
         /// "Construct" the "actual" DiskDevice Drives.
-        _krnDiskDriver = new DeviceDriverDisk();
+        Globals._krnDiskDriver = new DeviceDriverDisk();
 
         /// Call the driverEntry() initialization routine.
-        _krnDiskDriver.driverEntry();
-        this.krnTrace(_krnDiskDriver.status);
+        Globals._krnDiskDriver.driverEntry();
+        this.krnTrace(Globals._krnDiskDriver.status);
 
         //
         // ... more?
         //
-        _Disk = new Disk();
-        _Disk.init();
-        _MemoryManager = new MemoryManager();
+        Globals._Disk = new Disk();
+        Globals._Disk.init();
+        Globals._MemoryManager = new MemoryManager();
 
         /// Visualize Memory...
-        TSOS.Control.initializeVisualMemory();
+        Control.initializeVisualMemory();
 
         /// Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
         this.krnTrace("Enabling the interrupts.");
@@ -71,18 +84,18 @@ export class Kernel {
 
         /// Launch the shell.
         this.krnTrace("Creating and Launching the shell.");
-        _OsShell = new Shell();
-        _OsShell.init();
+        Globals._OsShell = new Shell();
+        Globals._OsShell.init();
 
 
-        _StdOut.putText("New Volume does not contain a recognized file system. Please format disk before use!");
-        _StdOut.advanceLine();
-        _OsShell.putPrompt();
+        Globals._StdOut.putText("New Volume does not contain a recognized file system. Please format disk before use!");
+        Globals._StdOut.advanceLine();
+        Globals._OsShell.putPrompt();
 
         /// Finally, initiate student testing protocol.
-        if (_GLaDOS) {
-            _GLaDOS.afterStartup();
-        }/// if
+        // if (_GLaDOS) {
+        //     _GLaDOS.afterStartup();
+        // }/// if
     }/// krBootstrap
 
     public krnShutdown() {
@@ -108,15 +121,15 @@ export class Kernel {
         */
 
         /// Check for an interrupt, if there are any. Page 560
-        if (_KernelInterruptPriorityQueue.getSize() > 0) {
+        if (Globals._KernelInterruptPriorityQueue!.getSize() > 0) {
 
             // Process the first interrupt on the interrupt queue.
             /// Implemented a priority queue of queues (not the most efficient I know)
-            var interrupt = _KernelInterruptPriorityQueue.dequeueInterruptOrPcb();
+            var interrupt = Globals._KernelInterruptPriorityQueue!.dequeueInterruptOrPcb();
             this.krnInterruptHandler(interrupt.irq, interrupt.params);
         }/// if
 
-        /// _CPU.isExecuting: controls if the cpu will try to read an instruction from memory
+        /// Globals._CPU.isExecuting: controls if the cpu will try to read an instruction from memory
         ///
         /// Various things will change this including but not limited to:
         ///     - Interrupts
@@ -124,31 +137,31 @@ export class Kernel {
         ///     - Error handling
         ///     - Maybe processes themselves?
         ///     - etc.
-        else if (_CPU.isExecuting) {
+        else if (Globals._CPU.isExecuting) {
 
             /// Perform One Single Step
-            if (_SingleStepMode) {
-                if (_NextStep) {
+            if (Globals._SingleStepMode) {
+                if (Globals._NextStep) {
                     this.countCpuBurst();
-                    _CPU.cycle();
-                    _Scheduler.checkSchedule();
-                    TSOS.Control.updateVisualMemory();
-                    TSOS.Control.updateVisualCpu();
-                    TSOS.Control.updateVisualPcb();
-                    TSOS.Control.visualizeResidentList();
-                    _NextStep = false;
+                    Globals._CPU.cycle();
+                    Globals._Scheduler.checkSchedule();
+                    Control.updateVisualMemory();
+                    Control.updateVisualCpu();
+                    Control.updateVisualPcb();
+                    Control.visualizeResidentList();
+                    Globals._NextStep = false;
                 }/// if
             }/// if
 
             /// Run normally
             else {
                 this.countCpuBurst();
-                _CPU.cycle();
-                _Scheduler.checkSchedule();
-                TSOS.Control.updateVisualMemory();
-                TSOS.Control.updateVisualCpu();
-                TSOS.Control.updateVisualPcb();
-                TSOS.Control.visualizeResidentList();
+                Globals._CPU.cycle();
+                Globals._Scheduler.checkSchedule();
+                Control.updateVisualMemory();
+                Control.updateVisualCpu();
+                Control.updateVisualPcb();
+                Control.visualizeResidentList();
             }/// else
 
             /// TODO: Make the date and time update NOT dependent on the cpu actually cycling
@@ -166,26 +179,26 @@ export class Kernel {
         /// Increase cpu burst count
         ///
         /// Single Step is special as you can force count to keep increasing in single step...
-        /// so reset _CPU_BURST when in Single Step and the scheduler is empty
+        /// so reset Globals._CPU_BURST when in Single Step and the scheduler is empty
         ///
         /// Not the best solution I could think of, but the first,
         /// Call this a "temporary fix"
-        if (_Scheduler.currentProcess === null && _Scheduler.readyQueue.getSize() === 0) {
-            _CPU_BURST = 0;
+        if (Globals._Scheduler.currentProcess === null && Globals._Scheduler.readyQueue.getSize() === 0) {
+            Globals._CPU_BURST = 0;
         }/// if
-        else { _CPU_BURST++; }
+        else { Globals._CPU_BURST++; }
 
         /// Wait time is time spent in the ready queue soo...
         /// Loop through Ready Queue and increment each pcb's wait time by 1 cycle
-        for (var i = 0; i < _Scheduler.readyQueue.getSize(); ++i) {
-            for (var h = 0; h < _Scheduler.readyQueue.queues[i].getSize(); ++h) {
-                _Scheduler.readyQueue.queues[i].q[h].waitTime += 1;
+        for (var i = 0; i < Globals._Scheduler.readyQueue.getSize(); ++i) {
+            for (var h = 0; h < Globals._Scheduler.readyQueue.queues[i].getSize(); ++h) {
+                Globals._Scheduler.readyQueue.queues[i].q[h].waitTime += 1;
             }/// for
         }/// for
 
         /// Turnaround Time is time running and in waiting queue...
         /// So track nummber of cpu cycles used per process and add cpu cycles used and wait time for turnaround time
-        _Scheduler.currentProcess.timeSpentExecuting += 1;
+        Globals._Scheduler.currentProcess!.timeSpentExecuting += 1;
     }/// countCpuBurst
 
     /// Hopefully Updates the Date and Time
@@ -197,8 +210,11 @@ export class Kernel {
         var hours = String(current.getHours()).padStart(2, '0');
         var minutes = String(current.getMinutes()).padStart(2, '0');
         var seconds = String(current.getSeconds()).padStart(2, '0');
-        document.getElementById('divLog--date').innerText = `${month}/${day}/${year}`;
-        document.getElementById('divLog--time').innerText = `${hours}:${minutes}:${seconds}`;
+
+        // TODO: Date Time
+        //
+        // document.getElementById('divLog--date').innerText = `${month}/${day}/${year}`;
+        // document.getElementById('divLog--time').innerText = `${hours}:${minutes}:${seconds}`;
 
         return `${month}${day}${year}${hours}${minutes}${seconds}`;
     }/// getCurrentDateTime
@@ -218,7 +234,7 @@ export class Kernel {
         // Put more here.
     }/// krnDisableInterrupts
 
-    public krnInterruptHandler(irq, params) {
+    public krnInterruptHandler(irq: any, params: any) {
         // This is the Interrupt Handler Routine.  See pages 8 and 560.
         // Trace our entrance here so we can compute Interrupt Latency by analyzing the log file later on. Page 766.
         this.krnTrace("Handling IRQ~" + irq);
@@ -229,54 +245,54 @@ export class Kernel {
         //       Maybe the hardware simulation will grow to support/require that in the future.
         switch (irq) {
             /// Kernel built-in routine for timers (not the clock).
-            case TIMER_IRQ:
+            case Globals.TIMER_IRQ:
                 this.krnTimerISR();
                 break;
 
             /// Hardware Interrupt
-            case KEYBOARD_IRQ:
+            case Globals.KEYBOARD_IRQ:
                 // Kernel mode device driver
-                _krnKeyboardDriver.isr(params);
-                _StdIn.handleInput();
+                Globals._krnKeyboardDriver!.isr(params);
+                Globals._StdIn.handleInput();
                 break;
 
-            case DISK_IRQ:
+            case Globals.DISK_IRQ:
                 /// Kernel mode device driver
                 this.diskISR(params);
                 break;
 
             /// Read/Write Console Interrupts
-            case SYS_CALL_IRQ:
+            case Globals.SYS_CALL_IRQ:
                 this.sysCallISR(params);
                 break;
-            case PS_IRQ:
+            case Globals.PS_IRQ:
                 this.psISR();
                 break;
 
             /// Single Step Interrupts
-            case SINGLE_STEP_IRQ:
+            case Globals.SINGLE_STEP_IRQ:
                 this.singleStepISR();
                 break;
-            case NEXT_STEP_IRQ:
+            case Globals.NEXT_STEP_IRQ:
                 this.nextStepISR();
                 break;
 
             /// Scheduling Interrupts
-            case CONTEXT_SWITCH_IRQ:
+            case Globals.CONTEXT_SWITCH_IRQ:
                 this.contextSwitchISR();
                 break;
-            case CHANGE_QUANTUM_IRQ:
+            case Globals.CHANGE_QUANTUM_IRQ:
                 this.changeQuantumISR(params);
                 break;
 
             /// Create Process Interrupts
-            case RUN_PROCESS_IRQ:
+            case Globals.RUN_PROCESS_IRQ:
                 this.runProcessISR(params);
                 break;
-            case RUN_ALL_PROCESSES_IRQ:
+            case Globals.RUN_ALL_PROCESSES_IRQ:
                 this.runAllProcesesISR();
                 break;
-            case SET_SCHEDULE_ALGORITHM:
+            case Globals.SET_SCHEDULE_ALGORITHM:
                 this.setSchedule(params);
                 break;
             ///////////////////////////////
@@ -284,16 +300,16 @@ export class Kernel {
             ///////////////////////////////
 
             /// When a process ends, it sends its own termination interrupt
-            case TERMINATE_PROCESS_IRQ:
+            case Globals.TERMINATE_PROCESS_IRQ:
                 this.terminateProcessISR();
                 break;
 
             /// This is the user "killing" the process,
             /// NOT the process sending its own termination interrupt
-            case KILL_PROCESS_IRQ:
+            case Globals.KILL_PROCESS_IRQ:
                 this.killProcessISR(params);
                 break;
-            case KILL_ALL_PROCESSES_IRQ:
+            case Globals.KILL_ALL_PROCESSES_IRQ:
                 this.killAllProcessesISR();
                 break;
 
@@ -310,27 +326,27 @@ export class Kernel {
         // Or do it elsewhere in the Kernel. We don't really need this.
     }/// krnTimerISR
 
-    public sysCallISR(params) {
+    public sysCallISR(params: any) {
         var myPcb: ProcessControlBlock = params[0];
         /// Print out the Y-reg if X-reg has 01
-        if (parseInt(_CPU.Xreg, 16) === 1) {
-            _StdOut.putText(` ${_CPU.Yreg} `);
-            myPcb.outputBuffer += ` ${_CPU.Yreg} `;
+        if (parseInt(Globals._CPU.Xreg, 16) === 1) {
+            Globals._StdOut.putText(` ${Globals._CPU.Yreg} `);
+            myPcb.outputBuffer += ` ${Globals._CPU.Yreg} `;
         }/// if
 
         /// Print from memeory starting at address
-        if (parseInt(_CPU.Xreg, 16) === 2) {
+        if (parseInt(Globals._CPU.Xreg, 16) === 2) {
             var ans: string = "";
 
             /// I'm assuming the program is using the logical address
             ///
             /// I'll find out the hard-way if I'm right or wrong...
-            var logicalCurrAddress: number = parseInt(_CPU.Yreg, 16);
+            var logicalCurrAddress: number = parseInt(Globals._CPU.Yreg, 16);
 
             /// Use Y-reg to find out which memory location to start reading from
             ///
             /// Convert to decimal char chode as well
-            var decimalCharCode: number = parseInt(_MemoryAccessor.read(_MemoryManager.simpleVolumes[_CPU.localPCB.volumeIndex], logicalCurrAddress), 16);
+            var decimalCharCode: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[Globals._CPU.localPCB!.volumeIndex], logicalCurrAddress)!, 16);
 
             /// Keep going until we hit a 00 which represents the end of the string
             while (decimalCharCode !== 0) {
@@ -338,63 +354,63 @@ export class Kernel {
 
                 /// Read nex character
                 logicalCurrAddress++;
-                decimalCharCode = parseInt(_MemoryAccessor.read(_MemoryManager.simpleVolumes[_CPU.localPCB.volumeIndex], logicalCurrAddress), 16);
+                decimalCharCode = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[Globals._CPU.localPCB!.volumeIndex], logicalCurrAddress)!, 16);
             }/// while
-            _StdOut.putText(ans);
+            Globals._StdOut.putText(ans);
             myPcb.outputBuffer += ans;
         }/// if
     }/// sysCallISR
 
     public psISR() {
-        for (var pos = 0; pos < _ResidentList.residentList.length; ++pos) {
+        for (var pos = 0; pos < Globals._ResidentList.residentList.length; ++pos) {
             pos === 0 ?
-                _StdOut.putText(`  pid ${_ResidentList.residentList[pos].processID}: ${_ResidentList.residentList[pos].processState} - Priority ${_ResidentList.residentList[pos].priority} `)
-                : _StdOut.putText(`pid ${_ResidentList.residentList[pos].processID}: ${_ResidentList.residentList[pos].processState} - Priority ${_ResidentList.residentList[pos].priority}`);
+                Globals._StdOut.putText(`  pid ${Globals._ResidentList.residentList[pos].processID}: ${Globals._ResidentList.residentList[pos].processState} - Priority ${Globals._ResidentList.residentList[pos].priority} `)
+                : Globals._StdOut.putText(`pid ${Globals._ResidentList.residentList[pos].processID}: ${Globals._ResidentList.residentList[pos].processState} - Priority ${Globals._ResidentList.residentList[pos].priority}`);
 
-            if (pos !== _ResidentList.residentList.length - 1) {
-                _StdOut.putText(`, `);
+            if (pos !== Globals._ResidentList.residentList.length - 1) {
+                Globals._StdOut.putText(`, `);
             }/// if
         }/// for
-        _StdOut.advanceLine();
-        _OsShell.putPrompt();
+        Globals._StdOut.advanceLine();
+        Globals._OsShell.putPrompt();
     }/// psISR
 
     public singleStepISR() {
-        if (_SingleStepMode) {
+        if (Globals._SingleStepMode) {
             /// Stop the CPU from executing
-            _CPU.isExecuting = false;
+            Globals._CPU.isExecuting = false;
         }/// if
         else {
             /// Go back to cpu executing
-            _CPU.isExecuting = true;
+            Globals._CPU.isExecuting = true;
         }/// else
     }/// singleStepISR
 
     public nextStepISR() {
         /// If we're in single step mode
-        if (_SingleStepMode) {
+        if (Globals._SingleStepMode) {
             /// Run 1 cycle
-            _NextStep = true;
-            _CPU.isExecuting = true;
+            Globals._NextStep = true;
+            Globals._CPU.isExecuting = true;
         }/// if
     }/// singleStepISR
 
     public contextSwitchISR() {
         this.krnTrace("Calling dispatcher for context switch");
-        _Dispatcher.contextSwitch();
+        Globals._Dispatcher.contextSwitch();
     }/// contextSwitch
 
     public changeQuantumISR(params: any[]) {
-        this.krnTrace(`Quantum ISR- Quatum was: ${oldDecimalQuanta}, Quantum now: ${_Scheduler.quanta}`);
+        this.krnTrace(`Quantum ISR- Quatum was: ${oldDecimalQuanta}, Quantum now: ${Globals._Scheduler.quanta}`);
         var oldDecimalQuanta = params[0];
         var newQuanta = params[1];
-        _Scheduler.quanta = newQuanta;
-        _StdOut.putText(`Quatum was: ${oldDecimalQuanta}, Quantum now: ${_Scheduler.quanta}`);
-        _StdOut.advanceLine();
-        _OsShell.putPrompt();
+        Globals._Scheduler.quanta = newQuanta;
+        Globals._StdOut.putText(`Quatum was: ${oldDecimalQuanta}, Quantum now: ${Globals._Scheduler.quanta}`);
+        Globals._StdOut.advanceLine();
+        Globals._OsShell.putPrompt();
     }/// changeQuantumISR
 
-    public runProcessISR(params): void {
+    public runProcessISR(params: any): void {
         /// Arguments: params [curr, args[0]];
         ///     params[0]: is the current position in the resident list the process
         ///                the user specified to "run" was found.
@@ -403,33 +419,33 @@ export class Kernel {
         /// TODO: Move if-else to _Schedule.scheduleProcess()
         ///
         /// Process is already running!
-        if (_ResidentList.residentList[params[0]].processState === "Running") {
-            _StdOut.putText(`Process with pid: ${parseInt(params[1])} is already running!`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+        if (Globals._ResidentList.residentList[params[0]].processState === "Running") {
+            Globals._StdOut.putText(`Process with pid: ${parseInt(params[1])} is already running!`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// if
 
         /// Process is already "Terminated"!
-        else if (_ResidentList.residentList[params[0]].processState === "Terminated") {
-            _StdOut.putText(`Process with pid: ${parseInt(params[1])} already terminated!`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+        else if (Globals._ResidentList.residentList[params[0]].processState === "Terminated") {
+            Globals._StdOut.putText(`Process with pid: ${parseInt(params[1])} already terminated!`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// else-if
 
         /// Process is already scheduled... "Ready"!
-        else if (_ResidentList.residentList[params[0]].processState === "Ready") {
-            _StdOut.putText(`Process with pid: ${parseInt(params[1])} is already scheduled!`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+        else if (Globals._ResidentList.residentList[params[0]].processState === "Ready") {
+            Globals._StdOut.putText(`Process with pid: ${parseInt(params[1])} is already scheduled!`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// else-if
 
         /// Schedule the new process
         else {
             /// Schedule the process using round robin
-            _Scheduler.scheduleProcess(_ResidentList.residentList[params[0]]);
+            Globals._Scheduler.scheduleProcess(Globals._ResidentList.residentList[params[0]]);
 
             /// Now we run it...
-            _Scheduler.runSchedule();
+            Globals._Scheduler.runSchedule();
         }/// else
     }/// runProcessISR
 
@@ -437,65 +453,66 @@ export class Kernel {
         var processWasLoaded: boolean = false;
         /// Load the Ready Queue with ALL Loaded Processes so...
         /// Enqueue all NON-TERMINATED, Non-Running, Non-Waiting Processes from the Resident List
-        for (var processID: number = 0; processID < _ResidentList.residentList.length; ++processID) {
+        for (var processID: number = 0; processID < Globals._ResidentList.residentList.length; ++processID) {
             /// Only get Non-Terminated Processes
-            if (_ResidentList.residentList[processID].processState === "Resident") {
-                var temp: boolean = _Scheduler.scheduleProcess(_ResidentList.residentList[processID]);
+            var temp: boolean = false;
+            if (Globals._ResidentList.residentList[processID].processState === "Resident") {
+                temp = Globals._Scheduler.scheduleProcess(Globals._ResidentList.residentList[processID]);
             }/// if 
             if (processWasLoaded === false && temp === true) {
                 processWasLoaded = true;
             }/// if
         }/// for
 
-        // if (_Scheduler.currentProcess !== null){
+        // if (Globals._Scheduler.currentProcess! !== null){
         //     processWasLoaded = true;
         // }/// if
-        _Scheduler.runSchedule(processWasLoaded);
+        Globals._Scheduler.runSchedule(processWasLoaded);
     }/// runAllProcessISR
 
     public terminateProcessISR() {
         try {
             /// Set current process state to "Terminated" for clean up
-            _Scheduler.currentProcess.processState === "Terminated";
+            Globals._Scheduler.currentProcess!.processState === "Terminated";
 
-            if (_Scheduler.currentProcess.processState === "Terminated" && _Scheduler.readyQueue.getSize() === 0) {
+            if (Globals._Scheduler.currentProcess!.processState === "Terminated" && Globals._Scheduler.readyQueue.getSize() === 0) {
                 /// Remove the last process from the Ready Queue
                 /// by removing the last process from current process
-                _Scheduler.currentProcess = null;
+                Globals._Scheduler.currentProcess = null;
 
                 /// "Turn Off" CPU
-                _CPU.isExecuting = false;
+                Globals._CPU.isExecuting = false;
 
                 /// Turn "off Single Step"
-                _SingleStepMode = false;
-                _NextStep = false;
+                Globals._SingleStepMode = false;
+                Globals._NextStep = false;
 
                 /// Reset visuals for Single Step
                 (<HTMLButtonElement>document.getElementById("btnNextStep")).disabled = true;
                 (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).value = "Single Step ON";
 
                 /// Prompt for more input
-                _StdOut.advanceLine();
-                _OsShell.putPrompt();
+                Globals._StdOut.advanceLine();
+                Globals._OsShell.putPrompt();
 
-                TSOS.Control.updateVisualPcb();
+                Control.updateVisualPcb();
             }/// if
         }/// try
 
         catch (e) {
-            _Kernel.krnTrace(e);
+            Globals._Kernel.krnTrace(e as string);
         }/// catch
     }/// terminateProcessISR
 
-    public killProcessISR(params) {
+    public killProcessISR(params: any) {
         /// Apparently Javascripts tolerance of NaN completly defeats the purpose of using this 
         /// try catch... nice!
         try {
             /// Check if the process exists with basic linear search
             var curr: number = 0;
             var found: boolean = false;
-            while (curr < _ResidentList.residentList.length && !found) {
-                if (_ResidentList.residentList[curr].processID == parseInt(params[0][0])) {
+            while (curr < Globals._ResidentList.residentList.length && !found) {
+                if (Globals._ResidentList.residentList[curr].processID == parseInt(params[0][0])) {
                     found = true;
                 }/// if
                 else {
@@ -504,9 +521,9 @@ export class Kernel {
             }/// while
 
             if (!found) {
-                _StdOut.putText(`No process control blocks found with pid: ${parseInt(params[0][0])}.`);
-                _StdOut.advanceLine();
-                _OsShell.putPrompt();
+                Globals._StdOut.putText(`No process control blocks found with pid: ${parseInt(params[0][0])}.`);
+                Globals._StdOut.advanceLine();
+                Globals._OsShell.putPrompt();
             }/// if
 
             /// Process exists in the resident queue
@@ -520,94 +537,94 @@ export class Kernel {
                 ///     > kill 1
                 /// No matter what order, should still kill process, finishing the schedule...
                 /// Use Single Step to see what's "really" happening...
-                switch (_ResidentList.residentList[curr].processState) {
+                switch (Globals._ResidentList.residentList[curr].processState) {
                     case "Terminated":
-                        _StdOut.putText("Process is already Terminated!");
-                        _StdOut.advanceLine();
+                        Globals._StdOut.putText("Process is already Terminated!");
+                        Globals._StdOut.advanceLine();
                         break;
                     case "Ready":
-                        _StdOut.putText("Ready process removed from Ready Queue!");
-                        _StdOut.advanceLine();
-                        _ResidentList.residentList[curr].processState = "Terminated";
+                        Globals._StdOut.putText("Ready process removed from Ready Queue!");
+                        Globals._StdOut.advanceLine();
+                        Globals._ResidentList.residentList[curr].processState = "Terminated";
                         break;
                     case "Running":
-                        _StdOut.putText("Running process is now terminated!");
-                        _StdOut.advanceLine();
-                        _ResidentList.residentList[curr].processState = "Terminated";
+                        Globals._StdOut.putText("Running process is now terminated!");
+                        Globals._StdOut.advanceLine();
+                        Globals._ResidentList.residentList[curr].processState = "Terminated";
                         break;
                     default:
-                        _StdOut.putText("Process was not scheduled to run yet!");
-                        _StdOut.advanceLine();
+                        Globals._StdOut.putText("Process was not scheduled to run yet!");
+                        Globals._StdOut.advanceLine();
                         break;
                 }/// switch
             }/// else
         }/// try
         catch (e) {
-            _StdOut.putText(`${e}`);
-            _StdOut.putText(`Usage: run <int> please supply a process id.`);
-            _OsShell.putPrompt();
+            Globals._StdOut.putText(`${e}`);
+            Globals._StdOut.putText(`Usage: run <int> please supply a process id.`);
+            Globals._OsShell.putPrompt();
         }/// catch
     }/// killProcessISR
 
     public killAllProcessesISR() {
         /// There are scheduled processes to kill
-        if (_Scheduler.readyQueue.getSize() > 0 || _Scheduler.currentProcess !== null) {
+        if (Globals._Scheduler.readyQueue.getSize() > 0 || Globals._Scheduler.currentProcess! !== null) {
 
             /// Mark all process in the schedule queue as terminated
-            _Scheduler.currentProcess.processState = "Terminated";
+            Globals._Scheduler.currentProcess!.processState = "Terminated";
 
-            for (var i = 0; i < _Scheduler.readyQueue.getSize(); ++i) {
-                for (var h = 0; h < _Scheduler.readyQueue.queues[i].getSize(); ++h) {
-                    _Scheduler.readyQueue.getIndex(i).getIndex(h).processState = "Terminated";
+            for (var i = 0; i < Globals._Scheduler.readyQueue.getSize(); ++i) {
+                for (var h = 0; h < Globals._Scheduler.readyQueue.queues[i].getSize(); ++h) {
+                    Globals._Scheduler.readyQueue.getIndex(i).getIndex(h).processState = "Terminated";
                 }/// for
             }/// for
-            // _Scheduler.terminatedAllProcess();
+            // Globals._Scheduler.terminatedAllProcess();
         }/// if
 
         /// There are no scheduled processes to kill
         else {
-            _StdOut.putText("No Proceses were scheduled to run yet!");
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._StdOut.putText("No Proceses were scheduled to run yet!");
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// else
     }/// runAllProcessISR
 
-    public diskISR(params) {
+    public diskISR(params: any) {
         /// params[0] == disk operation
         if (params[0] === 'format') {
             /// params [1] == -quick || -full
-            if (!_CPU.isExecuting) {
-                if (!_SingleStepMode) {
-                    _krnDiskDriver.format(params[1]);
+            if (!Globals._CPU.isExecuting) {
+                if (!Globals._SingleStepMode) {
+                    Globals._krnDiskDriver!.format(params[1]);
                 }/// if 
                 else {
-                    _StdOut.putText(`Disk cannot be formatted while in single step mode`);
-                    _StdOut.advanceLine();
-                    _StdOut.putText(`To be honest I ran out of time to fix this, so I just disabled it...`);
-                    _StdOut.advanceLine();
-                    _OsShell.putPrompt();
+                    Globals._StdOut.putText(`Disk cannot be formatted while in single step mode`);
+                    Globals._StdOut.advanceLine();
+                    Globals._StdOut.putText(`To be honest I ran out of time to fix this, so I just disabled it...`);
+                    Globals._StdOut.advanceLine();
+                    Globals._OsShell.putPrompt();
                 }/// else
             }/// if
             else {
-                _StdOut.putText(`Disk cannot be formatted while processes are running!`);
-                _StdOut.advanceLine();
-                _StdOut.putText(`Well, hello there! Evil Professor...`);
-                _StdOut.advanceLine();
-                _OsShell.putPrompt();
+                Globals._StdOut.putText(`Disk cannot be formatted while processes are running!`);
+                Globals._StdOut.advanceLine();
+                Globals._StdOut.putText(`Well, hello there! Evil Professor...`);
+                Globals._StdOut.advanceLine();
+                Globals._OsShell.putPrompt();
             }
         }/// if
 
         /// Only allow disk functions on formatted disks
-        else if (_krnDiskDriver.formatted) {
-            _krnDiskDriver.isr(params);
+        else if (Globals._krnDiskDriver!.formatted) {
+            Globals._krnDiskDriver!.isr(params);
         }/// if
 
         /// Not formatted, don't do anyting
         else {
             this.krnTrace("Disk is not yet formatted!");
-            _StdOut.putText(`You must format the drive disk before use!`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._StdOut.putText(`You must format the drive disk before use!`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// else
     }/// diskISR
 
@@ -615,137 +632,137 @@ export class Kernel {
         var schedulingAgorithm: string = params[0];
 
         /// Scheduling algorithm is already set to the one being passed
-        if (_Scheduler.schedulingMethod === schedulingAgorithm) {
-            _StdOut.putText(`Scheduling is already ${schedulingAgorithm}`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+        if (Globals._Scheduler.schedulingMethod === schedulingAgorithm) {
+            Globals._StdOut.putText(`Scheduling is already ${schedulingAgorithm}`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// if
 
-        else if (!_CPU.isExecuting) {
-            _Scheduler.schedulingMethod = schedulingAgorithm;
-            _StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+        else if (!Globals._CPU.isExecuting) {
+            Globals._Scheduler.schedulingMethod = schedulingAgorithm;
+            Globals._StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// else-if
 
         /// Scheduling algorithm is different than the one being passed
         else {
             switch (schedulingAgorithm) {
-                case ROUND_ROBIN:
+                case Globals.ROUND_ROBIN:
                     var tempRoundRobin: ProcessControlBlock[] = [];
 
                     /// Set scheduling method to Round Robin
-                    _Scheduler.schedulingMethod = ROUND_ROBIN;
-                    _Scheduler.swapToUserQuantum();
-                    _Scheduler.startBurst = _CPU_BURST;
+                    Globals._Scheduler.schedulingMethod = Globals.ROUND_ROBIN;
+                    Globals._Scheduler.swapToUserQuantum();
+                    Globals._Scheduler.startBurst = Globals._CPU_BURST;
 
                     /// Don't forget current process
-                    if (_Scheduler.currentProcess !== null) {
-                        _Scheduler.currentProcess.swapToDefaultPriority();
-                        tempRoundRobin.push(_Scheduler.currentProcess);
-                        _Scheduler.currentProcess = null;
+                    if (Globals._Scheduler.currentProcess! !== null) {
+                        Globals._Scheduler.currentProcess!.swapToDefaultPriority();
+                        tempRoundRobin.push(Globals._Scheduler.currentProcess!);
+                        Globals._Scheduler.currentProcess = null;
                     }/// if
 
                     /// Dequeue every process and swap back to using the user defined priority
-                    while (_Scheduler.readyQueue.getSize() > 0) {
-                        var pcb: ProcessControlBlock = _Scheduler.readyQueue.dequeueInterruptOrPcb();
+                    while (Globals._Scheduler.readyQueue.getSize() > 0) {
+                        var pcb: ProcessControlBlock = Globals._Scheduler.readyQueue.dequeueInterruptOrPcb();
                         pcb.swapToDefaultPriority();
                         tempRoundRobin.push(pcb);
                     }/// while
 
                     /// Re-enqueue all process
                     for (var p: number = 0; p < tempRoundRobin.length; ++p) {
-                        _Scheduler.readyQueue.enqueueInterruptOrPcb(tempRoundRobin[p]);
+                        Globals._Scheduler.readyQueue.enqueueInterruptOrPcb(tempRoundRobin[p]);
                     }/// for
 
                     /// Re-attach first process back to cpu...
-                    if (_Scheduler.currentProcess === null) {
-                        _Scheduler.currentProcess = _Scheduler.readyQueue.dequeueInterruptOrPcb();
-                        _Scheduler.currentProcess.processState === "Running";
-                        _Dispatcher.setNewProcessToCPU(_Scheduler.currentProcess);
+                    if (Globals._Scheduler.currentProcess === null) {
+                        Globals._Scheduler.currentProcess = Globals._Scheduler.readyQueue.dequeueInterruptOrPcb();
+                        Globals._Scheduler.currentProcess!.processState === "Running";
+                        Globals._Dispatcher.setNewProcessToCPU(Globals._Scheduler.currentProcess!);
                     }/// if
-                    _StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
-                    _StdOut.advanceLine();
-                    _OsShell.putPrompt();
+                    Globals._StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
+                    Globals._StdOut.advanceLine();
+                    Globals._OsShell.putPrompt();
                     break;
 
-                case FIRST_COME_FIRST_SERVE:
+                case Globals.FIRST_COME_FIRST_SERVE:
                     var tempFcFs: number[] = [];
 
                     /// Set scheduling method to First Come First Serve
-                    _Scheduler.schedulingMethod = FIRST_COME_FIRST_SERVE;
-                    _Scheduler.swapToFcFsQuantum();
-                    _Scheduler.startBurst = _CPU_BURST;
+                    Globals._Scheduler.schedulingMethod = Globals.FIRST_COME_FIRST_SERVE;
+                    Globals._Scheduler.swapToFcFsQuantum();
+                    Globals._Scheduler.startBurst = Globals._CPU_BURST;
 
                     /// Don't forget current process
-                    if (_Scheduler.currentProcess !== null) {
-                        tempFcFs.push(_Scheduler.currentProcess.processID);
-                        _Scheduler.currentProcess = null;
+                    if (Globals._Scheduler.currentProcess! !== null) {
+                        tempFcFs.push(Globals._Scheduler.currentProcess!.processID);
+                        Globals._Scheduler.currentProcess = null;
                     }/// if
 
                     /// Dequeue every process and swap back to using the user defined priority
-                    while (_Scheduler.readyQueue.getSize() > 0) {
-                        tempFcFs.push(_Scheduler.readyQueue.dequeueInterruptOrPcb().processID);
+                    while (Globals._Scheduler.readyQueue.getSize() > 0) {
+                        tempFcFs.push(Globals._Scheduler.readyQueue.dequeueInterruptOrPcb().processID);
                     }/// while
 
                     /// Re-enqueue all process
-                    for (var p: number = 0; p < _ResidentList.residentList.length; ++p) {
+                    for (var p: number = 0; p < Globals._ResidentList.residentList.length; ++p) {
                         /// Only re-enqueue scheduled processes
-                        if (tempFcFs.includes(_ResidentList.residentList[p].processID)) {
-                            _ResidentList.residentList[p].swapToDefaultPriority();
-                            _Scheduler.readyQueue.enqueueInterruptOrPcb(_ResidentList.residentList[p]);
+                        if (tempFcFs.includes(Globals._ResidentList.residentList[p].processID)) {
+                            Globals._ResidentList.residentList[p].swapToDefaultPriority();
+                            Globals._Scheduler.readyQueue.enqueueInterruptOrPcb(Globals._ResidentList.residentList[p]);
                         }/// if
                     }/// for
 
                     /// Re-attach first process back to cpu...
-                    if (_Scheduler.currentProcess === null) {
-                        _Scheduler.currentProcess = _Scheduler.readyQueue.dequeueInterruptOrPcb();
-                        _Scheduler.currentProcess.processState === "Running";
-                        _Dispatcher.setNewProcessToCPU(_Scheduler.currentProcess);
+                    if (Globals._Scheduler.currentProcess === null) {
+                        Globals._Scheduler.currentProcess = Globals._Scheduler.readyQueue.dequeueInterruptOrPcb();
+                        Globals._Scheduler.currentProcess!.processState === "Running";
+                        Globals._Dispatcher.setNewProcessToCPU(Globals._Scheduler.currentProcess!);
                     }/// if
-                    _StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
-                    _StdOut.advanceLine();
-                    _OsShell.putPrompt();
+                    Globals._StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
+                    Globals._StdOut.advanceLine();
+                    Globals._OsShell.putPrompt();
                     break;
-                case PRIORITY:
+                case Globals.PRIORITY:
                     var tempPriority: ProcessControlBlock[] = [];
 
                     /// Set scheduling method to Priority
-                    _Scheduler.schedulingMethod = PRIORITY;
+                    Globals._Scheduler.schedulingMethod = Globals.PRIORITY;
 
                     /// Don't forget current process
-                    if (_Scheduler.currentProcess !== null) {
-                        _Scheduler.currentProcess.swapToUserPriority();
-                        tempPriority.push(_Scheduler.currentProcess);
-                        _Scheduler.currentProcess = null;
+                    if (Globals._Scheduler.currentProcess! !== null) {
+                        Globals._Scheduler.currentProcess!.swapToUserPriority();
+                        tempPriority.push(Globals._Scheduler.currentProcess!);
+                        Globals._Scheduler.currentProcess = null;
                     }/// if
 
                     /// Dequeue every process and swap back to using the user defined priority
-                    while (_Scheduler.readyQueue.getSize() > 0) {
-                        var pcb: ProcessControlBlock = _Scheduler.readyQueue.dequeueInterruptOrPcb();
+                    while (Globals._Scheduler.readyQueue.getSize() > 0) {
+                        var pcb: ProcessControlBlock = Globals._Scheduler.readyQueue.dequeueInterruptOrPcb();
                         pcb.swapToUserPriority();
                         tempPriority.push(pcb);
                     }/// while
 
                     /// Re-enqueue all process
                     for (var p: number = 0; p < tempPriority.length; ++p) {
-                        _Scheduler.readyQueue.enqueueInterruptOrPcb(tempPriority[p]);
+                        Globals._Scheduler.readyQueue.enqueueInterruptOrPcb(tempPriority[p]);
                     }/// for
 
                     /// Re-attach first process back to cpu...
-                    if (_Scheduler.currentProcess === null) {
-                        _Scheduler.currentProcess = _Scheduler.readyQueue.dequeueInterruptOrPcb();
-                        _Scheduler.currentProcess.processState === "Running";
-                        _Dispatcher.setNewProcessToCPU(_Scheduler.currentProcess);
+                    if (Globals._Scheduler.currentProcess === null) {
+                        Globals._Scheduler.currentProcess = Globals._Scheduler.readyQueue.dequeueInterruptOrPcb();
+                        Globals._Scheduler.currentProcess!.processState === "Running";
+                        Globals._Dispatcher.setNewProcessToCPU(Globals._Scheduler.currentProcess!);
                     }/// if
-                    _StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
-                    _StdOut.advanceLine();
-                    _OsShell.putPrompt();
+                    Globals._StdOut.putText(`Scheduling algorithm set to: ${schedulingAgorithm}`);
+                    Globals._StdOut.advanceLine();
+                    Globals._OsShell.putPrompt();
                     break;
                 default:
-                    _StdOut.putText(`Scheduling algorithm: ${schedulingAgorithm} not recognized!`);
-                    _StdOut.advanceLine();
-                    _OsShell.putPrompt();
+                    Globals._StdOut.putText(`Scheduling algorithm: ${schedulingAgorithm} not recognized!`);
+                    Globals._StdOut.advanceLine();
+                    Globals._OsShell.putPrompt();
                     break;
             }/// switch
         }/// else
@@ -774,10 +791,10 @@ export class Kernel {
 
     public krnTrace(msg: string) {
         // Check globals to see if trace is set ON.  If so, then (maybe) log the message.
-        if (_Trace) {
+        if (Globals._Trace) {
             if (msg === "Idle") {
                 // We can't log every idle clock pulse because it would quickly lag the browser quickly.
-                if (_OSclock % 10 == 0) {
+                if (Globals._OSclock % 10 == 0) {
                     // Check the CPU_CLOCK_INTERVAL in globals.ts for an
                     // idea of the tick rate and adjust this line accordingly.
                     Control.hostLog(msg, "OS");
@@ -789,10 +806,10 @@ export class Kernel {
         }/// if
     }/// krnTrace
 
-    public krnTrapError(msg) {
+    public krnTrapError(msg: any) {
         Control.hostLog("OS ERROR - TRAP: " + msg);
         // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
-        document.getElementById('bsod').style.visibility = "visible"; /// Making layered image visible
+        // document.getElementById('bsod').style.visibility = "visible"; /// Making layered image visible
         this.krnShutdown();
     }/// krnTrapError
 }/// Kernel

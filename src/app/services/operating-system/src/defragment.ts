@@ -11,8 +11,7 @@
     used in a traditional quicksort.
     ------------ */
 
-import { _krnDiskDriver } from "./global";
-
+import { Globals } from "./global";
 
 export class Defragment {
     constructor() { } // consturctor
@@ -40,7 +39,7 @@ export class Defragment {
         // Do a shit ton of conversions
         var midInOctal: string = this.decimalToOctal(Math.floor((right + left) / 2));
         var formattedMidIntOctal: string = this.formatOctal(midInOctal);
-        var pivotInHex = _krnDiskDriver.getBlockFlag(formattedMidIntOctal);
+        var pivotInHex = Globals._krnDiskDriver!!.getBlockFlag(formattedMidIntOctal);
         var pivotInDecimal = parseInt(pivotInHex, 16);
 
         // Convert the start
@@ -56,14 +55,14 @@ export class Defragment {
         // start <= end
         while (startInDecimal <= endInDecimal) {
             // while (A[start] < pivot)
-            while (parseInt(_krnDiskDriver.getBlockFlag(formattedStartInOctal), 16) < pivotInDecimal) {
+            while (parseInt(Globals._krnDiskDriver!!.getBlockFlag(formattedStartInOctal), 16) < pivotInDecimal) {
                 startInDecimal++;
                 startInOctal = this.decimalToOctal(startInDecimal);
                 formattedStartInOctal = this.formatOctal(startInOctal);
             }// while
 
             // while (A[end] > pivot)
-            while (parseInt(_krnDiskDriver.getBlockFlag(formattedEndInOctal), 16) > pivotInDecimal) {
+            while (parseInt(Globals._krnDiskDriver!!.getBlockFlag(formattedEndInOctal), 16) > pivotInDecimal) {
                 endInDecimal--;
                 endInOctal = this.decimalToOctal(endInDecimal);
                 formattedEndInOctal = this.formatOctal(endInOctal);
@@ -95,13 +94,13 @@ export class Defragment {
 
         // Find previous blocks and update their pointers BEFORE SWAPPING
         // If done after swapping, there will be infinite loops... many, many infinite loops
-        var previousLeftBlock = _krnDiskDriver.findPreviousBlock(formattedLeftInOctal);
-        var previousRightBlock = _krnDiskDriver.findPreviousBlock(formattedRightInOctal);
+        var previousLeftBlock = Globals._krnDiskDriver!.findPreviousBlock(formattedLeftInOctal);
+        var previousRightBlock = Globals._krnDiskDriver!.findPreviousBlock(formattedRightInOctal);
         if (previousLeftBlock !== null) {
-            _krnDiskDriver.setBlockForwardPointer(previousLeftBlock, formattedRightInOctal);
+            Globals._krnDiskDriver!.setBlockForwardPointer(previousLeftBlock, formattedRightInOctal);
         } // if
         if (previousRightBlock !== null) {
-            _krnDiskDriver.setBlockForwardPointer(previousRightBlock, formattedLeftInOctal);
+            Globals._krnDiskDriver!.setBlockForwardPointer(previousRightBlock, formattedLeftInOctal);
         } // if
 
         // Swap session storage values
