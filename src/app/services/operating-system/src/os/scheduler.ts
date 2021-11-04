@@ -11,6 +11,12 @@
  *      later... *Cough* *Cough* time spent in the ready queue *Cough* *Cough*
  */
 
+import { Globals } from "../global";
+import { Control } from "../host/control";
+import { Interrupt } from "./interrupt";
+import { PriorityQueue } from "./priorityQueue";
+import { ProcessControlBlock } from "./processControlBlock";
+
 
 export class Scheduler {
 
@@ -23,8 +29,8 @@ export class Scheduler {
         public unInterleavedOutput: string[] = [],
         public processTurnaroundTime: number[] = [],
         public readyQueue = new PriorityQueue(),
-        public currentProcess: ProcessControlBlock = null,
-        public schedulingMethod = ROUND_ROBIN,
+        public currentProcess: ProcessControlBlock | null = null,
+        public schedulingMethod = Globals.ROUND_ROBIN,
     ) {
         /// this.readyQueue = this.schedulingMethod === 'Round Robin'? new Queue() : new PriorityQueue();
     }/// constructor
@@ -41,16 +47,16 @@ export class Scheduler {
     public scheduleProcess(newPcb: ProcessControlBlock): boolean {
         var success: boolean = false;
         switch (this.schedulingMethod) {
-            case ROUND_ROBIN:
+            case Globals.ROUND_ROBIN:
                 this.swapToUserQuantum();
                 success = this.scheduleAsRoundRobin(newPcb);
                 break;
-            case FIRST_COME_FIRST_SERVE:
+            case Globals.FIRST_COME_FIRST_SERVE:
                 /// FCFS is basically round robin with an infinite quantum...
                 this.swapToFcFsQuantum();
                 success = this.scheduleAsRoundRobin(newPcb);
                 break;
-            case PRIORITY:
+            case Globals.PRIORITY:
                 success = this.scheduleAsPriority(newPcb);
                 break;
             default:
@@ -62,48 +68,48 @@ export class Scheduler {
 
     public runSchedule(aNewProcessWasLoaded: boolean = true) {
         /// Kernel Mode
-        _Mode = 0;
+        Globals._Mode = 0;
         /// Make sure there are process loaded in the ready queue or
         /// in the current process slot
         if (this.readyQueue.getSize() === 0 && this.currentProcess === null) {
             /// Don't stop the cpu from executing, as it may already be executing other process
-            _StdOut.putText("No process found either loaded or not already terminated, running, scheduled.");
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._StdOut.putText("No process found either loaded or not already terminated, running, scheduled.");
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// if
         else if (!aNewProcessWasLoaded) {
-            _StdOut.putText("No new process found to run!");
-            _StdOut.advanceLine();
-            _OsShell.putPrompt();
+            Globals._StdOut.putText("No new process found to run!");
+            Globals._StdOut.advanceLine();
+            Globals._OsShell.putPrompt();
         }/// else 
         else {
             /// Set first process and update pcb
             if (this.currentProcess === null) {
                 this.currentProcess = this.readyQueue.dequeueInterruptOrPcb();
-                this.currentProcess.processState === "Running";
-                _Dispatcher.setNewProcessToCPU(this.currentProcess);
-                TSOS.Control.updateVisualPcb();
+                this.currentProcess!.processState === "Running";
+                Globals._Dispatcher.setNewProcessToCPU(this.currentProcess);
+                Control.updateVisualPcb();
             }/// if
-            _CPU.isExecuting = true;
+            Globals._CPU.isExecuting = true;
             /// Program is running so User Mode
-            _Mode = 1;
+            Globals._Mode = 1;
         }/// else
     }/// runSchedule
 
     public checkSchedule() {
         var success: boolean = false;
         switch (this.schedulingMethod) {
-            case ROUND_ROBIN:
+            case Globals.ROUND_ROBIN:
                 this.roundRobinCheck();
                 break;
-            case FIRST_COME_FIRST_SERVE:
+            case Globals.FIRST_COME_FIRST_SERVE:
                 this.roundRobinCheck();
                 break;
-            case PRIORITY:
+            case Globals.PRIORITY:
                 this.priorityCheck();
                 break;
             default:
-                _Kernel.krnTrace(`Scheduling Method ${this.schedulingMethod} not recognized!`);
+                Globals._Kernel.krnTrace(`Scheduling Method ${this.schedulingMethod} not recognized!`);
                 break;
         }/// switch
 
@@ -114,7 +120,7 @@ export class Scheduler {
         /// Give feedback if the process was successfuly scheduled or not
         var success = false;
         /// Kernel mode to schedule processes
-        _Mode = 0;
+        Globals._Mode = 0;
 
         /// Ensure a new process was passed 
         if (newProcess !== null) {
@@ -124,7 +130,7 @@ export class Scheduler {
             this.readyQueue.enqueueInterruptOrPcb(newProcess);
 
             /// Process scheduled successfully
-            _Kernel.krnTrace(`Process ${newProcess.processID} added to ready queue`);
+            Globals._Kernel.krnTrace(`Process ${newProcess.processID} added to ready queue`);
             success = true;
         }/// if
 
@@ -133,8 +139,8 @@ export class Scheduler {
 
     public priorityCheck() {
         /// Current Process Terminated...
-        if (this.currentProcess.processState === "Terminated") {
-            _Kernel.krnTrace(`Current process ${this.currentProcess.processID} terminated.`);
+        if (this.currentProcess!.processState === "Terminated") {
+            Globals._Kernel.krnTrace(`Current process ${this.currentProcess!.processID} terminated.`);
 
             /// Context Switch
             this.attemptContextSwitch();
@@ -145,7 +151,7 @@ export class Scheduler {
         /// Give feedback if the process was successfuly scheduled or not
         var success = false;
         /// Kernel mode to schedule processes
-        _Mode = 0;
+        Globals._Mode = 0;
 
         /// Ensure a new process is passed
         if (newProcess !== null) {
@@ -155,7 +161,7 @@ export class Scheduler {
             this.readyQueue.enqueueInterruptOrPcb(newProcess);
 
             /// Process scheduled successfully
-            _Kernel.krnTrace(`Process ${newProcess.processID} added to ready queue`);
+            Globals._Kernel.krnTrace(`Process ${newProcess.processID} added to ready queue`);
             success = true;
         }/// if
 
@@ -164,101 +170,101 @@ export class Scheduler {
 
     public roundRobinCheck(): void {
         /// Back to kernel mode for quantum and termination check
-        _Kernel.krnTrace(`Kernel Mode Activated...`);
-        _Kernel.krnTrace(`Round Robin Quantum Check!`);
-        _Mode = 0;
+        Globals._Kernel.krnTrace(`Kernel Mode Activated...`);
+        Globals._Kernel.krnTrace(`Round Robin Quantum Check!`);
+        Globals._Mode = 0;
 
         /// Current Process has terminated either Right On or Before quanta limit:
-        if (this.currentProcess.processState === "Terminated") {
-            _Kernel.krnTrace(`Current process ${this.currentProcess.processID} terminated.`);
+        if (this.currentProcess!.processState === "Terminated") {
+            Globals._Kernel.krnTrace(`Current process ${this.currentProcess!.processID} terminated.`);
 
             /// Context Switch
             this.attemptContextSwitch();
         }/// if
 
         /// Current process has not terminated but the quantum was reached:
-        else if ((_CPU_BURST - this.startBurst) >= this.quanta) {
+        else if ((Globals._CPU_BURST - this.startBurst) >= this.quanta) {
             /// Context Switch but put process back in process queue
             if (this.readyQueue.getSize() > 0) {
-                _Kernel.krnTrace(`Process ${this.currentProcess.processID} quantum reached, issuing context switch...`);
+                Globals._Kernel.krnTrace(`Process ${this.currentProcess!.processID} quantum reached, issuing context switch...`);
                 /// Queue interrupt for context switch
-                _KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, []));
+                Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
 
                 /// Reset the starting burst for the next new process
-                this.startBurst = _CPU_BURST;
+                this.startBurst = Globals._CPU_BURST;
 
             }/// if
             else {
-                _Kernel.krnTrace(`Process ${this.currentProcess.processID} is the final process, renewing quantum...`);
+                Globals._Kernel.krnTrace(`Process ${this.currentProcess!.processID} is the final process, renewing quantum...`);
                 /// There is one process left "in" the scheduler so keep renewing
                 /// its quantum to let the process run as it will termination.
-                this.startBurst = _CPU_BURST;
+                this.startBurst = Globals._CPU_BURST;
             }///else
 
             /// Back to running programs
-            _Kernel.krnTrace(`User Mode Activated!`);
-            _Mode = 0;
+            Globals._Kernel.krnTrace(`User Mode Activated!`);
+            Globals._Mode = 0;
         }/// if
     }/// roundRobinCheck
 
     private attemptContextSwitch(): void {
         /// Context Switch but don't put current process back in process queue
         if (this.readyQueue.getSize() > 0) {
-            _Kernel.krnTrace(`Another process was found in Ready Queue, issuing context switch...`);
+            Globals._Kernel.krnTrace(`Another process was found in Ready Queue, issuing context switch...`);
 
             /// Queue interrupt for context switch
-            _KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, []));
+            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
 
             /// Grab the procress' output, time spent executing, time spent waiting, turnaround time
-            _Kernel.krnTrace(`Collecting process ${this.currentProcess.processID} metadata before context switch.`);
-            var turnAroundTime = (this.currentProcess.timeSpentExecuting + this.currentProcess.waitTime);
-            this.unInterleavedOutput.push(`Pid ${this.currentProcess.processID}: ${this.currentProcess.outputBuffer}`);
+            Globals._Kernel.krnTrace(`Collecting process ${this.currentProcess!.processID} metadata before context switch.`);
+            var turnAroundTime = (this.currentProcess!.timeSpentExecuting + this.currentProcess!.waitTime);
+            this.unInterleavedOutput.push(`Pid ${this.currentProcess!.processID}: ${this.currentProcess!.outputBuffer}`);
             this.processesMetaData.push([
-                this.currentProcess.processID,
-                this.currentProcess.timeSpentExecuting,
-                this.currentProcess.waitTime,
+                this.currentProcess!.processID,
+                this.currentProcess!.timeSpentExecuting,
+                this.currentProcess!.waitTime,
                 turnAroundTime,
             ]);
 
             /// Reset the starting burst for the next new process
-            _Kernel.krnTrace(`Updating relative starting burst...`);
-            this.startBurst = _CPU_BURST;
+            Globals._Kernel.krnTrace(`Updating relative starting burst...`);
+            this.startBurst = Globals._CPU_BURST;
 
             /// Back to running programs
-            _Kernel.krnTrace(`User Mode Activated`);
-            _Mode = 1;
+            Globals._Kernel.krnTrace(`User Mode Activated`);
+            Globals._Mode = 1;
         }/// if
 
         /// Final process terminated!
         /// Stop the CPU, grab scedule metadata and show it to the user and reset the scheduler
         else {
-            _Kernel.krnTrace(`No more process found in Ready Queue, preparing to clear scheduler...`);
+            Globals._Kernel.krnTrace(`No more process found in Ready Queue, preparing to clear scheduler...`);
             /// Stay in Kernel Mode
-            _Mode = 0;
+            Globals._Mode = 0;
 
             /// Stop CPU execution since all processe are terminated
-            _CPU.isExecuting = false;
+            Globals._CPU.isExecuting = false;
 
             /// Grab the final procresses' output, time spent executing, time spent waiting, turnaround time
-            _Kernel.krnTrace(`Collecting final process ${this.currentProcess.processID} metadata.`);
-            var turnAroundTime = (this.currentProcess.timeSpentExecuting + this.currentProcess.waitTime);
-            this.unInterleavedOutput.push(`Pid ${this.currentProcess.processID}: ${this.currentProcess.outputBuffer}`);
+            Globals._Kernel.krnTrace(`Collecting final process ${this.currentProcess!.processID} metadata.`);
+            var turnAroundTime = (this.currentProcess!.timeSpentExecuting + this.currentProcess!.waitTime);
+            this.unInterleavedOutput.push(`Pid ${this.currentProcess!.processID}: ${this.currentProcess!.outputBuffer}`);
             this.processesMetaData.push([
-                this.currentProcess.processID,
-                this.currentProcess.timeSpentExecuting,
-                this.currentProcess.waitTime,
+                this.currentProcess!.processID,
+                this.currentProcess!.timeSpentExecuting,
+                this.currentProcess!.waitTime,
                 turnAroundTime,
             ]);
 
             /// Show user schedule metadata
-            _Kernel.krnTrace(`Dumping all processes metadata...`);
-            TSOS.Control.dumpScheduleMetaData();
+            Globals._Kernel.krnTrace(`Dumping all processes metadata...`);
+            Control.dumpScheduleMetaData();
 
             /// Clear scheduling metadata
-            _Kernel.krnTrace(`Clearing Scheduler...`);
-            _CPU_BURST = 0;
+            Globals._Kernel.krnTrace(`Clearing Scheduler...`);
+            Globals._CPU_BURST = 0;
             this.init();
-            TSOS.Control.updateVisualPcb();
+            Control.updateVisualPcb();
         }/// else
     }/// requestContextSwitch
 

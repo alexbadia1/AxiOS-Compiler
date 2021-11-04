@@ -1,7 +1,8 @@
 <mat-toolbar style="background-color: #161616; height: 6.5%; border-bottom: black solid 1px;">
   <div class="flex-row">
     <div class="nightingale">
-      <div><span class="text-nightingale-pink">Nightingale</span><span style="color: #3d3d3d; font-size: .7rem; margin-left: 15px;">Status: {{compilerStatus}}</span></div>
+      <div><span class="text-nightingale-pink">Nightingale</span><span
+          style="color: #3d3d3d; font-size: .7rem; margin-left: 15px;">Status: {{compilerStatus}}</span></div>
       <button mat-icon-button *ngIf="(compiling) == false" class="example-icon favorite-icon"
         aria-label="Example icon-button with heart icon" (click)="onCompileButtonClick()" style="color: #228B22;">
         <mat-icon>done</mat-icon>
@@ -12,14 +13,16 @@
     </div>
     <div class="divider"></div>
     <div class="axios">
-      <div><span class="text-blue">AxiOS </span> <span style="color: #3d3d3d; font-size: .7rem; margin-left: 15px;">Status: {{axiosStatus}}</span></div>
+      <div><span class="text-blue">AxiOS </span> <span
+          style="color: #3d3d3d; font-size: .7rem; margin-left: 15px;">Status: {{axiosStatus}} <span
+            if="divLog--status"></span></span></div>
       <div style="margin-right: 40px;">
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnStartOS"
-          (click)="hostBtnStartOS_click()" title="OS Power Button" [style.color]="'#228B22'" >
+          (click)="hostBtnStartOS_click()" title="OS Power Button" [style.color]="'#228B22'">
           <mat-icon>power_settings_new</mat-icon>
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnHaltOS"
-          (click)="hostBtnHaltOS_click('btnStartOS')" [style.color]="'#3d3d3d'" >
+          (click)="hostBtnHaltOS_click('btnStartOS')" [style.color]="'#3d3d3d'">
           <mat-icon>stop</mat-icon>
         </button>
         <!-- <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnReset"
@@ -27,11 +30,12 @@
           <mat-icon>power_settings_new</mat-icon>
         </button> -->
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon"
-          id="btnSingleStepMode" (click)="hostBtnSingleStep_click('btnSingleStepMode')" title="Toggle Single Step" [style.color]="'#3d3d3d'" >
+          id="btnSingleStepMode" (click)="hostBtnSingleStep_click('btnSingleStepMode')" title="Toggle Single Step"
+          [style.color]="'#3d3d3d'">
           <mat-icon>bug_report</mat-icon>
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnNextStep"
-          (click)="hostBtnNextStep_click('btnNextStep')" title="Step One" [style.color]="'#3d3d3d'" >
+          (click)="hostBtnNextStep_click('btnNextStep')" title="Step One" [style.color]="'#3d3d3d'">
           <mat-icon> keyboard_tab</mat-icon>
         </button>
       </div>
