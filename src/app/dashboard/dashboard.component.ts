@@ -54,6 +54,11 @@ interface TestNode {
 
 
 export class DashboardComponent implements OnInit {
+  private btnStartOS: HTMLButtonElement;
+  private btnHaltOS: HTMLButtonElement;
+  private btnSingleStepMode: HTMLButtonElement;
+  private btnNextStep: HTMLButtonElement;
+
   /**
    * Monaco Code Editor Plugin
    */
@@ -83,7 +88,11 @@ export class DashboardComponent implements OnInit {
   /**
    * Power Button [Green | Red] State
    */
-  public isActive: boolean = false;
+  public isPoweredOn: boolean = false;
+  public isHalted: boolean = false;
+  public isSingleStep: boolean = false;
+  public axiosStatus: string = "Offline";
+  public compilerStatus: string = "Ready";
 
   /**
    * Binding data
@@ -160,28 +169,52 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.canvas = document.getElementById('appConsole')!;
+    this.btnStartOS = document.getElementById('btnStartOS')! as HTMLButtonElement;
+    this.btnHaltOS = document.getElementById('btnHaltOS')! as HTMLButtonElement;
+    this.btnSingleStepMode = document.getElementById('btnSingleStepMode')! as HTMLButtonElement;
+    this.btnNextStep = document.getElementById('btnNextStep')! as HTMLButtonElement;
 
     if (this.canvas != null) {
       this.keyBoard = fromEvent<KeyboardEvent>(this.canvas, 'keydown');
     } // if
   }// ngOnInit
 
+  //================================================================================
+  // Monaco Editor Instance
+  //================================================================================
+
   editorInit(editor: MonacoStandaloneCodeEditor): void {
     // Get editor instance
     this.editor = editor;
   }// editorInit
 
-  onTestClick(args: string) {
+  //================================================================================
+  // Compiler UI Buttons
+  //================================================================================
+
+  /**
+   * Automatically puts test code in Monaco Editor
+   * 
+   * @param args test written as string
+   * @returns void
+   */
+  onCompilerTestClick(args: string) {
     if (this.editor == null) { return; }
     this.editor.setValue(args);
     this.opened = false;
   }// onTestClick
 
+  /**
+   * Runs te compiler implemented as a service.
+   * 
+   * @returns void 
+   */
   async onCompileButtonClick() {
     this.compiling = true;
+    this.compilerStatus = "Compiling...";
 
     // Artificial delay to convince the user we're doing some serious stuff.
-    await new Promise(f => setTimeout(f, 400));
+    await new Promise(f => setTimeout(f, 1000));
 
     // Editor hasn't loaded yet
     if (this.editor == null) { this.compiling = false; return; }
@@ -191,52 +224,137 @@ export class DashboardComponent implements OnInit {
 
     // Lex
     let lexerOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(lexerOutput);
 
     // Parse
     let parserOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(parserOutput);
 
     // Semantic Analysis
     let semanticAnalysisOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(semanticAnalysisOutput);
 
     // Code Generation
     let codeGenerationOutput: Map<string, any> = (await compilerGenerator.next()).value;
-    console.log(codeGenerationOutput);
 
+    // Update UI state
     this.programs = codeGenerationOutput.get(PROGRAMS);
     this.compiling = false;
+    this.compilerStatus = "Compiled - Ready";
     // Output
   }// onCompileButtonClick
 
-  hostBtnStartOS_click(buttonId: string) {
-    if (this.isActive) {
+  /**
+   * Automatically fills the OS input text area with op codes.
+   * 
+   * @param executableImage raw op codes from compilation
+   */
+  onExecutableImageClick(executableImage: string) {
+    document.getElementById('taProgramInput')!.innerHTML = executableImage;
+  } // onExecutableImageClick
+
+  //================================================================================
+  // OS UI Buttons
+  //================================================================================
+
+  hostBtnStartOS_click() {
+
+    // Turn Off on AxiOS
+    if (this.isPoweredOn) {
       this.osService.end();
+
+      // Update GUI
+      this.axiosStatus = "Offline";
+      this.btnHaltOS.disabled = true;
+      this.btnHaltOS.style.color = "#3d3d3d";
+      this.btnSingleStepMode.disabled = true;
+      this.btnSingleStepMode.style.color = "#3d3d3d";
+      this.btnNextStep.disabled = true;
+      this.btnNextStep.style.color = "#3d3d3d";
+      this.btnStartOS.style.color = "#228B22";
+
+      // Reset halting and single step
+      this.isHalted = false;
+      this.isSingleStep = false;
     } // if
 
+    // Turn on AxiOS
     else {
-      // Activate Input Streams 
+      // Activate Input Streams
+      this.axiosStatus = "Online - Okay";
       this.osService.setKeyboardSubscription(this.keyBoard);
+
+      // Activate halt OS button
+      this.btnHaltOS.disabled = false;
+      this.btnHaltOS.style.color = "red";
+
+      // Activate single step mode button
+      this.btnSingleStepMode.disabled = false;
+      this.btnSingleStepMode.style.color = "rgba(59, 130, 246, 0.5)";
+
+      // Disable next step button
+      this.btnNextStep.disabled = true;
+      this.btnNextStep.style.color = "#3d3d3d";
+      this.btnStartOS.style.color = "red";
     } // else
 
     // Flip State
-    this.isActive = !this.isActive;
+    this.isPoweredOn = !this.isPoweredOn;
   } // hostBtnStartOS_click
 
   hostBtnHaltOS_click(buttonId: string) {
+    if (!this.isPoweredOn || this.isHalted) { return; }
 
+    // Halt OS
+    if (!this.isHalted) {
+      // Halt OS
+      this.axiosStatus = "Online - Halted";
+      this.isHalted = true;
+      this.btnHaltOS.style.color = "#3d3d3d";
+
+      // Disable single step
+      this.btnSingleStepMode.disabled = true;
+      this.btnSingleStepMode.style.color = "#3d3d3d";
+      this.btnNextStep.disabled = true;
+      this.btnNextStep.style.color = "#3d3d3d";
+      this.isSingleStep = false;
+    } // if
   } // hostBtnHaltOS_click
 
   hostBtnReset_click(buttonId: string) {
+    if (!this.isPoweredOn) { return; }
 
   } // hostBtnReset_click
 
   hostBtnSingleStep_click(buttonId: string) {
+    if (!this.isPoweredOn || this.isHalted) { return; }
 
+    // Turn off single step
+    if (this.isSingleStep) {
+      this.axiosStatus = "Online- Okay";
+
+      // Disable Next Step Button
+      this.btnNextStep.disabled = true;
+      this.btnNextStep.style.color = "#3d3d3d";
+
+      // Make this button blue
+      this.btnSingleStepMode.style.color = "rgba(59, 130, 246, 0.5)";
+    } // if
+
+    // Enter single step
+    else {
+      // Make this button blue
+      this.axiosStatus = "Online- Single Step";
+      this.btnSingleStepMode.style.color = "red";
+
+      // Disable Next Step Button
+      this.btnNextStep.disabled = false;
+      this.btnNextStep.style.color = "#228B22";
+    } // else
+    
+    this.isSingleStep = !this.isSingleStep;
   } // hostBtnSingleStep_click
 
   hostBtnNextStep_click(buttonId: string) {
+    if (!this.isPoweredOn) { return; }
 
   } // hostBtnNextStep_click
+
 }// DashboardComponent

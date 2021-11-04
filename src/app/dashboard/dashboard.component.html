@@ -1,9 +1,7 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
 <mat-toolbar style="background-color: #161616; height: 6.5%; border-bottom: black solid 1px;">
   <div class="flex-row">
     <div class="nightingale">
-      <span class="text-nightingale-pink">Nightingale</span>
+      <div><span class="text-nightingale-pink">Nightingale</span><span style="color: #3d3d3d; font-size: .7rem; margin-left: 15px;">Status: {{compilerStatus}}</span></div>
       <button mat-icon-button *ngIf="(compiling) == false" class="example-icon favorite-icon"
         aria-label="Example icon-button with heart icon" (click)="onCompileButtonClick()" style="color: #228B22;">
         <mat-icon>done</mat-icon>
@@ -14,27 +12,27 @@
     </div>
     <div class="divider"></div>
     <div class="axios">
-      <span class="text-blue">AxiOS</span>
-      <div>
+      <div><span class="text-blue">AxiOS </span> <span style="color: #3d3d3d; font-size: .7rem; margin-left: 15px;">Status: {{axiosStatus}}</span></div>
+      <div style="margin-right: 40px;">
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnStartOS"
-          (click)="hostBtnStartOS_click('btnStartOS')">
+          (click)="hostBtnStartOS_click()" title="OS Power Button" [style.color]="'#228B22'" >
           <mat-icon>power_settings_new</mat-icon>
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnHaltOS"
-          (click)="hostBtnHaltOS_click('btnStartOS')">
-          <mat-icon>power_settings_new</mat-icon>
+          (click)="hostBtnHaltOS_click('btnStartOS')" [style.color]="'#3d3d3d'" >
+          <mat-icon>stop</mat-icon>
         </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnReset"
+        <!-- <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnReset"
           (click)="hostBtnReset_click('btnReset')">
           <mat-icon>power_settings_new</mat-icon>
-        </button>
+        </button> -->
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon"
-          id="btnSingleStepMode" (click)="hostBtnSingleStep_click('btnSingleStepMode')">
-          <mat-icon>power_settings_new</mat-icon>
+          id="btnSingleStepMode" (click)="hostBtnSingleStep_click('btnSingleStepMode')" title="Toggle Single Step" [style.color]="'#3d3d3d'" >
+          <mat-icon>bug_report</mat-icon>
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnNextStep"
-          (click)="hostBtnNextStep_click('btnNextStep')">
-          <mat-icon>power_settings_new</mat-icon>
+          (click)="hostBtnNextStep_click('btnNextStep')" title="Step One" [style.color]="'#3d3d3d'" >
+          <mat-icon> keyboard_tab</mat-icon>
         </button>
       </div>
     </div>
@@ -47,11 +45,15 @@
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle style="margin-top: 0;">
         <!-- Compiler tests are directly added to Monaco Editor -->
         <button mat-icon-button *ngIf="node.type == 'COMPILER_TEST'" style="width: min-content; font-size: .7rem;"
-          (click)="onTestClick(node.data)">
+          (click)="onCompilerTestClick(node.data)">
           {{node.name}}
         </button>
 
         <!-- TODO: Operating System tests (written in ) are directly added to OS Input -->
+        <!-- <button mat-icon-button *ngIf="node.type == 'OS_TEST'" style="width: min-content; font-size: .7rem;"
+          (click)="onOSTestClick(node.data)">
+          {{node.name}}
+        </button> -->
       </mat-tree-node>
       <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
         <div class="mat-tree-node">
@@ -77,7 +79,7 @@
           <ul>
             <li>
               <button mat-icon-button color="accent" class="example-icon" aria-label="Tests" (click)="opened = !opened">
-                <mat-icon class="text-blue">open_in_browser</mat-icon>
+                <mat-icon class="text-blue">folder</mat-icon>
               </button>
             </li>
           </ul>
@@ -184,7 +186,27 @@
                 </mat-tab>
 
                 <!-- Code Generation Output -->
-                <mat-tab label="6502a OP CODES"> Terminal </mat-tab>
+                <mat-tab label="6502a OP CODES">
+                  <div style="height: 100%; width: 50%; overflow-wrap:normal;">
+                    <ul>
+                      <li *ngFor="let prog of programs">
+                        <span
+                          style="font-size: .7rem; color: white; margin-left: 15px; margin-top: 15px;  border-bottom: 1px solid white;">
+                          Program {{prog.id}}
+                          <span *ngIf="prog.isValid == false">Skipped Due to Errors!</span>
+                          <span *ngIf="prog.isValid == true">
+                            Executable Image
+                            <button mat-icon-button (click)="onExecutableImageClick(prog.executableImage.memory())">
+                              <mat-icon style="color: #228b22;">arrow_right_alt</mat-icon>
+                            </button>
+                          </span>
+                        </span>
+                        <app-op-codes *ngIf="prog.isValid == true" [executableImage]="prog.executableImage.memory()">
+                        </app-op-codes>
+                      </li>
+                    </ul>
+                  </div>
+                </mat-tab>
               </mat-tab-group>
             </as-split-area>
           </as-split>

@@ -30,6 +30,7 @@ import { DiskComponent } from './components/operating-system/disk/disk.component
 import { HostLogComponent } from './components/operating-system/host-log/host-log.component';
 import { ProgramInputComponent } from './components/operating-system/program-input/program-input.component';
 import { ConsoleComponent } from './components/operating-system/console/console.component';
+import { OpCodesComponent } from './components/compiler/op-codes/op-codes.component';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { ConsoleComponent } from './components/operating-system/console/console.
     HostLogComponent,
     ProgramInputComponent,
     ConsoleComponent,
+    OpCodesComponent,
   ],
   imports: [
     BrowserModule,
