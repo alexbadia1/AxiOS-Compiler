@@ -175,6 +175,7 @@ export class DashboardComponent implements OnInit {
   public hostLogData: Array<HostLogData> = [];
   public cpuData: CpuData = new CpuData();
   public memory: MemoryMap = new MemoryMap(null!);
+  public processes: Array<PcbData> = [];
 
   constructor(
     private compilerService: CompilerService,
@@ -507,8 +508,13 @@ export class DashboardComponent implements OnInit {
     this.memory = new MemoryMap(memoryRows);
   } // memoryReaction
 
-  private processesReaction(val: Array<PcbData>) {
-    console.log(val);
+  /**
+   * Display current resident list in the GUI
+   * 
+   * @param newProcesses 
+   */
+  private processesReaction(newProcesses: Array<PcbData>) {
+    this.processes = newProcesses;
   } // processesReaction
 
   onAxiOsTabChange(event: MatTabChangeEvent) {

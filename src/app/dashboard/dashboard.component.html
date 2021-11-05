@@ -101,7 +101,7 @@
       </mat-grid-tile>
 
       <!-- Code Editor View -->
-      <mat-grid-tile class="material-grid-tile-code-editor" [colspan]="48" [rowspan]="1">
+      <mat-grid-tile class="material-grid-tile-code-editor" [colspan]="44" [rowspan]="1">
         <div style="height: 100%; width: 100%; align-items: center;">
           <as-split class="split-example ex-b" direction="vertical" [gutterSize]="1.25">
 
@@ -218,7 +218,7 @@
       </mat-grid-tile>
 
       <!-- Operating System -->
-      <mat-grid-tile [colspan]="48" [rowspan]="1">
+      <mat-grid-tile [colspan]="52" [rowspan]="1">
         <as-split class="split-example ex-b" direction="vertical" [gutterSize]="1.25" [disabled]="true">
 
           <!-- Canvas CMD -->
@@ -247,7 +247,7 @@
               <mat-tab label="CPU/PROCESSES">
                 <div style="height: 100%; width: 100%; overflow: scroll;">
                   <app-cpu-output [cpuData] = 'cpuData'></app-cpu-output>
-                  <app-processes></app-processes>
+                  <app-processes [processes]="processes"></app-processes>
                 </div>
               </mat-tab>
 

@@ -13,16 +13,16 @@
         <div class="box">Loc</div>
     </div>
 
-    <div class="pcb--wrapper pcb--wrapper--data">
-        <div id="pcb--pid" class="box">00</div>
-        <div id="pcb--pc" class="box">00</div>
-        <div id="pcb--ir" class="box">00</div>
-        <div id="pcb--acc" class="box">00</div>
-        <div id="pcb--x" class="box">00</div>
-        <div id="pcb--y" class="box">00</div>
-        <div id="pcb--z" class="box">00</div>
-        <div id="pcb--priority" class="box">00</div>
-        <div id="pcb--state" class="box">00</div>
-        <div id="pcb--location" class="box">0</div>
+    <div *ngFor="let process of processes" class="pcb--wrapper pcb--wrapper--data">
+        <div class="box">{{process.pid}}</div>
+        <div class="box">{{process.pc}}</div>
+        <div class="box">{{process.ir}}</div>
+        <div class="box">{{process.acc}}</div>
+        <div class="box">{{process.z}}</div>
+        <div class="box">{{process.y}}</div>
+        <div class="box">{{process.z}}</div>
+        <div class="box">{{process.priority}}</div>
+        <div class="box">{{process.state}}</div>
+        <div class="box">{{process.location}}</div>
     </div>
 </div>
