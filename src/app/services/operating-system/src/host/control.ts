@@ -24,14 +24,22 @@ import { Dispatcher } from "./dispatcher";
 import { Memory } from "./memory";
 import { MemoryAccessor } from "./memoryAccessor";
 import { Kernel } from "../os/kernel";
+import { Subject } from 'rxjs';
+import { HostLogData } from "../../operating-system.service";
 
 //
 // Control Services
 //
 export class Control {
 
-    public static hostInit(): void {
-        // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
+    public static hostInit(
+        hostLog$: Subject<HostLogData> | null
+
+    ): void {
+        // This is called from OS Service's power() method
+        //
+        // Make injected subjects available to the enitre operating system.
+        Globals._hostLog$ = hostLog$;
 
         // Get a global reference to the canvas.
         //
@@ -70,21 +78,19 @@ export class Control {
     ///////////////
 
     public static hostLog(msg: string, source: string = "?"): void {
-        // Note the OS CLOCK.
-        var clock: number = Globals._OSclock;
-
-        // Note the REAL clock in milliseconds since January 1, 1970.
-        var now: number = new Date().getTime();
-
-        // Build the log string.
-        var str: string = "({ clock:" + clock + ", source:" + source + ", msg:" + msg + ", now:" + now + " })" + "\n";
-
+        // Send Host Log Data back to the UI
+        if (Globals._hostLog$ != null || Globals._hostLog$ != undefined) { 
+            Globals._hostLog$.next(
+                new HostLogData(
+                    Globals._OSclock.toString(),  // Note the OS CLOCK.
+                    source,
+                    msg, 
+                    new Date().getTime().toString()  // Note the REAL clock in milliseconds since January 1, 1970.
+                ),
+            ); // Globals._hostLog$.next
+        } // if
         // Update the log console.
-        // var taLog = <HTMLInputElement>document.getElementById("taHostLog");
-        // taLog.value = str + taLog.value;
-
-        // TODO in the future: Optionally update a log database or some streaming service.
-    }/// hostLog
+    } // hostLog
 
 
     //

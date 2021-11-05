@@ -5,6 +5,8 @@
    This code references page numbers in our text book:
    Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
    ------------ */
+import { Subject } from "rxjs";
+import { HostLogData } from "../operating-system.service";
 import { Cpu } from "./host/cpu";
 import { Disk } from "./host/disk";
 import { Dispatcher } from "./host/dispatcher";
@@ -116,6 +118,9 @@ export class Globals {
    public static _Scheduler: Scheduler;
 
    public static _Disk: Disk;
+
+   // Subjects
+   public static _hostLog$: Subject<HostLogData> | null;
 
    /// Software (OS)
    public static _MemoryManager: any = null;

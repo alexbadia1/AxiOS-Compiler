@@ -1,1 +1,7 @@
-<p>host-log works!</p>
+<ul>
+    <li *ngFor="let hostMsg of hostMessages" class="hostlog-output-li">
+        {{ '{' }}(Clock: {{hostMsg.clock}}, Source: {{hostMsg.source}}, Message: {{hostMsg.message}},
+        Now: {{hostMsg.now}}){{ '}' }} this is a very long sentce more gibberish i don't know what I'm saying but lets see if this get cut off or not
+    </li>
+</ul>
+<div style="height: 5vh;"></div>

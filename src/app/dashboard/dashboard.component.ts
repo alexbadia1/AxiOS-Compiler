@@ -1,14 +1,14 @@
 import { NestedTreeControl } from "@angular/cdk/tree";
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { MatTabChangeEvent } from "@angular/material/tabs";
 import { MatTreeNestedDataSource } from "@angular/material/tree";
 import { MonacoStandaloneCodeEditor } from "@materia-ui/ngx-monaco-editor";
-import { fromEvent, Observable } from "rxjs";
-import { ConsoleComponent } from "../components/operating-system/console/console.component";
+import { Subject } from "rxjs";
 import { CompilerService } from "../services/compiler/compiler.service";
 import { PROGRAMS } from "../services/compiler/src/global";
 import { Program } from "../services/compiler/src/models/program";
 import { TestService } from "../services/compiler/src/test.service";
-import { OperatingSystemService } from "../services/operating-system/operating-system.service";
+import { HostLogData, OperatingSystemService } from "../services/operating-system/operating-system.service";
 
 
 const COMPILER_TEST = "COMPILER_TEST";
@@ -54,11 +54,6 @@ interface TestNode {
 
 
 export class DashboardComponent implements OnInit {
-  private btnStartOS: HTMLButtonElement;
-  private btnHaltOS: HTMLButtonElement;
-  private btnSingleStepMode: HTMLButtonElement;
-  private btnNextStep: HTMLButtonElement;
-
   /**
    * Monaco Code Editor Plugin
    */
@@ -71,35 +66,70 @@ export class DashboardComponent implements OnInit {
   code: string = codePrompt;
   originalCode: string = codePrompt;
 
-  private canvas: HTMLElement;
-  private keyBoard: Observable<KeyboardEvent>;
-
   /**
    * Sidebar [Open | Close] State
    */
   public opened: boolean = false;
+
+  //================================================================================
+  // Nightingale Comiler Instance Variables
+  //================================================================================
 
   /**
    * Compile Button [Show | Hide] State
    * AND Progress Icon [Show | Hide] State
    */
   public compiling: boolean = false;
-
-  /**
-   * Power Button [Green | Red] State
-   */
-  public isPoweredOn: boolean = false;
-  public isHalted: boolean = false;
-  public isSingleStep: boolean = false;
-  public axiosStatus: string = "Offline";
   public compilerStatus: string = "Ready";
 
   /**
-   * Binding data
+   * Compiler UI Binding
    */
   programs: Array<Program> = [];
   dataSource = new MatTreeNestedDataSource<TestNode>();
   treeControl = new NestedTreeControl<TestNode>(node => node.children);
+
+  //================================================================================
+  // AxiOS Instance Variables
+  //================================================================================
+
+  /**
+   * AxiOS power button state
+   */
+  public isPoweredOn: boolean = false;
+  private btnStartOS: HTMLButtonElement;
+  public axiosStatus: string = "Offline";
+
+  /**
+   * AxiOS halt button state
+   */
+  public isHalted: boolean = false;
+  private btnHaltOS: HTMLButtonElement;
+
+  /**
+   * AxiOS single step button state
+   */
+  public isSingleStep: boolean = false;
+  private btnSingleStepMode: HTMLButtonElement;
+
+  /**
+   * AxiOS GUI references
+   */
+  private canvas: HTMLElement;
+  private btnNextStep: HTMLButtonElement;
+
+  /**
+   * AxiOS Subscribers
+   */
+  private hostLog$: Subject<any> | null = null;
+  private cpu$: Subject<any> | null = null;
+  private processes$: Subject<any> | null = null;
+  private memory$: Subject<any> | null = null;
+
+  /**
+   * AxiOS Component Data Binding
+   */
+  public hostLog: Array<HostLogData> = [];
 
   constructor(
     private compilerService: CompilerService,
@@ -173,10 +203,6 @@ export class DashboardComponent implements OnInit {
     this.btnHaltOS = document.getElementById('btnHaltOS')! as HTMLButtonElement;
     this.btnSingleStepMode = document.getElementById('btnSingleStepMode')! as HTMLButtonElement;
     this.btnNextStep = document.getElementById('btnNextStep')! as HTMLButtonElement;
-
-    if (this.canvas != null) {
-      this.keyBoard = fromEvent<KeyboardEvent>(this.canvas, 'keydown');
-    } // if
   }// ngOnInit
 
   //================================================================================
@@ -256,7 +282,7 @@ export class DashboardComponent implements OnInit {
 
   hostBtnStartOS_click() {
 
-    // Turn Off on AxiOS
+    // Shutdown AxiOS
     if (this.isPoweredOn) {
       // Update GUI
       this.axiosStatus = "Offline";
@@ -273,11 +299,12 @@ export class DashboardComponent implements OnInit {
       this.isSingleStep = false;
     } // if
 
-    // Turn on AxiOS
+    // Power AxiOS
     else {
-      // Activate Input Streams
+      // Power on and setup scubscriptions
+      this.osService.power();
+      this.setupAxiosSubscriptions();
       this.axiosStatus = "Online - Okay";
-      this.osService.startAxiOS();
 
       // Activate halt OS button
       this.btnHaltOS.disabled = false;
@@ -346,7 +373,7 @@ export class DashboardComponent implements OnInit {
       this.btnNextStep.disabled = false;
       this.btnNextStep.style.color = "#228B22";
     } // else
-    
+
     this.isSingleStep = !this.isSingleStep;
   } // hostBtnSingleStep_click
 
@@ -355,4 +382,70 @@ export class DashboardComponent implements OnInit {
 
   } // hostBtnNextStep_click
 
+  //================================================================================
+  // AxiOS Subscriptions
+  //================================================================================
+
+  private setupAxiosSubscriptions() {
+    if (this.hostLog$ != null
+      || this.cpu$ != null
+      || this.processes$ != null
+      || this.memory$ != null) { return; } // if
+
+    // Retrieve Axios Subjects
+    this.hostLog$ = this.osService.hostLog$();
+    this.cpu$ = this.osService.cpu$();
+    this.processes$ = this.osService.processes$();
+    this.memory$ = this.osService.memory$();
+
+    // Subscribe and map to UI functions
+    this.hostLog$.subscribe(val => this.hostLogReaction(val));
+    this.cpu$.subscribe(val => this.cpuReaction(val));
+    this.processes$.subscribe(val => this.processesReaction(val));
+    this.memory$.subscribe(val => this.memoryReaction(val));
+  } // setUpSubscriptions
+
+  private teardownAxiosSubscriptions() {
+    this.hostLog$ = null;
+    this.cpu$ = null;
+    this.processes$ = null;
+    this.memory$ = null;
+  } // teardownSubscriptions
+
+  private hostLogReaction(newHostLog: HostLogData) {
+    this.hostLog.push(newHostLog);
+    this.autoScrollToBottom('appHostLog');
+  } // hostLogReaction
+
+  private cpuReaction(val: any) {
+
+  } // cpuReaction
+
+  private processesReaction(val: any) {
+
+  } // processesReaction
+
+  private memoryReaction(val: any) {
+
+  } // memoryReaction
+
+  onAxiOsTabChange(event: MatTabChangeEvent) {
+    console.log(event);
+
+    switch (event.index) {
+      case 4:
+        this.autoScrollToBottom('appHostLog');
+        break;
+      default:
+        break;
+    } // switch
+  } // onAxiOsTabChange
+
+  private autoScrollToBottom(id: string) {
+    // Autoscroll
+    let el = document.getElementById(id);
+    if (el != null || el != undefined) {
+      el.scrollTop = el.scrollHeight;
+    } // if
+  } // autoScrollToBottom
 }// DashboardComponent

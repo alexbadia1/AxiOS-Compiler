@@ -219,7 +219,7 @@
 
       <!-- Operating System -->
       <mat-grid-tile [colspan]="48" [rowspan]="1">
-        <as-split class="split-example ex-b" direction="vertical" [gutterSize]="1.25" [disabled]="false">
+        <as-split class="split-example ex-b" direction="vertical" [gutterSize]="1.25" [disabled]="true">
 
           <!-- Canvas CMD -->
           <as-split-area [size]="70" [minSize]="20">
@@ -228,10 +228,10 @@
 
           <!-- OS Details -->
           <as-split-area id="osBottomSplitArea" [size]="30" [minSize]="20">
-            <mat-tab-group animationDuration="0ms" [dynamicHeight]="true" style="height: 100%;">
+            <mat-tab-group animationDuration="0ms" [dynamicHeight]="true" style="height: 100%;" (selectedTabChange)="onAxiOsTabChange($event)">
               <!-- 6502a Input -->
               <mat-tab label="6502a INPUT">
-                <div style="height: 100%; width: 100%; overflow: scroll;">
+                <div id="appProgramInput" style="height: 100%; width: 100%; overflow: scroll;">
                   <app-program-input></app-program-input>
                 </div>
               </mat-tab>
@@ -258,8 +258,9 @@
 
               <!-- Host Log -->
               <mat-tab label="HOST LOG">
-                <textarea name="taHostLog" id="taHostLog" rows="21" cols="48"
-                  style='width: 98.75%; height: 100%; resize: none; background-color: transparent; color:#d4d4d4; border: none;'></textarea>
+                <div id="appHostLog" style="height: 100%; width: 100%; white-space:normal; overflow-wrap:break-word; overflow-x: hidden; overflow-y: scroll;">
+                  <app-host-log [hostMessages]='hostLog'></app-host-log>
+                </div>
               </mat-tab>
             </mat-tab-group>
           </as-split-area>
