@@ -8,7 +8,7 @@ import { CompilerService } from "../services/compiler/compiler.service";
 import { PROGRAMS } from "../services/compiler/src/global";
 import { Program } from "../services/compiler/src/models/program";
 import { TestService } from "../services/compiler/src/test.service";
-import { CpuData, HostLogData, OperatingSystemService } from "../services/operating-system/operating-system.service";
+import { CpuData, HostLogData, OperatingSystemService, PcbData } from "../services/operating-system/operating-system.service";
 import { Address } from "../services/operating-system/src/host/addressBlock";
 
 
@@ -485,8 +485,6 @@ export class DashboardComponent implements OnInit {
    * @param newMemoryAddresses 
    */
   private memoryReaction(newMemoryAddresses: Array<Address>) {
-    console.log(newMemoryAddresses);
-    console.log(newMemoryAddresses.length);
     let tmp: Array<AddressMap> = [];
     let memoryRows: Array<MemoryRow> = [];
     let memoryAddressesSize: number = newMemoryAddresses.length;
@@ -506,12 +504,11 @@ export class DashboardComponent implements OnInit {
         tmp.push({ physicalAddress: newMemoryAddresses[i].physicalAddress, value: newMemoryAddresses[i].data });
       } // if
     } // for
-    console.log(new MemoryMap(memoryRows));
     this.memory = new MemoryMap(memoryRows);
   } // memoryReaction
 
-  private processesReaction(val: any) {
-
+  private processesReaction(val: Array<PcbData>) {
+    console.log(val);
   } // processesReaction
 
   onAxiOsTabChange(event: MatTabChangeEvent) {

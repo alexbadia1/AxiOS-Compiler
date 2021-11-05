@@ -24,14 +24,29 @@ export class CpuData {
   ) { } // constuctor
 } // CpuData
 
+export class PcbData {
+  constructor(
+    public pid: string = "00",
+    public pc: string = "00",
+    public ir: string = "00",
+    public acc: string = "00",
+    public x: string = "00",
+    public y: string = "00",
+    public z: string = "0",
+    public priority: string = "0",
+    public state: string = "-----",
+    public location: string = "-----"
+  ) { } // constuctor
+} // CpuData
+
 @Injectable({
   providedIn: 'root'
 })
 export class OperatingSystemService {
   private hostLogSnapshot$: Subject<HostLogData> | null = null;
   private cpuSnapshot$: Subject<CpuData> | null = null;
-  private processesSnapshot$: Subject<Array<Address>> | null = null;
-  private memorySnapshot$: Subject<any> | null = null;
+  private processesSnapshot$: Subject<Array<PcbData>> | null = null;
+  private memorySnapshot$: Subject<Array<Address>> | null = null;
   public keys: Array<string> = [];
 
   constructor() { } // constructor
@@ -44,7 +59,8 @@ export class OperatingSystemService {
       Control.hostInit(
         this.hostLogSnapshot$,
         this.cpuSnapshot$,
-        this.memorySnapshot$
+        this.memorySnapshot$,
+        this.processesSnapshot$
       );
       Control.hostBtnStartOS_click();
   } //startAxiOS

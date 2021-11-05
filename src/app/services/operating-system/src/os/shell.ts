@@ -1124,7 +1124,7 @@ export class Shell {
 
     /// quantum <int> - let the user set the Round Robin Quantum (measured in CPU cycles)
     public shellQuantum(args: string[]) {
-        if (Globals._Scheduler.schedulingMethod !== "Round Robin") {
+        if (Globals._Scheduler.schedulingMethod !== Globals.ROUND_ROBIN) {
             Globals._StdOut.putText(`${Globals.INDENT_STRING}Quantum cannot be changed while using ${Globals._Scheduler.schedulingMethod} schheduling!`);
             Globals._StdOut.advanceLine();
             return;

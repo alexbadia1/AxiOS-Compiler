@@ -25,7 +25,7 @@ import { Memory } from "./memory";
 import { MemoryAccessor } from "./memoryAccessor";
 import { Kernel } from "../os/kernel";
 import { Subject } from 'rxjs';
-import { CpuData, HostLogData } from "../../operating-system.service";
+import { CpuData, HostLogData, PcbData } from "../../operating-system.service";
 import { Address } from "./addressBlock";
 
 //
@@ -36,6 +36,7 @@ export class Control {
         hostLog$: Subject<HostLogData> | null,
         cpu$: Subject<CpuData> | null,
         memory$: Subject<Array<Address>> | null,
+        processes$: Subject<Array<PcbData>> | null
     ): void {
         // This is called from OS Service's power() method
         //
@@ -43,6 +44,7 @@ export class Control {
         Globals._hostLog$ = hostLog$;
         Globals._cpu$ = cpu$;
         Globals._memory$ = memory$;
+        Globals._processes = processes$;
 
         // Get a global reference to the canvas.
         //
@@ -482,26 +484,47 @@ export class Control {
     } // createVisualResidentList
 
     public static visualizeResidentList() {
-        /// Visually refreshing the "Ready Queue" requires deleting the pre-existing tables.
-        /// Obviously on the first iteration there will be no pre-existing tables, so just catch the error
-        /// and continue building the table.
-        // try {
-        //     let processes: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName("pcb--wrapper--data") as HTMLCollectionOf<HTMLDivElement>;
-        //     Array.prototype.forEach.call(processes, function (el) {
-        //         el!.parentNode!.removeChild(el);
-        //     });
-        // }/// try
-        // catch (e) {
-        //     Globals._Kernel.krnTrace(e as string);
-        //     Globals._Kernel.krnTrace("No resident list to delete.");
-        // }/// catch
-        // for (var index: number = 0; index < Globals._Scheduler.readyQueue.getSize(); ++index) {
-        //     for (var nestedIndex = 0; nestedIndex < Globals._Scheduler.readyQueue.queues[index].getSize(); ++nestedIndex) {
-        //         this.createVisualResidentList(Globals._Scheduler.readyQueue.queues[index].q[nestedIndex]);
-        //     }/// for
-        // }/// for
-    }/// visualizeResidentList
+        if (Globals._processes != undefined || Globals._processes != null) {
+            let tmp: Array<PcbData> = [];
 
+            // Get the current pcb
+            tmp.push(
+                new PcbData(
+                    Globals._CPU.localPCB.processID.toString(),
+                    this.formatToHexWithPadding(Globals._CPU.PC),
+                    Globals._CPU.IR,
+                    Globals._CPU.Acc,
+                    Globals._CPU.Xreg,
+                    Globals._CPU.Yreg,
+                    Globals._CPU.Zflag.toString(),
+                    Globals._CPU.localPCB.priority.toString(),
+                    Globals._CPU.localPCB.processState,
+                    Globals._CPU.localPCB.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB.volumeIndex + 1}`,
+                ) // PcbData
+            ); // tmp.push
+
+            // Show the resident list
+            for (var index: number = 0; index < Globals._Scheduler.readyQueue.getSize(); ++index) {
+                for (var nestedIndex = 0; nestedIndex < Globals._Scheduler.readyQueue.queues[index].getSize(); ++nestedIndex) {
+                    tmp.push(
+                        new PcbData(
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].processID.toString(),
+                            this.formatToHexWithPadding(Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].programCounter),
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].instructionRegister,
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].accumulator,
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].xRegister,
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].yRegister,
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].zFlag.toString(),
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].priority.toString(),
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].processState,
+                            Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].volumeIndex === -1 ? `Disk` : `Seg ${Globals._Scheduler.readyQueue.queues[index].q[nestedIndex].volumeIndex + 1}`,
+                        ) // PcbData
+                    ); // tmp.push
+                } // for
+            } // for
+            Globals._processes.next(tmp);
+        } // if
+    }/// visualizeResidentList
 
     /**
      * iProject4 Control Methods

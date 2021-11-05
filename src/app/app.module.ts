@@ -22,7 +22,6 @@ import { AstComponent } from './components/compiler/ast/ast.component';
 import {MatTreeModule} from '@angular/material/tree';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { ScopeTreeComponent } from './components/compiler/scope-tree/scope-tree.component';
-import { OperatingSystemComponent } from './components/operating-system/operating-system.component';
 import { ProcessesComponent } from './components/operating-system/processes/processes.component';
 import { MemoryComponent } from './components/operating-system/memory/memory.component';
 import { DiskComponent } from './components/operating-system/disk/disk.component';
@@ -41,7 +40,6 @@ import { CpuOutputComponent } from './components/operating-system/cpu-output/cpu
     OutputComponent,
     AstComponent,
     ScopeTreeComponent,
-    OperatingSystemComponent,
     ProcessesComponent,
     MemoryComponent,
     DiskComponent,
