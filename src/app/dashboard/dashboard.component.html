@@ -239,14 +239,14 @@
               <!-- CPU, Processes and Memory -->
               <mat-tab label="CPU/MEMORY">
                 <div style="height: 100%; width: 100%; overflow: scroll;">
-                  <app-cpu></app-cpu>
-                  <app-memory></app-memory>
+                  <app-cpu-output [cpuData] = 'cpuData'></app-cpu-output>
+                  <app-memory [memory]="memory.rows"></app-memory>
                 </div>
               </mat-tab>
 
               <mat-tab label="CPU/PROCESSES">
                 <div style="height: 100%; width: 100%; overflow: scroll;">
-                  <app-cpu></app-cpu>
+                  <app-cpu-output [cpuData] = 'cpuData'></app-cpu-output>
                   <app-processes></app-processes>
                 </div>
               </mat-tab>
@@ -259,7 +259,7 @@
               <!-- Host Log -->
               <mat-tab label="HOST LOG">
                 <div id="appHostLog" style="height: 100%; width: 100%; white-space:normal; overflow-wrap:break-word; overflow-x: hidden; overflow-y: scroll;">
-                  <app-host-log [hostMessages]='hostLog'></app-host-log>
+                  <app-host-log [hostMessages]='hostLogData'></app-host-log>
                 </div>
               </mat-tab>
             </mat-tab-group>

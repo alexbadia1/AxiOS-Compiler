@@ -17,7 +17,6 @@ import { Interrupt } from "./interrupt";
 import { PriorityQueue } from "./priorityQueue";
 import { ProcessControlBlock } from "./processControlBlock";
 
-
 export class Scheduler {
 
     constructor(
@@ -29,7 +28,7 @@ export class Scheduler {
         public unInterleavedOutput: string[] = [],
         public processTurnaroundTime: number[] = [],
         public readyQueue = new PriorityQueue(),
-        public currentProcess: ProcessControlBlock | null = null,
+        public currentProcess: ProcessControlBlock = null!,
         public schedulingMethod = Globals.ROUND_ROBIN,
     ) {
         /// this.readyQueue = this.schedulingMethod === 'Round Robin'? new Queue() : new PriorityQueue();
@@ -39,7 +38,7 @@ export class Scheduler {
         this.startBurst = 0;
         /// this.readyQueue = this.schedulingMethod === 'Round Robin'? new Queue() : new PriorityQueue();
         this.readyQueue = new PriorityQueue();
-        this.currentProcess = null;
+        this.currentProcess = null!;
         this.processesMetaData = [];
         this.unInterleavedOutput = [];
     }/// init
@@ -86,7 +85,7 @@ export class Scheduler {
             /// Set first process and update pcb
             if (this.currentProcess === null) {
                 this.currentProcess = this.readyQueue.dequeueInterruptOrPcb();
-                this.currentProcess!.processState === "Running";
+                this.currentProcess.processState === "Running";
                 Globals._Dispatcher.setNewProcessToCPU(this.currentProcess);
                 Control.updateVisualPcb();
             }/// if
@@ -139,8 +138,8 @@ export class Scheduler {
 
     public priorityCheck() {
         /// Current Process Terminated...
-        if (this.currentProcess!.processState === "Terminated") {
-            Globals._Kernel.krnTrace(`Current process ${this.currentProcess!.processID} terminated.`);
+        if (this.currentProcess.processState === "Terminated") {
+            Globals._Kernel.krnTrace(`Current process ${this.currentProcess.processID} terminated.`);
 
             /// Context Switch
             this.attemptContextSwitch();
@@ -175,8 +174,8 @@ export class Scheduler {
         Globals._Mode = 0;
 
         /// Current Process has terminated either Right On or Before quanta limit:
-        if (this.currentProcess!.processState === "Terminated") {
-            Globals._Kernel.krnTrace(`Current process ${this.currentProcess!.processID} terminated.`);
+        if (this.currentProcess.processState === "Terminated") {
+            Globals._Kernel.krnTrace(`Current process ${this.currentProcess.processID} terminated.`);
 
             /// Context Switch
             this.attemptContextSwitch();
@@ -186,16 +185,16 @@ export class Scheduler {
         else if ((Globals._CPU_BURST - this.startBurst) >= this.quanta) {
             /// Context Switch but put process back in process queue
             if (this.readyQueue.getSize() > 0) {
-                Globals._Kernel.krnTrace(`Process ${this.currentProcess!.processID} quantum reached, issuing context switch...`);
+                Globals._Kernel.krnTrace(`Process ${this.currentProcess.processID} quantum reached, issuing context switch...`);
                 /// Queue interrupt for context switch
-                Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
+                Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
 
                 /// Reset the starting burst for the next new process
                 this.startBurst = Globals._CPU_BURST;
 
             }/// if
             else {
-                Globals._Kernel.krnTrace(`Process ${this.currentProcess!.processID} is the final process, renewing quantum...`);
+                Globals._Kernel.krnTrace(`Process ${this.currentProcess.processID} is the final process, renewing quantum...`);
                 /// There is one process left "in" the scheduler so keep renewing
                 /// its quantum to let the process run as it will termination.
                 this.startBurst = Globals._CPU_BURST;
@@ -213,16 +212,16 @@ export class Scheduler {
             Globals._Kernel.krnTrace(`Another process was found in Ready Queue, issuing context switch...`);
 
             /// Queue interrupt for context switch
-            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
+            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.CONTEXT_SWITCH_IRQ, []));
 
             /// Grab the procress' output, time spent executing, time spent waiting, turnaround time
-            Globals._Kernel.krnTrace(`Collecting process ${this.currentProcess!.processID} metadata before context switch.`);
-            var turnAroundTime = (this.currentProcess!.timeSpentExecuting + this.currentProcess!.waitTime);
-            this.unInterleavedOutput.push(`Pid ${this.currentProcess!.processID}: ${this.currentProcess!.outputBuffer}`);
+            Globals._Kernel.krnTrace(`Collecting process ${this.currentProcess.processID} metadata before context switch.`);
+            var turnAroundTime = (this.currentProcess.timeSpentExecuting + this.currentProcess.waitTime);
+            this.unInterleavedOutput.push(`Pid ${this.currentProcess.processID}: ${this.currentProcess.outputBuffer}`);
             this.processesMetaData.push([
-                this.currentProcess!.processID,
-                this.currentProcess!.timeSpentExecuting,
-                this.currentProcess!.waitTime,
+                this.currentProcess.processID,
+                this.currentProcess.timeSpentExecuting,
+                this.currentProcess.waitTime,
                 turnAroundTime,
             ]);
 
@@ -246,13 +245,13 @@ export class Scheduler {
             Globals._CPU.isExecuting = false;
 
             /// Grab the final procresses' output, time spent executing, time spent waiting, turnaround time
-            Globals._Kernel.krnTrace(`Collecting final process ${this.currentProcess!.processID} metadata.`);
-            var turnAroundTime = (this.currentProcess!.timeSpentExecuting + this.currentProcess!.waitTime);
-            this.unInterleavedOutput.push(`Pid ${this.currentProcess!.processID}: ${this.currentProcess!.outputBuffer}`);
+            Globals._Kernel.krnTrace(`Collecting final process ${this.currentProcess.processID} metadata.`);
+            var turnAroundTime = (this.currentProcess.timeSpentExecuting + this.currentProcess.waitTime);
+            this.unInterleavedOutput.push(`Pid ${this.currentProcess.processID}: ${this.currentProcess.outputBuffer}`);
             this.processesMetaData.push([
-                this.currentProcess!.processID,
-                this.currentProcess!.timeSpentExecuting,
-                this.currentProcess!.waitTime,
+                this.currentProcess.processID,
+                this.currentProcess.timeSpentExecuting,
+                this.currentProcess.waitTime,
                 turnAroundTime,
             ]);
 

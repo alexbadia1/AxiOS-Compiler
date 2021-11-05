@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { Address } from './src/host/addressBlock';
 import { Control } from './src/host/control';
 
 
@@ -12,14 +13,24 @@ export class HostLogData {
   ) { } // constuctor
 } // HostLog
 
+export class CpuData {
+  constructor(
+    public pc: string = "00",
+    public ir: string = "00",
+    public acc: string = "00",
+    public x: string = "00",
+    public y: string = "00",
+    public z: string = "0"
+  ) { } // constuctor
+} // CpuData
 
 @Injectable({
   providedIn: 'root'
 })
 export class OperatingSystemService {
   private hostLogSnapshot$: Subject<HostLogData> | null = null;
-  private cpuSnapshot$: Subject<any> | null = null;
-  private processesSnapshot$: Subject<any> | null = null;
+  private cpuSnapshot$: Subject<CpuData> | null = null;
+  private processesSnapshot$: Subject<Array<Address>> | null = null;
   private memorySnapshot$: Subject<any> | null = null;
   public keys: Array<string> = [];
 
@@ -32,6 +43,8 @@ export class OperatingSystemService {
       // Run the AxiOS
       Control.hostInit(
         this.hostLogSnapshot$,
+        this.cpuSnapshot$,
+        this.memorySnapshot$
       );
       Control.hostBtnStartOS_click();
   } //startAxiOS

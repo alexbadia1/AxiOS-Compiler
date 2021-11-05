@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CpuComponent } from './cpu.component';
+import { CpuOutputComponent } from './cpu-output.component';
 
-describe('CpuComponent', () => {
-  let component: CpuComponent;
-  let fixture: ComponentFixture<CpuComponent>;
+describe('CpuOutputComponent', () => {
+  let component: CpuOutputComponent;
+  let fixture: ComponentFixture<CpuOutputComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CpuComponent ]
+      declarations: [ CpuOutputComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CpuComponent);
+    fixture = TestBed.createComponent(CpuOutputComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

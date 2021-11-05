@@ -8,7 +8,8 @@ import { CompilerService } from "../services/compiler/compiler.service";
 import { PROGRAMS } from "../services/compiler/src/global";
 import { Program } from "../services/compiler/src/models/program";
 import { TestService } from "../services/compiler/src/test.service";
-import { HostLogData, OperatingSystemService } from "../services/operating-system/operating-system.service";
+import { CpuData, HostLogData, OperatingSystemService } from "../services/operating-system/operating-system.service";
+import { Address } from "../services/operating-system/src/host/addressBlock";
 
 
 const COMPILER_TEST = "COMPILER_TEST";
@@ -43,8 +44,49 @@ interface TestNode {
   data?: string;
   type?: string;
   children?: TestNode[];
-}
+} // TestNode
 
+export interface AddressMap {
+  physicalAddress: number,
+  value: string,
+} // locationMap
+
+/**
+ * Represents a row of 8 memory locations
+ */
+export class MemoryRow {
+  constructor(
+    public baseInHex: string,
+    public addresses: Array<AddressMap>
+  ) { } //constuctor
+} // MemoryRow
+
+export class MemoryMap {
+  public rows: Array<MemoryRow> = [];
+  constructor(
+    newRows: Array<MemoryRow>
+  ) {
+    if (newRows != null) {
+      this.rows = newRows; 
+      return;
+    } // if
+    let tmp: Array<AddressMap> = [];
+    for (let i: number = 0; i <= 768; ++i) {
+      if (i % 8 == 0 && i != 0) {
+        this.rows.push(
+          new MemoryRow(
+            (i - 8).toString(16).padStart(3, "0"),
+            tmp
+          ) // MemoryRow
+        ); // this.rows.push
+
+        tmp = [];
+      } // if
+
+      tmp.push({ physicalAddress: i, value: "00" });
+    } // for
+  } // constructor
+} // MemoryMap
 
 @Component({
   selector: 'app-dashboard',
@@ -129,7 +171,10 @@ export class DashboardComponent implements OnInit {
   /**
    * AxiOS Component Data Binding
    */
-  public hostLog: Array<HostLogData> = [];
+  public pc: string = "00"
+  public hostLogData: Array<HostLogData> = [];
+  public cpuData: CpuData = new CpuData();
+  public memory: MemoryMap = new MemoryMap(null!);
 
   constructor(
     private compilerService: CompilerService,
@@ -301,6 +346,9 @@ export class DashboardComponent implements OnInit {
 
     // Power AxiOS
     else {
+      // Clear Host Log
+      this.hostLogData = [];
+
       // Power on and setup scubscriptions
       this.osService.power();
       this.setupAxiosSubscriptions();
@@ -412,26 +460,61 @@ export class DashboardComponent implements OnInit {
     this.memory$ = null;
   } // teardownSubscriptions
 
+  /**
+   * Updates the UI based on the new Host Log Data passed in.
+   * 
+   * @param newHostLog AxiOS Host Log Data for current cpu cycle.
+   */
   private hostLogReaction(newHostLog: HostLogData) {
-    this.hostLog.push(newHostLog);
+    this.hostLogData.push(newHostLog);
     this.autoScrollToBottom('appHostLog');
   } // hostLogReaction
 
-  private cpuReaction(val: any) {
-
+  /**
+   * Current state of the CPU.
+   * 
+   * @param newCpuData AxiOS Host Log Data for current cpu cycle.
+   */
+  private cpuReaction(newCpuData: CpuData) {
+    this.cpuData = newCpuData;
   } // cpuReaction
+
+  /**
+   * Display current snapshot of memory in the GUI
+   * 
+   * @param newMemoryAddresses 
+   */
+  private memoryReaction(newMemoryAddresses: Array<Address>) {
+    console.log(newMemoryAddresses);
+    console.log(newMemoryAddresses.length);
+    let tmp: Array<AddressMap> = [];
+    let memoryRows: Array<MemoryRow> = [];
+    let memoryAddressesSize: number = newMemoryAddresses.length;
+    for (let i: number = 0; i <= memoryAddressesSize; ++i) {
+      if (i % 8 == 0 && i != 0) {
+        memoryRows.push(
+          new MemoryRow(
+            (i - 8).toString(16).padStart(3, "0"),
+            tmp
+          ) // MemoryRow
+        ); // this.rows.push
+
+        tmp = [];
+      } // if
+
+      if (i != memoryAddressesSize) {
+        tmp.push({ physicalAddress: newMemoryAddresses[i].physicalAddress, value: newMemoryAddresses[i].data });
+      } // if
+    } // for
+    console.log(new MemoryMap(memoryRows));
+    this.memory = new MemoryMap(memoryRows);
+  } // memoryReaction
 
   private processesReaction(val: any) {
 
   } // processesReaction
 
-  private memoryReaction(val: any) {
-
-  } // memoryReaction
-
   onAxiOsTabChange(event: MatTabChangeEvent) {
-    console.log(event);
-
     switch (event.index) {
       case 4:
         this.autoScrollToBottom('appHostLog');

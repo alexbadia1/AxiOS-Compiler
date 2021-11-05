@@ -23,7 +23,6 @@ import {MatTreeModule} from '@angular/material/tree';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { ScopeTreeComponent } from './components/compiler/scope-tree/scope-tree.component';
 import { OperatingSystemComponent } from './components/operating-system/operating-system.component';
-import { CpuComponent } from './components/operating-system/cpu/cpu.component';
 import { ProcessesComponent } from './components/operating-system/processes/processes.component';
 import { MemoryComponent } from './components/operating-system/memory/memory.component';
 import { DiskComponent } from './components/operating-system/disk/disk.component';
@@ -31,6 +30,7 @@ import { HostLogComponent } from './components/operating-system/host-log/host-lo
 import { ProgramInputComponent } from './components/operating-system/program-input/program-input.component';
 import { ConsoleComponent } from './components/operating-system/console/console.component';
 import { OpCodesComponent } from './components/compiler/op-codes/op-codes.component';
+import { CpuOutputComponent } from './components/operating-system/cpu-output/cpu-output.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +42,6 @@ import { OpCodesComponent } from './components/compiler/op-codes/op-codes.compon
     AstComponent,
     ScopeTreeComponent,
     OperatingSystemComponent,
-    CpuComponent,
     ProcessesComponent,
     MemoryComponent,
     DiskComponent,
@@ -50,6 +49,7 @@ import { OpCodesComponent } from './components/compiler/op-codes/op-codes.compon
     ProgramInputComponent,
     ConsoleComponent,
     OpCodesComponent,
+    CpuOutputComponent,
   ],
   imports: [
     BrowserModule,

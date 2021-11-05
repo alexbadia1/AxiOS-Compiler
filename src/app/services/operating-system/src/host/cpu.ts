@@ -1,18 +1,19 @@
 /* ------------
-    CPU.ts
-    Routines for the host CPU simulation, NOT for the OS itself.
-    In this manner, it's A LITTLE BIT like a hypervisor,
-    in that the Document environment inside a browser is the "bare metal" (so to speak) for which we write code
-    that hosts our client OS. But that analogy only goes so far, and the lines are blurred, because we are using
-    TypeScript/JavaScript in both the host and client environments.
-    This code references page numbers in the text book:
-    Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
-    ------------ */
+     CPU.ts
+     Routines for the host CPU simulation, NOT for the OS itself.
+     In this manner, it's A LITTLE BIT like a hypervisor,
+     in that the Document environment inside a browser is the "bare metal" (so to speak) for which we write code
+     that hosts our client OS. But that analogy only goes so far, and the lines are blurred, because we are using
+     TypeScript/JavaScript in both the host and client environments.
+     This code references page numbers in the text book:
+     Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
+     ------------ */
 
 import { Globals } from "../global";
 import { Interrupt } from "../os/interrupt";
 import { ProcessControlBlock } from "../os/processControlBlock";
 import { Control } from "./control";
+
 
 export class Cpu {
 
@@ -24,7 +25,7 @@ export class Cpu {
         public Yreg: string = "00",
         public Zflag: number = 0,
         public isExecuting: boolean = false,
-        public localPCB: ProcessControlBlock | null = null) {
+        public localPCB: ProcessControlBlock = null!) {
     }
 
     public init(): void {
@@ -35,7 +36,7 @@ export class Cpu {
         this.Yreg = "00";
         this.Zflag = 0;
         this.isExecuting = false;
-        this.localPCB = null;
+        this.localPCB = null!;
     }/// init
 
     public cycle(): void {
@@ -63,13 +64,13 @@ export class Cpu {
     public fetch() {
         /// Get Data which is already in a hex string...
         var data: string = "00";
-        data = Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], this.PC)!;
+        data = Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], this.PC);
 
         /// Put data into the instruction register... just to log what's going on right now
         /// Obviously b/c of the shared stored program concept we won't know that this is necessarily
         /// an instruction or not until it's decoded... 
         this.IR = data;
-        this.localPCB!.instructionRegister = data;
+        this.localPCB.instructionRegister = data;
 
         return data;
     }///fetch
@@ -150,19 +151,19 @@ export class Cpu {
                 break;
 
             default:
-                if (this.localPCB!.processState !== "Terminated") {
+                if (this.localPCB.processState !== "Terminated") {
                     /// "Program" hit an invalid op code, just kill the program for now...
                     /// By changing the current process state to "Terminated", the following 
-                    /// _Scheduler.roundRobinCheck() in Kernel will clean up this process.
-                    this.localPCB!.processState = "Terminated";
-                    Globals._Scheduler.currentProcess!.processState = "Terminated";
+                    /// Globals._Scheduler.roundRobinCheck() in Kernel will clean up this process.
+                    this.localPCB.processState = "Terminated";
+                    Globals._Scheduler.currentProcess.processState = "Terminated";
 
                     /// Letting the user know what's going on
-                    Globals._Kernel.krnTrace(`Pid ${this.localPCB!.processID} intstruction error: ${newAddressData} could not be decoded into an instruction!`);
-                    Globals._Kernel.krnTrace(`Killing process ${this.localPCB!.processID}...`);
-                    Globals._StdOut.putText(`Pid ${this.localPCB!.processID} intstruction error: ${newAddressData} could not be decoded into an instruction!`);
+                    Globals._Kernel.krnTrace(`Pid ${this.localPCB.processID} intstruction error: ${newAddressData} could not be decoded into an instruction!`);
+                    Globals._Kernel.krnTrace(`Killing process ${this.localPCB.processID}...`);
+                    Globals._StdOut.putText(`Pid ${this.localPCB.processID} intstruction error: ${newAddressData} could not be decoded into an instruction!`);
                     Globals._StdOut.advanceLine();
-                    Globals._StdOut.putText(`Killing process ${this.localPCB!.processID}...`);
+                    Globals._StdOut.putText(`Killing process ${this.localPCB.processID}...`);
                     Globals._StdOut.advanceLine();
                     Globals._OsShell.putPrompt();
                 }/// if
@@ -186,7 +187,7 @@ export class Cpu {
         /// Should already be stored in memory as Hex from Shell...
         ///
         /// Read from process control block queue
-        this.Acc = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], this.PC)!, 16));
+        this.Acc = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], this.PC), 16));
 
         /// Increase the program counter to the next instruction
         ///
@@ -202,7 +203,7 @@ export class Cpu {
         var wrapAdjustedLogicalAddress: number = this.getWrapAdjustedLogicalAddress();
 
         /// Actually read from memory using the wrapped logical address that is also adjusted for inversion
-        this.Acc = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress)!, 16));
+        this.Acc = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress), 16));
 
         /// Increment program counter as usual
         this.PC++;
@@ -218,7 +219,7 @@ export class Cpu {
         var formattedHex = Control.formatToHexWithPadding(parseInt(this.Acc, 16));
 
         /// Actually read from memory using the wrapped logical address that is also adjusted for inversion
-        Globals._MemoryAccessor.write(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress, formattedHex);
+        Globals._MemoryAccessor.write(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress, formattedHex);
 
         /// Increment program counter as usual
         this.PC++;
@@ -230,7 +231,7 @@ export class Cpu {
         this.PC++;
 
         /// Actually read from memory using the wrapped logical address that is also adjusted for inversion
-        this.Xreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], this.PC)!, 16));
+        this.Xreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], this.PC), 16));
 
         /// Increment program counter as usual
         this.PC++;
@@ -242,7 +243,7 @@ export class Cpu {
         var wrapAdjustedLogicalAddress: number = this.getWrapAdjustedLogicalAddress();
 
         /// Actually read from memory using the wrapped logical address that is also adjusted for inversion
-        this.Xreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress)!, 16));
+        this.Xreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress), 16));
 
         /// Increment program counter as usual
         this.PC++;
@@ -254,7 +255,7 @@ export class Cpu {
         this.PC++;
 
         /// Actually read from memory using the wrapped logical address that is also adjusted for inversion
-        this.Yreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], this.PC)!, 16));
+        this.Yreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], this.PC), 16));
 
         /// Increment program counter as usual
         this.PC++;
@@ -266,7 +267,7 @@ export class Cpu {
         var wrapAdjustedLogicalAddress: number = this.getWrapAdjustedLogicalAddress();
 
         /// Actually read from memory using the wrapped logical address that is also adjusted for inversion
-        this.Yreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress)!, 16));
+        this.Yreg = Control.formatToHexWithPadding(parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress), 16));
 
         /// Increment program counter as usual
         this.PC++;
@@ -281,7 +282,7 @@ export class Cpu {
         var wrapAdjustedLogicalAddress: number = this.getWrapAdjustedLogicalAddress();
 
         /// Actually read from memory using the wrapped logical address that is also adjusted for inversion
-        var numberToBeAdded: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress)!, 16);
+        var numberToBeAdded: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress), 16);
 
         /// Convert Numbers to decimal for addition
         var accNum: number = parseInt(this.Acc, 16);
@@ -305,14 +306,14 @@ export class Cpu {
     /// Break
     public break() {
         /// Process break as an interrupt as well.
-        Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.TERMINATE_PROCESS_IRQ, []));
+        Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.TERMINATE_PROCESS_IRQ, []));
 
         /// Update the local process state that each
         /// 
         /// The local PCB really just refernces the global PCB in the global PCB queue
         /// So updating the local PCB state is sufficent
-        Globals._CPU.localPCB!.processState = "Terminated";
-        Globals._Scheduler.currentProcess!.processState = "Terminated";
+        Globals._CPU.localPCB.processState = "Terminated";
+        Globals._Scheduler.currentProcess.processState = "Terminated";
     }/// break
 
     /// Compare a byte in memory to the X reg EC CPX EC $0010 EC 10 00
@@ -322,7 +323,7 @@ export class Cpu {
         var wrapAdjustedLogicalAddress: number = this.getWrapAdjustedLogicalAddress();
 
         /// Number is converted to decimal
-        var memoryNum: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress)!, 16);
+        var memoryNum: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress), 16);
         var xRegNum: number = parseInt(this.Xreg, 16);
 
         /// Set z flag... don't have to worry about the -stupid- conversion
@@ -344,7 +345,7 @@ export class Cpu {
         /// Get n address units to branch by
         ///
         /// Must parse from hex to decimal since everything is stored as hexidecimal strings in memory.
-        var nUnits: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], this.PC)!, 16);
+        var nUnits: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], this.PC), 16);
 
         /// Check if Z-flag is zero
         if (this.Zflag === 0) {
@@ -369,7 +370,7 @@ export class Cpu {
         var wrapAdjustedLogicalAddress: number = this.getWrapAdjustedLogicalAddress();
 
         /// Actually increment the data by one
-        var incrementedNumber: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress)!, 16) + 1;
+        var incrementedNumber: number = parseInt(Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress), 16) + 1;
 
         /// Reformat to Hex
         var paddedFormattedIncrementedNumber: string = Control.formatToHexWithPadding(incrementedNumber);
@@ -377,7 +378,7 @@ export class Cpu {
         /// Take the incremented by one data and write to memory.
         ///
         /// Check [_MemoryAcessor.write()] method for memory boundary protection...
-        Globals._MemoryAccessor.write(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], wrapAdjustedLogicalAddress, paddedFormattedIncrementedNumber);
+        Globals._MemoryAccessor.write(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], wrapAdjustedLogicalAddress, paddedFormattedIncrementedNumber);
 
         /// OP code was exected, increment program counter as usual
         ///
@@ -389,10 +390,10 @@ export class Cpu {
     public sysCall() {
         /// Process handling Y register as an interrupt
         if (parseInt(this.Xreg, 16) === 1) {
-            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.SYS_CALL_IRQ, [this.localPCB]));
+            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.SYS_CALL_IRQ, [this.localPCB]));
         }/// if
         else if (parseInt(this.Xreg, 16) === 2) {
-            Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.SYS_CALL_IRQ, [this.localPCB]));
+            Globals._KernelInterruptPriorityQueue.enqueueInterruptOrPcb(new Interrupt(Globals.SYS_CALL_IRQ, [this.localPCB]));
         }/// else if
         this.PC++;
     }/// sysCall
@@ -401,11 +402,11 @@ export class Cpu {
 
         /// Read the "first" argument which is really the second
         this.PC++;
-        var secondArg: string = Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], this.PC)!;
+        var secondArg: string = Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], this.PC);
 
         /// Read the "second" argument which is really the first
         this.PC++;
-        var firstArg: string = Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB!.volumeIndex], this.PC)!;
+        var firstArg: string = Globals._MemoryAccessor.read(Globals._MemoryManager.simpleVolumes[this.localPCB.volumeIndex], this.PC);
 
         /// Deal with the inversion
         var reversedArgs: number = parseInt(firstArg + secondArg, 16);

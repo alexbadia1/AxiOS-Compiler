@@ -27,7 +27,7 @@ export class ProcessControlBlock {
         public outputBuffer: string = "",
         public timeSpentExecuting: number = 0,
         public waitTime: number = 0,
-        public swapFileName: string | null = null,
+        public swapFileName: string = null!,
     ) { }
 
     public init(): void { } /// init

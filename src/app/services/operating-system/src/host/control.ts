@@ -25,21 +25,24 @@ import { Memory } from "./memory";
 import { MemoryAccessor } from "./memoryAccessor";
 import { Kernel } from "../os/kernel";
 import { Subject } from 'rxjs';
-import { HostLogData } from "../../operating-system.service";
+import { CpuData, HostLogData } from "../../operating-system.service";
+import { Address } from "./addressBlock";
 
 //
 // Control Services
 //
 export class Control {
-
     public static hostInit(
-        hostLog$: Subject<HostLogData> | null
-
+        hostLog$: Subject<HostLogData> | null,
+        cpu$: Subject<CpuData> | null,
+        memory$: Subject<Array<Address>> | null,
     ): void {
         // This is called from OS Service's power() method
         //
         // Make injected subjects available to the enitre operating system.
         Globals._hostLog$ = hostLog$;
+        Globals._cpu$ = cpu$;
+        Globals._memory$ = memory$;
 
         // Get a global reference to the canvas.
         //
@@ -72,19 +75,19 @@ export class Control {
         // }/// if
     }/// hostInit
 
-
-    ///////////////
-    /// Buttons ///
-    ///////////////
-
+    /**
+     * Sends Host Log Data back to the UI.
+     * 
+     * @param msg string
+     * @param source string
+     */
     public static hostLog(msg: string, source: string = "?"): void {
-        // Send Host Log Data back to the UI
-        if (Globals._hostLog$ != null || Globals._hostLog$ != undefined) { 
+        if (Globals._hostLog$ != undefined && Globals._hostLog$ != null) {
             Globals._hostLog$.next(
                 new HostLogData(
                     Globals._OSclock.toString(),  // Note the OS CLOCK.
                     source,
-                    msg, 
+                    msg,
                     new Date().getTime().toString()  // Note the REAL clock in milliseconds since January 1, 1970.
                 ),
             ); // Globals._hostLog$.next
@@ -195,32 +198,44 @@ export class Control {
         Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.NEXT_STEP_IRQ, []));
     }/// hostBtnNextStep_click
 
+    /**
+     * Sends Memory Snapshot back to the UI
+     */
     public static updateVisualMemory() {
-        for (let physicalAddress: number = 0; physicalAddress < Globals._MemoryAccessor.mainMemorySize(); ++physicalAddress) {
-            document.getElementById(`memory--location--${physicalAddress}`)!.innerHTML = Globals._Memory.getAddress(physicalAddress).read();
-        } // for
+        if (Globals._memory$ != undefined && Globals._memory$ != null) {
+            Globals._memory$.next(Globals._Memory.addressBlock);
+        } // if
     }/// updateVisualMemory
 
+    /**
+     * Sends CPU Data back to the UI
+     */
     public static updateVisualCpu() {
-        document.getElementById("cpu--pc")!.innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
-        document.getElementById("cpu--ir")!.innerHTML = Globals._CPU.IR;
-        document.getElementById("cpu--acc")!.innerHTML = Globals._CPU.Acc;
-        document.getElementById("cpu--x")!.innerHTML = Globals._CPU.Xreg;
-        document.getElementById("cpu--y")!.innerHTML = Globals._CPU.Yreg;
-        document.getElementById("cpu--z")!.innerHTML = Globals._CPU.Zflag.toString();
+        if (Globals._cpu$ != undefined && Globals._cpu$ != null) {
+            Globals._cpu$.next(
+                new CpuData(
+                    this.formatToHexWithPadding(Globals._CPU.PC),
+                    Globals._CPU.IR,
+                    Globals._CPU.Acc,
+                    Globals._CPU.Xreg,
+                    Globals._CPU.Yreg,
+                    Globals._CPU.Zflag.toString()
+                ) // CpuData
+            ); // Globals._cpu$.next
+        } // if
     }/// updateVisualCpu
 
     public static updateVisualPcb() {
-        document.getElementById("pcb--pid")!.innerHTML = Globals._CPU.localPCB!.processID.toString();
-        document.getElementById("pcb--pc")!.innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
-        document.getElementById("pcb--ir")!.innerHTML = Globals._CPU.IR;
-        document.getElementById("pcb--acc")!.innerHTML = Globals._CPU.Acc;
-        document.getElementById("pcb--x")!.innerHTML = Globals._CPU.Xreg;
-        document.getElementById("pcb--y")!.innerHTML = Globals._CPU.Yreg;
-        document.getElementById("pcb--z")!.innerHTML = Globals._CPU.Zflag.toString();
-        document.getElementById("pcb--priority")!.innerHTML = Globals._CPU.localPCB!.priority.toString();
-        document.getElementById("pcb--state")!.innerHTML = Globals._CPU.localPCB!.processState;
-        document.getElementById("pcb--location")!.innerHTML = Globals._CPU.localPCB!.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB!.volumeIndex + 1}`;
+        // document.getElementById("pcb--pid")!.innerHTML = Globals._CPU.localPCB!.processID.toString();
+        // document.getElementById("pcb--pc")!.innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
+        // document.getElementById("pcb--ir")!.innerHTML = Globals._CPU.IR;
+        // document.getElementById("pcb--acc")!.innerHTML = Globals._CPU.Acc;
+        // document.getElementById("pcb--x")!.innerHTML = Globals._CPU.Xreg;
+        // document.getElementById("pcb--y")!.innerHTML = Globals._CPU.Yreg;
+        // document.getElementById("pcb--z")!.innerHTML = Globals._CPU.Zflag.toString();
+        // document.getElementById("pcb--priority")!.innerHTML = Globals._CPU.localPCB!.priority.toString();
+        // document.getElementById("pcb--state")!.innerHTML = Globals._CPU.localPCB!.processState;
+        // document.getElementById("pcb--location")!.innerHTML = Globals._CPU.localPCB!.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB!.volumeIndex + 1}`;
     }/// updateVisualPcb
 
     public static visualizeInstructionRegister(newInsruction: string) {
@@ -470,21 +485,21 @@ export class Control {
         /// Visually refreshing the "Ready Queue" requires deleting the pre-existing tables.
         /// Obviously on the first iteration there will be no pre-existing tables, so just catch the error
         /// and continue building the table.
-        try {
-            let processes: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName("pcb--wrapper--data") as HTMLCollectionOf<HTMLDivElement>;
-            Array.prototype.forEach.call(processes, function (el) {
-                el!.parentNode!.removeChild(el);
-            });
-        }/// try
-        catch (e) {
-            Globals._Kernel.krnTrace(e as string);
-            Globals._Kernel.krnTrace("No resident list to delete.");
-        }/// catch
-        for (var index: number = 0; index < Globals._Scheduler.readyQueue.getSize(); ++index) {
-            for (var nestedIndex = 0; nestedIndex < Globals._Scheduler.readyQueue.queues[index].getSize(); ++nestedIndex) {
-                this.createVisualResidentList(Globals._Scheduler.readyQueue.queues[index].q[nestedIndex]);
-            }/// for
-        }/// for
+        // try {
+        //     let processes: HTMLCollectionOf<HTMLDivElement> = document.getElementsByClassName("pcb--wrapper--data") as HTMLCollectionOf<HTMLDivElement>;
+        //     Array.prototype.forEach.call(processes, function (el) {
+        //         el!.parentNode!.removeChild(el);
+        //     });
+        // }/// try
+        // catch (e) {
+        //     Globals._Kernel.krnTrace(e as string);
+        //     Globals._Kernel.krnTrace("No resident list to delete.");
+        // }/// catch
+        // for (var index: number = 0; index < Globals._Scheduler.readyQueue.getSize(); ++index) {
+        //     for (var nestedIndex = 0; nestedIndex < Globals._Scheduler.readyQueue.queues[index].getSize(); ++nestedIndex) {
+        //         this.createVisualResidentList(Globals._Scheduler.readyQueue.queues[index].q[nestedIndex]);
+        //     }/// for
+        // }/// for
     }/// visualizeResidentList
 
 

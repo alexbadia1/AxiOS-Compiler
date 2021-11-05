@@ -6,7 +6,8 @@
    Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
    ------------ */
 import { Subject } from "rxjs";
-import { HostLogData } from "../operating-system.service";
+import { CpuData, HostLogData } from "../operating-system.service";
+import { Address } from "./host/addressBlock";
 import { Cpu } from "./host/cpu";
 import { Disk } from "./host/disk";
 import { Dispatcher } from "./host/dispatcher";
@@ -121,6 +122,8 @@ export class Globals {
 
    // Subjects
    public static _hostLog$: Subject<HostLogData> | null;
+   public static _cpu$: Subject<CpuData> | null;
+   public static _memory$: Subject<Array<Address>> | null;
 
    /// Software (OS)
    public static _MemoryManager: any = null;
@@ -144,7 +147,7 @@ export class Globals {
 
    // The OS Kernel and its queues.
    public static _Kernel: Kernel;
-   public static _KernelInterruptPriorityQueue: PriorityQueue | null = null;
+   public static _KernelInterruptPriorityQueue: PriorityQueue = null!;
    public static _KernelInputQueue: Queue | null = null;
    public static _KernelBuffers: any = null;
 
@@ -162,7 +165,7 @@ export class Globals {
 
    // Global Device Driver Objects - page 12
    public static _krnKeyboardDriver: DeviceDriverKeyboard | null = null;
-   public static _krnDiskDriver: DeviceDriverDisk | null = null;
+   public static _krnDiskDriver: DeviceDriverDisk = null!;
 
    public static _hardwareClockID: any = null;
 

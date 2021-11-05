@@ -16,7 +16,7 @@ export class MemoryAccessor {
     constructor() { }
 
     public read(newVolume: SimpleVolume, newLogicalAddress: number = -1) {
-        var myData: string | null = null;
+        var myData: string = null!;
 
         /// Translate the logical address to the physical address in memory
         ///

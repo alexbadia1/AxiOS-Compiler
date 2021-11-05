@@ -475,7 +475,7 @@ export class Kernel {
             if (Globals._Scheduler.currentProcess!.processState === "Terminated" && Globals._Scheduler.readyQueue.getSize() === 0) {
                 /// Remove the last process from the Ready Queue
                 /// by removing the last process from current process
-                Globals._Scheduler.currentProcess = null;
+                Globals._Scheduler.currentProcess = null!;
 
                 /// "Turn Off" CPU
                 Globals._CPU.isExecuting = false;
@@ -657,7 +657,7 @@ export class Kernel {
                     if (Globals._Scheduler.currentProcess! !== null) {
                         Globals._Scheduler.currentProcess!.swapToDefaultPriority();
                         tempRoundRobin.push(Globals._Scheduler.currentProcess!);
-                        Globals._Scheduler.currentProcess = null;
+                        Globals._Scheduler.currentProcess = null!;
                     }/// if
 
                     /// Dequeue every process and swap back to using the user defined priority
@@ -694,7 +694,7 @@ export class Kernel {
                     /// Don't forget current process
                     if (Globals._Scheduler.currentProcess! !== null) {
                         tempFcFs.push(Globals._Scheduler.currentProcess!.processID);
-                        Globals._Scheduler.currentProcess = null;
+                        Globals._Scheduler.currentProcess = null!;
                     }/// if
 
                     /// Dequeue every process and swap back to using the user defined priority
@@ -731,7 +731,7 @@ export class Kernel {
                     if (Globals._Scheduler.currentProcess! !== null) {
                         Globals._Scheduler.currentProcess!.swapToUserPriority();
                         tempPriority.push(Globals._Scheduler.currentProcess!);
-                        Globals._Scheduler.currentProcess = null;
+                        Globals._Scheduler.currentProcess = null!;
                     }/// if
 
                     /// Dequeue every process and swap back to using the user defined priority

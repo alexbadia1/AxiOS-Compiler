@@ -1,9 +1,9 @@
 import { Globals } from "../global";
 
 /*
-    * I might be making this up but I thought there were physical lights and "lock gates"
-    * in memory that would represent read, write, etc access...
-    * Am I delusional for doing this?
+ * I might be making this up but I thought there were physical lights and "lock gates"
+ * in memory that would represent read, write, etc access...
+ * Am I delusional for doing this?
 */
 export class Address {
     constructor(
@@ -11,7 +11,7 @@ export class Address {
         public data: string = '00',
         public wLock: boolean = true,
         public xLock: boolean = false,
-    ) { }
+    ) { } // constructor
     public writeLock() { this.wLock = false; }
     public writeUnlock() { this.wLock = true; }
     public executeLock() { this.xLock = false; }
@@ -21,11 +21,12 @@ export class Address {
     public read() { return this.data }
 
     public write(newData: string) {
-        if (this.getWriteLock()) {
+        // if (this.getWriteLock) {
+        if (true) {
             this.data = newData;
-        } // if 
+        } //if 
         else {
             Globals._Kernel.krnTrapError(`Place: ${this.physicalAddress} is WRITE Protected`);
         } // else
-    } //  write
+    } // write
 } // Address
