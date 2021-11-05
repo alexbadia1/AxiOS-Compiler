@@ -1,1 +1,2 @@
-<textarea name="taProgramInput" id="taProgramInput" rows="10" cols="20" placeholder="Paste 6502a op codes here: A9 00 8D D0 00..."></textarea>
+<textarea [(ngModel)]="opCodes" (change)="change($event)" name="taProgramInput" id="taProgramInput" rows="10" cols="20"
+    placeholder="Paste 6502a op codes here: A9 00 8D D0 00...">{{opCodes}}</textarea>

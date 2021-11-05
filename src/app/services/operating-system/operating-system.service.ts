@@ -43,6 +43,7 @@ export class PcbData {
   providedIn: 'root'
 })
 export class OperatingSystemService {
+  private opCodeInputSnapshot$: Subject<string> | null = null;
   private hostLogSnapshot$: Subject<HostLogData> | null = null;
   private cpuSnapshot$: Subject<CpuData> | null = null;
   private processesSnapshot$: Subject<Array<PcbData>> | null = null;
@@ -52,17 +53,18 @@ export class OperatingSystemService {
   constructor() { } // constructor
 
   public power() {
-      // Setup channels for communication from AxiOS
-      this.setupSubjects();
+    // Setup channels for communication from AxiOS
+    this.setupSubjects();
 
-      // Run the AxiOS
-      Control.hostInit(
-        this.hostLogSnapshot$,
-        this.cpuSnapshot$,
-        this.memorySnapshot$,
-        this.processesSnapshot$
-      );
-      Control.hostBtnStartOS_click();
+    // Run the AxiOS and inject subjects
+    Control.hostInit(
+      this.hostLogSnapshot$,
+      this.cpuSnapshot$,
+      this.memorySnapshot$,
+      this.processesSnapshot$,
+      this.opCodeInputSnapshot$
+    );
+    Control.hostBtnStartOS_click();
   } //startAxiOS
 
   public shutdown() {
@@ -93,4 +95,9 @@ export class OperatingSystemService {
   public cpu$(): Subject<any> { return this.cpuSnapshot$!; } // cpu$
   public processes$(): Subject<any> { return this.processesSnapshot$!; } // processes$
   public memory$(): Subject<any> { return this.memorySnapshot$!; } // memory$
+  public setOpCodeSubject(sub: Subject<string>) {
+    if (this.opCodeInputSnapshot$ == null) {
+      this.opCodeInputSnapshot$ = sub;
+    } // if
+  }// setOpCodeSubject
 } // OperatingSystemService

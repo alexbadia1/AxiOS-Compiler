@@ -101,7 +101,7 @@
       </mat-grid-tile>
 
       <!-- Code Editor View -->
-      <mat-grid-tile class="material-grid-tile-code-editor" [colspan]="44" [rowspan]="1">
+      <mat-grid-tile class="material-grid-tile-code-editor" [colspan]="46" [rowspan]="1">
         <div style="height: 100%; width: 100%; align-items: center;">
           <as-split class="split-example ex-b" direction="vertical" [gutterSize]="1.25">
 
@@ -218,7 +218,7 @@
       </mat-grid-tile>
 
       <!-- Operating System -->
-      <mat-grid-tile [colspan]="52" [rowspan]="1">
+      <mat-grid-tile [colspan]="50" [rowspan]="1">
         <as-split class="split-example ex-b" direction="vertical" [gutterSize]="1.25" [disabled]="true">
 
           <!-- Canvas CMD -->
@@ -232,7 +232,7 @@
               <!-- 6502a Input -->
               <mat-tab label="6502a INPUT">
                 <div id="appProgramInput" style="height: 100%; width: 100%; overflow: scroll;">
-                  <app-program-input></app-program-input>
+                  <app-program-input (changeEcho)="onOpCodeInputChange($event)" [opCodes] = "opCodeInput"></app-program-input>
                 </div>
               </mat-tab>
 
@@ -277,7 +277,6 @@
 
     // Get the starting node from DOM
     let currentNode = document.getElementById(`cst_p${program_num}_li_node_id_${node_id}`);
-    console.log(currentNode);
     if (currentNode == null) { return; }
 
     // Push starting node's children onto stack

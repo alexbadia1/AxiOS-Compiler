@@ -732,7 +732,7 @@ export class Shell {
 
         if (args.length <= 1 && args.length >= 0) {
             /// Getting and cleansing input
-            var userInput: string = Globals._taProgramInput.value.trim();
+            var userInput: string = Globals._taProgramInput.trim();
             userInput = userInput.toUpperCase().replace(/\s/g, '');
 
             /// Test for hexadecimal characters using regular expression...

@@ -1,3 +1,4 @@
+import { animate, state, style, transition, trigger } from "@angular/animations";
 import { NestedTreeControl } from "@angular/cdk/tree";
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { MatTabChangeEvent } from "@angular/material/tabs";
@@ -67,7 +68,7 @@ export class MemoryMap {
     newRows: Array<MemoryRow>
   ) {
     if (newRows != null) {
-      this.rows = newRows; 
+      this.rows = newRows;
       return;
     } // if
     let tmp: Array<AddressMap> = [];
@@ -90,6 +91,27 @@ export class MemoryMap {
 
 @Component({
   selector: 'app-dashboard',
+  animations: [
+    trigger('openClose', [
+      // ...
+      state('open', style({
+        height: '200px',
+        opacity: 1,
+        color: 'yellow'
+      })),
+      state('closed', style({
+        height: '100px',
+        opacity: 0.8,
+        color: 'blue'
+      })),
+      transition('open => closed', [
+        animate('1s')
+      ]),
+      transition('closed => open', [
+        animate('0.5s')
+      ]),
+    ]),
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
@@ -127,6 +149,7 @@ export class DashboardComponent implements OnInit {
   /**
    * Compiler UI Binding
    */
+  isPasted: boolean = false;
   programs: Array<Program> = [];
   dataSource = new MatTreeNestedDataSource<TestNode>();
   treeControl = new NestedTreeControl<TestNode>(node => node.children);
@@ -167,6 +190,7 @@ export class DashboardComponent implements OnInit {
   private cpu$: Subject<any> | null = null;
   private processes$: Subject<any> | null = null;
   private memory$: Subject<any> | null = null;
+  public opCodeInput$: Subject<string> = new Subject<string>();
 
   /**
    * AxiOS Component Data Binding
@@ -176,12 +200,17 @@ export class DashboardComponent implements OnInit {
   public cpuData: CpuData = new CpuData();
   public memory: MemoryMap = new MemoryMap(null!);
   public processes: Array<PcbData> = [];
+  public opCodeInput: string = "";
+  testModel: string;
 
   constructor(
     private compilerService: CompilerService,
     private testService: TestService,
     private osService: OperatingSystemService,
   ) {
+    // Send Axios text input subject
+    this.osService.setOpCodeSubject(this.opCodeInput$);
+
     // Create a root Compiler 'directory'
     let compilerTestNode: TestNode = {
       name: "Compiler Tests",
@@ -319,8 +348,20 @@ export class DashboardComponent implements OnInit {
    * @param executableImage raw op codes from compilation
    */
   onExecutableImageClick(executableImage: string) {
-    document.getElementById('taProgramInput')!.innerHTML = executableImage;
+    // Send new op code input to AxiOS
+    this.opCodeInput$.next(executableImage);
+
+    // Show the visual changes
+    this.opCodeInput = executableImage;
   } // onExecutableImageClick
+
+  onOpCodeInputChange(newOpCodes: string) {
+    // Send new op code input to AxiOS
+    this.opCodeInput$.next(newOpCodes);
+
+    // Show the visual changes
+    this.opCodeInput = newOpCodes;
+  } // onOpCodeInputChange
 
   //================================================================================
   // OS UI Buttons
@@ -353,6 +394,9 @@ export class DashboardComponent implements OnInit {
       // Power on and setup scubscriptions
       this.osService.power();
       this.setupAxiosSubscriptions();
+
+      // Get op codes if user loaded them before AxiOS was powered.
+      this.opCodeInput$.next(this.opCodeInput);
       this.axiosStatus = "Online - Okay";
 
       // Activate halt OS button

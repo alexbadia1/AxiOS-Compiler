@@ -36,7 +36,8 @@ export class Control {
         hostLog$: Subject<HostLogData> | null,
         cpu$: Subject<CpuData> | null,
         memory$: Subject<Array<Address>> | null,
-        processes$: Subject<Array<PcbData>> | null
+        processes$: Subject<Array<PcbData>> | null,
+        opCodeInput$: Subject<string> | null
     ): void {
         // This is called from OS Service's power() method
         //
@@ -46,6 +47,11 @@ export class Control {
         Globals._memory$ = memory$;
         Globals._processes = processes$;
 
+        // Listen for op code input changes
+        if (opCodeInput$ != undefined && opCodeInput$ != null) {
+            opCodeInput$.subscribe(newOpCodes => { console.log(newOpCodes); Globals._taProgramInput = newOpCodes});
+        } // if
+
         // Get a global reference to the canvas.
         //
         // TODO: Should we move this stuff into a Display Device Driver?
@@ -53,9 +59,6 @@ export class Control {
 
         // Get a global reference to the drawing context.
         Globals._DrawingContext = Globals._Canvas.getContext("2d");
-
-        // Get global reference to the input log
-        Globals._taProgramInput = document.getElementById("taProgramInput");
 
         /// Get global reference for visual pcb
         Globals._visualResidentList = document.getElementById("processes--div");
