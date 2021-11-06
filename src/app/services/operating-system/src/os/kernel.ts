@@ -208,8 +208,8 @@ export class Kernel {
         var minutes = String(current.getMinutes()).padStart(2, '0');
         var seconds = String(current.getSeconds()).padStart(2, '0');
 
-        // TODO: Date Time
-        //
+        alert(`${month}${day}${year}${hours}${minutes}${seconds}: this feature is deprecated.`);
+
         // document.getElementById('divLog--date').innerText = `${month}/${day}/${year}`;
         // document.getElementById('divLog--time').innerText = `${hours}:${minutes}:${seconds}`;
 
