@@ -37,7 +37,8 @@ export class Control {
         cpu$: Subject<CpuData> | null,
         memory$: Subject<Array<Address>> | null,
         processes$: Subject<Array<PcbData>> | null,
-        opCodeInput$: Subject<string> | null
+        opCodeInput$: Subject<string> | null,
+        terminateProcess$: Subject<any>
     ): void {
         // This is called from OS Service's power() method
         //
@@ -46,6 +47,7 @@ export class Control {
         Globals._cpu$ = cpu$;
         Globals._memory$ = memory$;
         Globals._processes = processes$;
+        Globals._terminateProcess$ = terminateProcess$;
 
         // Listen for op code input changes
         if (opCodeInput$ != undefined && opCodeInput$ != null) {
@@ -60,24 +62,8 @@ export class Control {
         // Get a global reference to the drawing context.
         Globals._DrawingContext = Globals._Canvas.getContext("2d");
 
-        /// Get global reference for visual pcb
-        Globals._visualResidentList = document.getElementById("processes--div");
-
         // Enable the added-in canvas text functions (see canvastext.ts for provenance and details).
         CanvasTextFunctions.enable(Globals._DrawingContext);   // Text functionality is now built in to the HTML5 canvas. But this is old-school, and fun, so we'll keep it.
-
-        // Clear the log text box.
-        // Use the TypeScript cast to HTMLInputElement
-        // (<HTMLInputElement>document.getElementById("taHostLog")).value = "";
-
-        // Check for our testing and enrichment core, which
-        // may be referenced here (from index.html) as function Glados().
-        // if (typeof Glados === "function") {
-        //     // function Glados() is here, so instantiate Her into
-        //     // the global (and properly capitalized) _GLaDOS variable.
-        //     _GLaDOS = new Glados();
-        //     _GLaDOS.init();
-        // }/// if
     }/// hostInit
 
     /**
@@ -106,7 +92,7 @@ export class Control {
     //
     public static hostBtnStartOS_click(): void {
         // .. set focus on the OS console display ...
-        document.getElementById("display")!.focus();
+        document.getElementById("display")?.focus();
 
         // ... Create and initialize the CPU (because it's part of the hardware)  ...
         Globals._CPU = new Cpu();  // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
@@ -141,7 +127,7 @@ export class Control {
         Globals._Kernel.krnBootstrap();  // _GLaDOS.afterStartup() will get called in there, if configured.
     }/// hostBtnStartOS_click
 
-    public static hostBtnHaltOS_click(btn: any): void {
+    public static hostBtnHaltOS_click(): void {
         Control.hostLog("Emergency halt", "host");
         Control.hostLog("Attempting Kernel shutdown.", "host");
         // Call the OS shutdown routine.
@@ -149,15 +135,8 @@ export class Control {
         // Stop the interval that's simulating our clock pulse.
         clearInterval(Globals._hardwareClockID);
         // TODO: Is there anything else we need to do here?
-    }/// hostBtnHaltOS_click
-
-    public static hostBtnReset_click(btn: any): void {
-        // The easiest and most thorough way to do this is to reload (not refresh) the document.
-        location.reload();
-        // That boolean parameter is the 'forceget' flag. When it is true it causes the page to always
-        // be reloaded from the server. If it is false or not specified the browser may reload the
-        // page from its cache, which is not what we want.
-    }/// hostBtnReset_click
+        document.getElementById('divLog--status')!.innerText = "";
+    } // hostBtnHaltOS_click
 
     /************************************************************************************************
     iProject2 Buttons and Display: 
@@ -167,38 +146,16 @@ export class Control {
             - intializeVisualMemory(): called on start up of os to create the table for memory
             - updateVisualMemory(): called after every cpu cycle to visually update the memory table
             - updateVisualCpu(): called after every cpu cycle to visually update the cpu table
-            - updateVisualPcb(): called after every cpu cycle to visually update the process table
             - visualizeInstructionRegister()
             - formatToHexWithPadding(): formats decimal string to hexadecimal
     **************************************************************************************************/
 
-    public static hostBtnSingleStep_click(btn: any): void {
-        /// Must do this first so the text label updates properly
+    public static hostBtnSingleStep_click(): void {
         Globals._SingleStepMode = !Globals._SingleStepMode;
-
-        /// Single Step Mode active
-        if (Globals._SingleStepMode) {
-            /// Enable the "Next Step" button
-            (<HTMLButtonElement>document.getElementById("btnNextStep")).disabled = false;
-            (<HTMLButtonElement>document.getElementById("btnNextStep")).style.backgroundColor = "#007acc";
-
-            /// Show user that single step mode is ON
-            (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).value = "Single Step OFF";
-        }/// if
-
-        /// Single Step Mode 
-        else {
-            /// Enable the "Next Step" button
-            (<HTMLButtonElement>document.getElementById("btnNextStep")).disabled = true;
-            (<HTMLButtonElement>document.getElementById("btnNextStep")).style.backgroundColor = '#143e6c';
-
-            /// Visually show user that single step mode is OFF
-            (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).value = "Single Step ON";
-        }/// else
         Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.SINGLE_STEP_IRQ, []));
     }/// hostBtnSingleStep_click
 
-    public static hostBtnNextStep_click(btn: any): void {
+    public static hostBtnNextStep_click(): void {
         /// Process single step interrupt
         Globals._KernelInterruptPriorityQueue!.enqueueInterruptOrPcb(new Interrupt(Globals.NEXT_STEP_IRQ, []));
     }/// hostBtnNextStep_click
@@ -229,19 +186,6 @@ export class Control {
             ); // Globals._cpu$.next
         } // if
     }/// updateVisualCpu
-
-    public static updateVisualPcb() {
-        // document.getElementById("pcb--pid")!.innerHTML = Globals._CPU.localPCB!.processID.toString();
-        // document.getElementById("pcb--pc")!.innerHTML = this.formatToHexWithPadding(Globals._CPU.PC);
-        // document.getElementById("pcb--ir")!.innerHTML = Globals._CPU.IR;
-        // document.getElementById("pcb--acc")!.innerHTML = Globals._CPU.Acc;
-        // document.getElementById("pcb--x")!.innerHTML = Globals._CPU.Xreg;
-        // document.getElementById("pcb--y")!.innerHTML = Globals._CPU.Yreg;
-        // document.getElementById("pcb--z")!.innerHTML = Globals._CPU.Zflag.toString();
-        // document.getElementById("pcb--priority")!.innerHTML = Globals._CPU.localPCB!.priority.toString();
-        // document.getElementById("pcb--state")!.innerHTML = Globals._CPU.localPCB!.processState;
-        // document.getElementById("pcb--location")!.innerHTML = Globals._CPU.localPCB!.volumeIndex === -1 ? `Disk` : `Seg ${Globals._CPU.localPCB!.volumeIndex + 1}`;
-    }/// updateVisualPcb
 
     public static visualizeInstructionRegister(newInsruction: string) {
         /// Instruction Register
@@ -415,76 +359,6 @@ export class Control {
         Globals._StdOut.advanceLine();
         Globals._OsShell.putPrompt();
     }/// dumpScheduleMetaData
-
-    public static createVisualResidentList(pcb: any): void {
-        // Boiler plate
-        let wrapper = document.createElement('div');
-        wrapper.className = "pcb--wrapper--data"
-
-        // Process ID
-        let pid = document.createElement('div');
-        pid.className = "box";
-        pid.innerHTML = pcb.processID.toString();
-        wrapper.appendChild(pid);
-
-        // Program Counter
-        let pc = document.createElement('div');
-        pc.className = "box";
-        pc.innerHTML = this.formatToHexWithPadding(pcb.programCounter);
-        wrapper.appendChild(pc);
-
-        // Instruction Register
-        let ir = document.createElement('div')
-        ir.className = "box";
-        ir.innerHTML = pcb.instructionRegister;
-        wrapper.appendChild(ir);
-
-        // Accumulator
-        let acc = document.createElement('div')
-        acc.className = "box";
-        acc.innerHTML = pcb.accumulator;
-        wrapper.appendChild(acc);
-
-        // X Register
-        let x = document.createElement('div')
-        x.className = "box";
-        x.innerHTML = pcb.xRegister;
-        wrapper.appendChild(x);
-
-        // Y Register
-        let y = document.createElement('div')
-        y.className = "box";
-        y.innerHTML = pcb.yRegister;
-        wrapper.appendChild(y);
-
-        // Z Flag
-        let z = document.createElement('div')
-        z.className = "box";
-        z.innerHTML = pcb.zFlag.toString();
-        wrapper.appendChild(z);
-
-        // Priority
-        let priority = document.createElement('div')
-        priority.className = "box";
-        priority.innerHTML = pcb.priority.toString();
-        wrapper.appendChild(priority);
-
-        // State
-        let state = document.createElement('div')
-        state.className = "box";
-        state.innerHTML = pcb.processState;
-        wrapper.appendChild(state);
-
-        // Location
-        let location = document.createElement('div')
-        location.className = "box";
-        location.innerHTML = pcb.volumeIndex === -1 ? `Disk` : `Seg ${pcb.volumeIndex + 1}`;
-        wrapper.appendChild(location);
-
-        // Append to processes list
-        let processesList = document.getElementById('processes--div');
-        processesList!.appendChild(wrapper);
-    } // createVisualResidentList
 
     public static visualizeResidentList() {
         if (Globals._processes != undefined || Globals._processes != null) {

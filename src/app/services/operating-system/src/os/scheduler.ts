@@ -87,7 +87,6 @@ export class Scheduler {
                 this.currentProcess = this.readyQueue.dequeueInterruptOrPcb();
                 this.currentProcess.processState === "Running";
                 Globals._Dispatcher.setNewProcessToCPU(this.currentProcess);
-                Control.updateVisualPcb();
             }/// if
             Globals._CPU.isExecuting = true;
             /// Program is running so User Mode
@@ -263,7 +262,6 @@ export class Scheduler {
             Globals._Kernel.krnTrace(`Clearing Scheduler...`);
             Globals._CPU_BURST = 0;
             this.init();
-            Control.updateVisualPcb();
         }/// else
     }/// requestContextSwitch
 

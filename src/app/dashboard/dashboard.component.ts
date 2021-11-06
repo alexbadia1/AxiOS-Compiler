@@ -165,11 +165,6 @@ export class DashboardComponent implements OnInit {
   private btnStartOS: HTMLButtonElement;
   public axiosStatus: string = "Offline";
 
-  /**
-   * AxiOS halt button state
-   */
-  public isHalted: boolean = false;
-  private btnHaltOS: HTMLButtonElement;
 
   /**
    * AxiOS single step button state
@@ -180,7 +175,7 @@ export class DashboardComponent implements OnInit {
   /**
    * AxiOS GUI references
    */
-  private canvas: HTMLElement;
+  private canvas: HTMLCanvasElement;
   private btnNextStep: HTMLButtonElement;
 
   /**
@@ -191,6 +186,7 @@ export class DashboardComponent implements OnInit {
   private processes$: Subject<any> | null = null;
   private memory$: Subject<any> | null = null;
   public opCodeInput$: Subject<string> = new Subject<string>();
+  private terminateProcess$: Subject<any> = null!;
 
   /**
    * AxiOS Component Data Binding
@@ -273,9 +269,8 @@ export class DashboardComponent implements OnInit {
   hasChild = (_: number, node: TestNode) => !!node.children && node.children.length > 0;
 
   ngOnInit(): void {
-    this.canvas = document.getElementById('appConsole')!;
+    this.canvas = document.getElementById('display')! as HTMLCanvasElement;
     this.btnStartOS = document.getElementById('btnStartOS')! as HTMLButtonElement;
-    this.btnHaltOS = document.getElementById('btnHaltOS')! as HTMLButtonElement;
     this.btnSingleStepMode = document.getElementById('btnSingleStepMode')! as HTMLButtonElement;
     this.btnNextStep = document.getElementById('btnNextStep')! as HTMLButtonElement;
   }// ngOnInit
@@ -373,8 +368,6 @@ export class DashboardComponent implements OnInit {
     if (this.isPoweredOn) {
       // Update GUI
       this.axiosStatus = "Offline";
-      this.btnHaltOS.disabled = true;
-      this.btnHaltOS.style.color = "#3d3d3d";
       this.btnSingleStepMode.disabled = true;
       this.btnSingleStepMode.style.color = "#3d3d3d";
       this.btnNextStep.disabled = true;
@@ -382,8 +375,14 @@ export class DashboardComponent implements OnInit {
       this.btnStartOS.style.color = "#228B22";
 
       // Reset halting and single step
-      this.isHalted = false;
       this.isSingleStep = false;
+
+      // Shutdown and clear canvas
+      this.osService.shutdown();
+      let ctx = this.canvas?.getContext('2d');
+      ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      this.osService = new OperatingSystemService();
     } // if
 
     // Power AxiOS
@@ -399,10 +398,6 @@ export class DashboardComponent implements OnInit {
       this.opCodeInput$.next(this.opCodeInput);
       this.axiosStatus = "Online - Okay";
 
-      // Activate halt OS button
-      this.btnHaltOS.disabled = false;
-      this.btnHaltOS.style.color = "red";
-
       // Activate single step mode button
       this.btnSingleStepMode.disabled = false;
       this.btnSingleStepMode.style.color = "rgba(59, 130, 246, 0.5)";
@@ -417,32 +412,8 @@ export class DashboardComponent implements OnInit {
     this.isPoweredOn = !this.isPoweredOn;
   } // hostBtnStartOS_click
 
-  hostBtnHaltOS_click(buttonId: string) {
-    if (!this.isPoweredOn || this.isHalted) { return; }
-
-    // Halt OS
-    if (!this.isHalted) {
-      // Halt OS
-      this.axiosStatus = "Online - Halted";
-      this.isHalted = true;
-      this.btnHaltOS.style.color = "#3d3d3d";
-
-      // Disable single step
-      this.btnSingleStepMode.disabled = true;
-      this.btnSingleStepMode.style.color = "#3d3d3d";
-      this.btnNextStep.disabled = true;
-      this.btnNextStep.style.color = "#3d3d3d";
-      this.isSingleStep = false;
-    } // if
-  } // hostBtnHaltOS_click
-
-  hostBtnReset_click(buttonId: string) {
+  hostBtnSingleStep_click() {
     if (!this.isPoweredOn) { return; }
-
-  } // hostBtnReset_click
-
-  hostBtnSingleStep_click(buttonId: string) {
-    if (!this.isPoweredOn || this.isHalted) { return; }
 
     // Turn off single step
     if (this.isSingleStep) {
@@ -468,11 +439,12 @@ export class DashboardComponent implements OnInit {
     } // else
 
     this.isSingleStep = !this.isSingleStep;
+    this.osService.onSingleStepButtonClick();
   } // hostBtnSingleStep_click
 
-  hostBtnNextStep_click(buttonId: string) {
-    if (!this.isPoweredOn) { return; }
-
+  hostBtnNextStep_click() {
+    if (!this.isPoweredOn || !this.isSingleStep) { return; }
+    this.osService.onNextStepButtonClick();
   } // hostBtnNextStep_click
 
   //================================================================================
@@ -480,22 +452,19 @@ export class DashboardComponent implements OnInit {
   //================================================================================
 
   private setupAxiosSubscriptions() {
-    if (this.hostLog$ != null
-      || this.cpu$ != null
-      || this.processes$ != null
-      || this.memory$ != null) { return; } // if
-
     // Retrieve Axios Subjects
     this.hostLog$ = this.osService.hostLog$();
     this.cpu$ = this.osService.cpu$();
     this.processes$ = this.osService.processes$();
     this.memory$ = this.osService.memory$();
+    this.terminateProcess$ = this.osService.terminateProcess$();
 
     // Subscribe and map to UI functions
     this.hostLog$.subscribe(val => this.hostLogReaction(val));
     this.cpu$.subscribe(val => this.cpuReaction(val));
     this.processes$.subscribe(val => this.processesReaction(val));
     this.memory$.subscribe(val => this.memoryReaction(val));
+    this.terminateProcess$.subscribe(val => this.terminateProcessReaction(val));
   } // setUpSubscriptions
 
   private teardownAxiosSubscriptions() {
@@ -560,6 +529,23 @@ export class DashboardComponent implements OnInit {
   private processesReaction(newProcesses: Array<PcbData>) {
     this.processes = newProcesses;
   } // processesReaction
+
+  /**
+   * Turn off single step
+   */
+  private terminateProcessReaction(val: any) {
+    console.log(val);
+    this.axiosStatus = "Online- Okay";
+
+    // Disable Next Step Button
+    this.btnNextStep.disabled = true;
+    this.btnNextStep.style.color = "#3d3d3d";
+
+    // Make this button blue
+    this.btnSingleStepMode.style.color = "rgba(59, 130, 246, 0.5)";
+
+    this.isSingleStep = false;
+  } // terminateProcessReaction
 
   onAxiOsTabChange(event: MatTabChangeEvent) {
     switch (event.index) {

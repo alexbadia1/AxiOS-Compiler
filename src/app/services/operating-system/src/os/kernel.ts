@@ -144,7 +144,6 @@ export class Kernel {
                     Globals._Scheduler.checkSchedule();
                     Control.updateVisualMemory();
                     Control.updateVisualCpu();
-                    Control.updateVisualPcb();
                     Control.visualizeResidentList();
                     Globals._NextStep = false;
                 }/// if
@@ -157,7 +156,6 @@ export class Kernel {
                 Globals._Scheduler.checkSchedule();
                 Control.updateVisualMemory();
                 Control.updateVisualCpu();
-                Control.updateVisualPcb();
                 Control.visualizeResidentList();
             }/// else
 
@@ -195,7 +193,9 @@ export class Kernel {
 
         /// Turnaround Time is time running and in waiting queue...
         /// So track nummber of cpu cycles used per process and add cpu cycles used and wait time for turnaround time
-        Globals._Scheduler.currentProcess!.timeSpentExecuting += 1;
+        if (Globals._Scheduler.currentProcess != null) {
+            Globals._Scheduler.currentProcess.timeSpentExecuting += 1;
+        } // if
     }/// countCpuBurst
 
     /// Hopefully Updates the Date and Time
@@ -379,7 +379,9 @@ export class Kernel {
         }/// if
         else {
             /// Go back to cpu executing
-            Globals._CPU.isExecuting = true;
+            if (Globals._ResidentList.size > 0 && Globals._Scheduler.currentProcess != null) {
+                Globals._CPU.isExecuting = true;
+            } // if
         }/// else
     }/// singleStepISR
 
@@ -388,7 +390,10 @@ export class Kernel {
         if (Globals._SingleStepMode) {
             /// Run 1 cycle
             Globals._NextStep = true;
-            Globals._CPU.isExecuting = true;
+
+            if (Globals._ResidentList.size > 0 && Globals._Scheduler.currentProcess != null) {
+                Globals._CPU.isExecuting = true;
+            } // if
         }/// if
     }/// singleStepISR
 
@@ -485,14 +490,11 @@ export class Kernel {
                 Globals._NextStep = false;
 
                 /// Reset visuals for Single Step
-                (<HTMLButtonElement>document.getElementById("btnNextStep")).disabled = true;
-                (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).value = "Single Step ON";
+                Globals._terminateProcess$.next(true);
 
                 /// Prompt for more input
                 Globals._StdOut.advanceLine();
                 Globals._OsShell.putPrompt();
-
-                Control.updateVisualPcb();
             }/// if
         }/// try
 
