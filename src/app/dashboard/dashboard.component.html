@@ -28,7 +28,7 @@
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon" id="btnNextStep"
           (click)="hostBtnNextStep_click()" title="Step One" [style.color]="'#3d3d3d'" title="Next Step">
-          <mat-icon> keyboard_tab</mat-icon>
+          <mat-icon>keyboard_tab</mat-icon>
         </button>
       </div>
     </div>
@@ -37,19 +37,26 @@
 
 <mat-sidenav-container class="mat-sidenav-container">
   <mat-sidenav class="sidenav-side-content" [(opened)]="opened" mode="over">
+    <h2 style="padding-left: 15px; padding-right: 15px; padding-top: 15px; color: white;">Compiler Code Snippets</h2>
+    <p style="padding-left: 15px; padding-right: 15px; color: white; font-size: .7rem;">
+      <strong>Note</strong>: Compiler tests are directly loaded into the code
+    </p>
+    <p style="padding-left: 15px; padding-right: 15px; color: white; font-size: .7rem;">
+      editor, while AxiOS tests are loaded into the AxiOS input field.
+    </p>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle style="margin-top: 0;">
         <!-- Compiler tests are directly added to Monaco Editor -->
-        <button mat-icon-button *ngIf="node.type == 'COMPILER_TEST'" style="width: min-content; font-size: .7rem;"
+        <button mat-icon-button *ngIf="node.type == 'COMPILER_TEST'" style="width: min-content; font-size: .7rem; color:rgba(59, 130, 246, 0.5);"
           (click)="onCompilerTestClick(node.data)">
           {{node.name}}
         </button>
 
         <!-- TODO: Operating System tests (written in ) are directly added to OS Input -->
-        <!-- <button mat-icon-button *ngIf="node.type == 'OS_TEST'" style="width: min-content; font-size: .7rem;"
-          (click)="onOSTestClick(node.data)">
+        <button mat-icon-button *ngIf="node.type == 'OPERATING_SYSTEM_TEST'" style="width: min-content; font-size: .7rem; color: rgba(59, 130, 246, 0.5);"
+        (click)="onOSTestClick(node.data)">
           {{node.name}}
-        </button> -->
+        </button>
       </mat-tree-node>
       <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
         <div class="mat-tree-node">
@@ -65,6 +72,42 @@
         </div>
       </mat-nested-tree-node>
     </mat-tree>
+
+    <!-- Project Links for the OS -->
+    <h2 style="padding-left: 15px; padding-right: 15px; padding-top: 15px; color: white;">AxiOS Overview</h2>
+    <p style="padding-left: 15px; padding-right: 15px; color: white; font-size: .7rem;">
+      Learn more about what AxiOS can do here:
+    </p>
+    <ul style="padding-left: 15px; padding-right: 15px;">
+      <li>
+        <a href="https://www.labouseur.com/courses/os/iProject1.pdf">
+          <button mat-icon-button style="width: min-content; font-size: .7rem; color:rgba(59, 130, 246, 0.5);">
+            Command Line Interface
+          </button>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.labouseur.com/courses/os/iProject2.pdf">
+          <button mat-icon-button style="width: min-content; font-size: .7rem; color:rgba(59, 130, 246, 0.5);">
+            CPU Execution of 6502a Op Codes
+          </button>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.labouseur.com/courses/os/iProject3.pdf">
+          <button mat-icon-button style="width: min-content; font-size: .7rem; color:rgba(59, 130, 246, 0.5);">
+            Scheduling / Context Switching Multiple Programs
+          </button>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.labouseur.com/courses/os/iProject4-final.pdf">
+          <button mat-icon-button style="width: min-content; font-size: .7rem; color:rgba(59, 130, 246, 0.5);">
+            External Disk, File Systems, and Swapping
+          </button>
+        </a>
+      </li>
+    </ul>
   </mat-sidenav>
 
   <mat-sidenav-content class="main-content">
@@ -247,7 +290,9 @@
 
               <!-- Disk -->
               <mat-tab label="DISK">
-
+                <div id="appDisk" style="height: 100%; width: 100%; overflow: scroll; white-space: nowrap;">
+                  <app-disk [sessionStorageWrapper]='sessionStorageWrapper'></app-disk>
+                </div>
               </mat-tab>
 
               <!-- Host Log -->

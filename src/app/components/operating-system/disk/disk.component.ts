@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { SessionStorageWrapper } from 'src/app/dashboard/dashboard.component';
 
 @Component({
   selector: 'app-disk',
@@ -6,10 +7,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./disk.component.scss']
 })
 export class DiskComponent implements OnInit {
+  @Input() sessionStorageWrapper: SessionStorageWrapper;
 
-  constructor() { }
+  constructor() { } // constructor
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void { } //ngOnInit
 
-}
+} // DiskComponent

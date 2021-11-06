@@ -1,0 +1,15 @@
+.disk--wrapper {
+    vertical-align: top;
+    display: grid;
+    grid-template-columns: min-content min-content;
+    grid-gap: 0px;
+    background-color: transparent;
+}
+  
+.box {
+    background-color: transparent;
+    color: white;
+    border: 1px solid #cccccc33;
+    font-size: .7rem;
+    text-align: center;
+}

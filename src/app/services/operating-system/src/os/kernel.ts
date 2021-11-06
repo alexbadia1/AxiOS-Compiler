@@ -208,7 +208,7 @@ export class Kernel {
         var minutes = String(current.getMinutes()).padStart(2, '0');
         var seconds = String(current.getSeconds()).padStart(2, '0');
 
-        alert(`${month}${day}${year}${hours}${minutes}${seconds}: this feature is deprecated.`);
+        // alert(`${month}${day}${year}${hours}${minutes}${seconds}: this feature is deprecated.`);
 
         // document.getElementById('divLog--date').innerText = `${month}/${day}/${year}`;
         // document.getElementById('divLog--time').innerText = `${hours}:${minutes}:${seconds}`;
@@ -490,7 +490,7 @@ export class Kernel {
                 Globals._NextStep = false;
 
                 /// Reset visuals for Single Step
-                Globals._terminateProcess$.next(true);
+                // Globals._terminateProcess$.next(true);
 
                 /// Prompt for more input
                 Globals._StdOut.advanceLine();

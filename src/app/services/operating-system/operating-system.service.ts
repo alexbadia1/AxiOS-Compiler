@@ -48,7 +48,7 @@ export class OperatingSystemService {
   private cpuSnapshot$: Subject<CpuData> | null = null;
   private processesSnapshot$: Subject<Array<PcbData>> | null = null;
   private memorySnapshot$: Subject<Array<Address>> | null = null;
-  private terminateProcessSnapshot$: Subject<any> = null!;
+  private sessionStorageSnapshot$: Subject<any> = null!;
   public keys: Array<string> = [];
 
   constructor() { } // constructor
@@ -64,7 +64,7 @@ export class OperatingSystemService {
       this.memorySnapshot$,
       this.processesSnapshot$,
       this.opCodeInputSnapshot$,
-      this.terminateProcessSnapshot$,
+      this.sessionStorageSnapshot$,
     );
     Control.hostBtnStartOS_click();
   } //startAxiOS
@@ -90,7 +90,7 @@ export class OperatingSystemService {
     this.cpuSnapshot$ = new Subject();
     this.processesSnapshot$ = new Subject();
     this.memorySnapshot$ = new Subject();
-    this.terminateProcessSnapshot$ = new Subject();
+    this.sessionStorageSnapshot$ = new Subject();
   } // setUpSubjects
 
   /**
@@ -101,14 +101,14 @@ export class OperatingSystemService {
     this.cpuSnapshot$ = null;
     this.processesSnapshot$ = null;
     this.memorySnapshot$ = null;
-    this.terminateProcessSnapshot$ = null!;
+    this.sessionStorageSnapshot$ = null!;
   } // tearDownSubjects
 
   public hostLog$(): Subject<any> { return this.hostLogSnapshot$!; } // hostLog$
   public cpu$(): Subject<any> { return this.cpuSnapshot$!; } // cpu$
   public processes$(): Subject<any> { return this.processesSnapshot$!; } // processes$
   public memory$(): Subject<any> { return this.memorySnapshot$!; } // memory$
-  public terminateProcess$(): Subject<any> { return this.terminateProcessSnapshot$; } // terminateProcess$
+  public checkSessionStorage$(): Subject<any> { return this.sessionStorageSnapshot$; } // terminateProcess$
   public setOpCodeSubject(sub: Subject<string>) {
     if (this.opCodeInputSnapshot$ == null) {
       this.opCodeInputSnapshot$ = sub;

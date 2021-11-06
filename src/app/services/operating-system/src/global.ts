@@ -125,7 +125,7 @@ export class Globals {
    public static _cpu$: Subject<CpuData> | null;
    public static _memory$: Subject<Array<Address>> | null;
    public static _processes: Subject<Array<PcbData>> | null;
-   public static _terminateProcess$: Subject<any>;
+   public static _sessionStorage$: Subject<any>;
 
    /// Software (OS)
    public static _MemoryManager: any = null;

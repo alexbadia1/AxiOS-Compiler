@@ -8,9 +8,11 @@ import { Subject } from "rxjs";
 import { CompilerService } from "../services/compiler/compiler.service";
 import { PROGRAMS } from "../services/compiler/src/global";
 import { Program } from "../services/compiler/src/models/program";
-import { TestService } from "../services/compiler/src/test.service";
+import { CompilerTestService } from "../services/compiler/src/test.service";
 import { CpuData, HostLogData, OperatingSystemService, PcbData } from "../services/operating-system/operating-system.service";
+import { Globals } from "../services/operating-system/src/global";
 import { Address } from "../services/operating-system/src/host/addressBlock";
+import { AxiOSTestsService } from "../services/operating-system/tests.service";
 
 
 const COMPILER_TEST = "COMPILER_TEST";
@@ -46,6 +48,30 @@ interface TestNode {
   type?: string;
   children?: TestNode[];
 } // TestNode
+
+export class SessionStorageWrapper {
+  public sessionStorageValues: Array<SessionStorageVal> = [];
+  constructor(newSessionStorageValues: Array<SessionStorageVal>) {
+    if (newSessionStorageValues == undefined || newSessionStorageValues == null) {
+      for (var trackNum: number = 0; trackNum < Globals.TRACK_LIMIT; ++trackNum) {
+        for (var sectorNum: number = 0; sectorNum < Globals.SECTOR_LIMIT; ++sectorNum) {
+          for (var blockNum: number = 0; blockNum < Globals.BLOCK_LIMIT; ++blockNum) {
+            this.sessionStorageValues.push({
+              key: `(${trackNum}, ${sectorNum}, ${blockNum})`,
+              value: `00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`
+            }); // this.sessionStorageValues.push
+          }/// for
+        }/// for
+      }/// for
+    } else {
+      this.sessionStorageValues = newSessionStorageValues;
+    } // if-else
+  } // constructor
+}
+export interface SessionStorageVal {
+  key: string,
+  value: string
+} // SessionStorageVal
 
 export interface AddressMap {
   physicalAddress: number,
@@ -186,23 +212,23 @@ export class DashboardComponent implements OnInit {
   private processes$: Subject<any> | null = null;
   private memory$: Subject<any> | null = null;
   public opCodeInput$: Subject<string> = new Subject<string>();
-  private terminateProcess$: Subject<any> = null!;
+  private checkSessionStorage$: Subject<any> = null!;
 
   /**
    * AxiOS Component Data Binding
    */
-  public pc: string = "00"
   public hostLogData: Array<HostLogData> = [];
   public cpuData: CpuData = new CpuData();
   public memory: MemoryMap = new MemoryMap(null!);
   public processes: Array<PcbData> = [];
   public opCodeInput: string = "";
-  testModel: string;
+  public sessionStorageWrapper: SessionStorageWrapper = new SessionStorageWrapper(null!);
 
   constructor(
     private compilerService: CompilerService,
-    private testService: TestService,
+    private copmilerTestService: CompilerTestService,
     private osService: OperatingSystemService,
+    private osTestService: AxiOSTestsService,
   ) {
     // Send Axios text input subject
     this.osService.setOpCodeSubject(this.opCodeInput$);
@@ -219,50 +245,84 @@ export class DashboardComponent implements OnInit {
     } // compilerTestNode
 
     // Load default test cases at root 'directory'
-    for (let c of this.testService.defaultTests) {
+    for (let c of this.copmilerTestService.defaultTests) {
       for (let k of c.keys()) {
         compilerTestNode.children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
     // Load Lexer test cases in Lexer 'directory'
-    for (let c of this.testService.lexerTests) {
+    for (let c of this.copmilerTestService.lexerTests) {
       for (let k of c.keys()) {
         compilerTestNode.children![0].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
     // Load Parser test cases in Parser 'directory'
-    for (let c of this.testService.parserTests) {
+    for (let c of this.copmilerTestService.parserTests) {
       for (let k of c.keys()) {
         compilerTestNode.children![1].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
     // Load Semantic Analysis test cases in Semantic Analysis 'directory'
-    for (let c of this.testService.semanticAnalysisTests) {
+    for (let c of this.copmilerTestService.semanticAnalysisTests) {
       for (let k of c.keys()) {
         compilerTestNode.children![2].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
     // Load Code Generation test cases in Code Generation 'directory'
-    for (let c of this.testService.codeGenerationTests) {
+    for (let c of this.copmilerTestService.codeGenerationTests) {
       for (let k of c.keys()) {
         compilerTestNode.children![3].children?.push({ name: k.toLowerCase(), data: c.get(k), type: COMPILER_TEST })
       } // for
     }// for
 
-    // TODO: Create a root Operating Systems 'directory'
-    // let osTestNode: TestNode = {
-    //   name: "Operating System Tests",
-    //   children: []
-    // } // osTestNode
+    // Create a root Operating Systems 'directory'
+    let osTestNode: TestNode = {
+      name: "Operating System Tests",
+      children: [
+        { name: "GlaDos 1.0", children: [] },
+        { name: "GlaDos 2.0", children: [] },
+        { name: "GlaDos 3.0", children: [] },
+        { name: "GlaDos 4.0", children: [] },
+        { name: "Stress Tests", children: [] },
+      ]
+    } // osTestNode
+
+    // Load AxiOS tests
+    for (let c of this.osTestService.glados1) {
+      for (let k of c.keys()) {
+        osTestNode.children![0].children?.push({ name: k.toLowerCase(), data: c.get(k), type: OPERATING_SYSTEM_TEST })
+      } // for
+    }// for
+    for (let c of this.osTestService.glados2) {
+      for (let k of c.keys()) {
+        osTestNode.children![1].children?.push({ name: k.toLowerCase(), data: c.get(k), type: OPERATING_SYSTEM_TEST })
+      } // for
+    }// for
+    for (let c of this.osTestService.glados3) {
+      for (let k of c.keys()) {
+        osTestNode.children![2].children?.push({ name: k.toLowerCase(), data: c.get(k), type: OPERATING_SYSTEM_TEST })
+      } // for
+    }// for
+    for (let c of this.osTestService.glados4) {
+      for (let k of c.keys()) {
+        osTestNode.children![3].children?.push({ name: k.toLowerCase(), data: c.get(k), type: OPERATING_SYSTEM_TEST })
+      } // for
+    }// for
+    for (let c of this.osTestService.stressTests) {
+      for (let k of c.keys()) {
+        osTestNode.children![4].children?.push({ name: k.toLowerCase(), data: c.get(k), type: OPERATING_SYSTEM_TEST })
+      } // for
+    }// for
+
 
     // Bind to component
     this.dataSource.data = [
       compilerTestNode,
-      // TODO: osTestNode,
+      osTestNode,
     ];
   } // constructor
 
@@ -310,7 +370,7 @@ export class DashboardComponent implements OnInit {
     this.compilerStatus = "Compiling...";
 
     // Artificial delay to convince the user we're doing some serious stuff.
-    await new Promise(f => setTimeout(f, 1000));
+    await new Promise(f => setTimeout(f, 300));
 
     // Editor hasn't loaded yet
     if (this.editor == null) { this.compiling = false; return; }
@@ -374,21 +434,29 @@ export class DashboardComponent implements OnInit {
       this.btnNextStep.style.color = "#3d3d3d";
       this.btnStartOS.style.color = "#228B22";
 
-      // Reset halting and single step
-      this.isSingleStep = false;
+       // Toggle the Single Step Off
+       if (this.isSingleStep) {
+        this.osService.onSingleStepButtonClick();
+        this.isSingleStep = false;
+      } // if
 
       // Shutdown and clear canvas
       this.osService.shutdown();
       let ctx = this.canvas?.getContext('2d');
       ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+      // Reset OS and Session storage too.
       this.osService = new OperatingSystemService();
+      sessionStorage.clear();
     } // if
 
     // Power AxiOS
     else {
-      // Clear Host Log
+      // Clear UI of previous data
       this.hostLogData = [];
+      this.cpuData = new CpuData();
+      this.memory = new MemoryMap(null!);
+      this.processes = [];
 
       // Power on and setup scubscriptions
       this.osService.power();
@@ -447,6 +515,17 @@ export class DashboardComponent implements OnInit {
     this.osService.onNextStepButtonClick();
   } // hostBtnNextStep_click
 
+  onOSTestClick(nodeData: string) {
+    // Send new op code input to AxiOS
+    this.opCodeInput$.next(nodeData);
+
+    // Show the visual changes
+    this.opCodeInput = nodeData;
+
+    // Close sidebar
+    this.opened = false;
+  } // onOSTestClick
+
   //================================================================================
   // AxiOS Subscriptions
   //================================================================================
@@ -457,14 +536,14 @@ export class DashboardComponent implements OnInit {
     this.cpu$ = this.osService.cpu$();
     this.processes$ = this.osService.processes$();
     this.memory$ = this.osService.memory$();
-    this.terminateProcess$ = this.osService.terminateProcess$();
+    this.checkSessionStorage$ = this.osService.checkSessionStorage$();
 
     // Subscribe and map to UI functions
     this.hostLog$.subscribe(val => this.hostLogReaction(val));
     this.cpu$.subscribe(val => this.cpuReaction(val));
     this.processes$.subscribe(val => this.processesReaction(val));
     this.memory$.subscribe(val => this.memoryReaction(val));
-    this.terminateProcess$.subscribe(val => this.terminateProcessReaction(val));
+    this.checkSessionStorage$.subscribe(val => this.checkSessionStorageReaction(val));
   } // setUpSubscriptions
 
   private teardownAxiosSubscriptions() {
@@ -531,20 +610,10 @@ export class DashboardComponent implements OnInit {
   } // processesReaction
 
   /**
-   * Turn off single step
+   * Updates session storage visualization
    */
-  private terminateProcessReaction(val: any) {
-    console.log(val);
-    this.axiosStatus = "Online- Okay";
-
-    // Disable Next Step Button
-    this.btnNextStep.disabled = true;
-    this.btnNextStep.style.color = "#3d3d3d";
-
-    // Make this button blue
-    this.btnSingleStepMode.style.color = "rgba(59, 130, 246, 0.5)";
-
-    this.isSingleStep = false;
+  private checkSessionStorageReaction(val: Array<SessionStorageVal>) {
+    this.sessionStorageWrapper = new SessionStorageWrapper(val);
   } // terminateProcessReaction
 
   onAxiOsTabChange(event: MatTabChangeEvent) {

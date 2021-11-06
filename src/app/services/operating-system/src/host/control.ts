@@ -27,6 +27,7 @@ import { Kernel } from "../os/kernel";
 import { Subject } from 'rxjs';
 import { CpuData, HostLogData, PcbData } from "../../operating-system.service";
 import { Address } from "./addressBlock";
+import { SessionStorageVal } from "src/app/dashboard/dashboard.component";
 
 //
 // Control Services
@@ -38,7 +39,7 @@ export class Control {
         memory$: Subject<Array<Address>> | null,
         processes$: Subject<Array<PcbData>> | null,
         opCodeInput$: Subject<string> | null,
-        terminateProcess$: Subject<any>
+        sessionStorage$: Subject<any>
     ): void {
         // This is called from OS Service's power() method
         //
@@ -47,11 +48,11 @@ export class Control {
         Globals._cpu$ = cpu$;
         Globals._memory$ = memory$;
         Globals._processes = processes$;
-        Globals._terminateProcess$ = terminateProcess$;
+        Globals._sessionStorage$ = sessionStorage$;
 
         // Listen for op code input changes
         if (opCodeInput$ != undefined && opCodeInput$ != null) {
-            opCodeInput$.subscribe(newOpCodes => { console.log(newOpCodes); Globals._taProgramInput = newOpCodes});
+            opCodeInput$.subscribe(newOpCodes => { Globals._taProgramInput = newOpCodes; });
         } // if
 
         // Get a global reference to the canvas.
@@ -410,43 +411,26 @@ export class Control {
 
     public static updateVisualDisk(): void {
         Globals._Kernel.krnTrace('Updated visual disk!');
-        /// Get table
-        try {
-            document.getElementById("visual--disk--table")!.parentNode!.removeChild(document.getElementById("visual--disk--table")!);
-        }/// try
-        catch (e) { };
-        var table = document.createElement('table');
-        table.setAttribute("id", "visual--disk--table");
-        table.style.border = "none";
+
         /// Check to see if disk is formatted
         if (!Globals._krnDiskDriver!.formatted) {
             Globals._Kernel.krnTrace('Not formatted');
             return;
         }/// if
 
-        /// Create Headers and append the header row
-        // var rowWithHeaders = document.createElement('tr');
-        // rowWithHeaders.appendChild(document.createElement('td').appendChild(document.createTextNode('Key')));
-        // rowWithHeaders.appendChild(document.createElement('td').appendChild(document.createTextNode('Value')));
-        // table.appendChild(rowWithHeaders);
-
         /// Create each block in the 16KB Disk
+        let tmp: Array<SessionStorageVal> = [];
         for (var trackNum: number = 0; trackNum < Globals.TRACK_LIMIT; ++trackNum) {
             for (var sectorNum: number = 0; sectorNum < Globals.SECTOR_LIMIT; ++sectorNum) {
                 for (var blockNum: number = 0; blockNum < Globals.BLOCK_LIMIT; ++blockNum) {
-                    /// Create a row
-                    var rowWithValues = document.createElement('tr');
-                    /// var key = document.createElement('td').appendChild(document.createTextNode(`(${trackNum}, ${sectorNum}, ${blockNum})`));
-                    var value = document.createElement('td');
-                    value.style.whiteSpace = 'nowrap';
-                    value.appendChild(document.createTextNode(`(${trackNum}, ${sectorNum}, ${blockNum}) | ${sessionStorage.getItem(`${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`)}`));
-                    rowWithValues.appendChild(value);
-
-                    table.appendChild(rowWithValues);
+                    tmp.push({
+                        key: `(${trackNum}, ${sectorNum}, ${blockNum})`,
+                        value: `${sessionStorage.getItem(`${Control.formatToHexWithPadding(trackNum)}${Control.formatToHexWithPadding(sectorNum)}${Control.formatToHexWithPadding(blockNum)}`)}`
+                    }); // tmp.push
                 }/// for
             }/// for
         }/// for
 
-        document.getElementById('visual--disk--table--container')!.appendChild(table);
+        Globals._sessionStorage$.next(tmp);
     }/// updateVisualDisk
 }/// class

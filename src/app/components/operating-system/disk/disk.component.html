@@ -1,1 +1,8 @@
-<p>disk works!</p>
+<div style="padding-left: 15px; padding-top: 15px;">
+    <div class="box" > Disk </div>
+    <div *ngFor = "let row of sessionStorageWrapper.sessionStorageValues" class="disk--wrapper">
+        <div id="disk--location--header--{{row.key}}" class="box" style="padding-left: 8px; padding-right: 8px;">{{row.key}}</div>
+        <div id="disk--location--{{row.value}}" class="box" style="padding-left: 8px; padding-right: 8px;">{{row.value}}</div>
+    </div>
+</div>
+<div style="height: 5vh;"></div>
