@@ -1,11 +1,11 @@
 # AxiOS Compiler
 
-[A Compiler and Operating System all in one dashboard](https://alexbadia1.github.io/AxiOS-Compiler/)!
+[A Compiler and Operating System all in one dashboard](https://alexbadia1.github.io/AxiOS-Compiler/#/)!
 
   * Nightingale Compiler: compiles a custom coding language to 6502a Op Codes, providing well defined compilation feedback.
   * AxiOS Operating System: runs 6502a OP codes, with it's own command line interface, file system, virtual memory, and more.
 
-See this project on git-pages: https://alexbadia1.github.io/AxiOS-Compiler/
+See this project on git-pages: https://alexbadia1.github.io/AxiOS-Compiler/#/
 
 # Getting Started
   Here are the system requirements to run this project (on Windows at least):
