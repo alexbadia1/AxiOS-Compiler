@@ -1,0 +1,117 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="utf-8">
+  <title>AxiOS</title>
+  <base href="#">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <style type="text/css">@font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fCRc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;}@font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fABc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;}@font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fCBc4AMP6lbBP.woff2) format('woff2');unicode-range:U+1F00-1FFF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fBxc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0370-03FF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fCxc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;}@font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fChc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fBBc4AMP6lQ.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');unicode-range:U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu5mxKKTU1Kvnz.woff2) format('woff2');unicode-range:U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu7mxKKTU1Kvnz.woff2) format('woff2');unicode-range:U+1F00-1FFF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu4WxKKTU1Kvnz.woff2) format('woff2');unicode-range:U+0370-03FF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu7WxKKTU1Kvnz.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu7GxKKTU1Kvnz.woff2) format('woff2');unicode-range:U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fCRc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;}@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fABc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;}@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fCBc4AMP6lbBP.woff2) format('woff2');unicode-range:U+1F00-1FFF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fBxc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0370-03FF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fCxc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;}@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fChc4AMP6lbBP.woff2) format('woff2');unicode-range:U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;}@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fBBc4AMP6lQ.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}</style>
+  <style type="text/css">@font-face{font-family:'Material Icons';font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/materialicons/v114/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');}.material-icons{font-family:'Material Icons';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;}</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>.mat-typography{font:400 14px/20px Roboto,Helvetica Neue,sans-serif;letter-spacing:normal}body,html{height:100%}body{margin:0;font-family:Roboto,Helvetica Neue,sans-serif;font-size:10pt;font-weight:lighter;font-style:normal}</style><link rel="stylesheet" href="styles.6db867bbd628d7f76e75.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="styles.6db867bbd628d7f76e75.css"></noscript></head>
+
+<body class="mat-typography">
+  <app-root></app-root>
+<script src="runtime.46c779d41da7657c74cb.js" defer></script><script src="polyfills.d1162d3ca1fa2883922c.js" defer></script><script src="main.be3aeb9273190577103b.js" defer></script>
+
+<script>
+  function highlightSubtree(program_num, node_id, cst_or_ast_or_scope_tree) {
+    // To simulate recursion, iteratively, use a stack.
+    let stack = [];
+
+    // Get the starting node from DOM
+
+    let currentNode;
+
+    // TODO: Change this curde implementation of abstracting the button!
+    if (cst_or_ast_or_scope_tree === "CST") {
+      currentNode = document.getElementById(`cst_p${program_num}_li_node_id_${node_id}`);
+    }// if
+
+    else if (cst_or_ast_or_scope_tree === "AST") {
+      currentNode = document.getElementById(`ast_p${program_num}_li_node_id_${node_id}`);
+    }// else if
+
+    else if (cst_or_ast_or_scope_tree === "SCOPETREE") {
+      currentNode = document.getElementById(`scope-tree_p${program_num}_li_node_id_${node_id}`);
+    }// else if
+
+    else {
+      return;
+    }// else
+
+    // Push starting node's children onto stack
+    let children = currentNode.children;
+
+    // Add to recursion stack
+    stack.push(children);
+
+    // Starting node is already highlighted, thus unhighlight starting node and it's descendants.
+    if (children.namedItem("node-anchor-tag").classList.contains("anchor-node__active")) {
+
+      if (currentNode instanceof HTMLAnchorElement) {
+        // Remove the CSS class that highlights the node
+        currentNode.classList.remove("anchor-node__active");
+      }// if
+
+      while (stack.length > 0) {
+
+        // Get current nodes children elements from the stack
+        let currentRemoveItemInStack = stack.pop();
+
+        // Remove highlight from each child
+        for (let removeChild = 0; removeChild < currentRemoveItemInStack.length; ++removeChild) {
+
+          // Only remove highlight from links <a> and <li>
+          if (currentRemoveItemInStack[removeChild] instanceof HTMLAnchorElement) {
+            if (currentRemoveItemInStack[removeChild].classList.contains("anchor-node__active")) {
+              currentRemoveItemInStack[removeChild].classList.remove("anchor-node__active");
+            }// if
+          }// if
+
+          let nestedChildren = currentRemoveItemInStack[removeChild].children;
+
+          // Prevents infinite stack hopefully... I hatre recursion...
+          if (nestedChildren !== undefined && nestedChildren !== null && nestedChildren.length > 0) {
+            stack.push(nestedChildren);
+          }// if
+        }// for
+      }// while
+    }// if
+
+    // Highlight current nod and its descendants
+    else {
+
+      if (currentNode instanceof HTMLAnchorElement) {
+        // Add the CSS class that highlights the node
+        currentNode.classList.add("anchor-node__active");
+      }// if
+
+      while (stack.length > 0) {
+
+        // Get current nodes children elements from the stack
+        let currentAddItemInStack = stack.pop();
+
+        // Add highlight from each child
+        for (let addChild = 0; addChild < currentAddItemInStack.length; ++addChild) {
+
+          // Only remove highlight from links <a> and <li>
+          if (currentAddItemInStack[addChild] instanceof HTMLAnchorElement) {
+            if (!currentAddItemInStack[addChild].classList.contains("anchor-node__active")) {
+              currentAddItemInStack[addChild].classList.add("anchor-node__active");
+            }// if
+          }// if
+
+          let nestedChildren = currentAddItemInStack[addChild].children;
+
+          // Prevents infinite stack hopefully... I hatre recursion...
+          if (nestedChildren !== undefined && nestedChildren !== null && nestedChildren.length > 0) {
+            stack.push(nestedChildren);
+          }// if
+        }// for
+      }// while
+    }// else
+  }// highlightSubtree
+</script>
+
+</body></html>
