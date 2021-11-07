@@ -473,6 +473,7 @@ export class DashboardComponent implements OnInit {
       this.cpuData = new CpuData();
       this.memory = new MemoryMap(null!);
       this.processes = [];
+      this.sessionStorageWrapper = new SessionStorageWrapper(null!);
 
       // Power on and setup scubscriptions
       this.osService.power();
