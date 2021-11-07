@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Address } from './src/host/addressBlock';
 import { Control } from './src/host/control';

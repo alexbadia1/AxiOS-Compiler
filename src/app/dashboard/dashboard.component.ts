@@ -4,6 +4,7 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 import { MatTreeNestedDataSource } from "@angular/material/tree";
 import { MonacoStandaloneCodeEditor } from "@materia-ui/ngx-monaco-editor";
+import { SplitComponent } from "angular-split";
 import { Subject } from "rxjs";
 import { CompilerService } from "../services/compiler/compiler.service";
 import { PROGRAMS } from "../services/compiler/src/global";
@@ -144,6 +145,7 @@ export class MemoryMap {
 
 
 export class DashboardComponent implements OnInit {
+  @ViewChild('osSplit') osSplit: SplitComponent;
   /**
    * Monaco Code Editor Plugin
    */
@@ -334,6 +336,20 @@ export class DashboardComponent implements OnInit {
     this.btnSingleStepMode = document.getElementById('btnSingleStepMode')! as HTMLButtonElement;
     this.btnNextStep = document.getElementById('btnNextStep')! as HTMLButtonElement;
   }// ngOnInit
+
+  ngAfterViewInit(): void {
+    this.osSplit.dragProgress$.subscribe((val) => {
+      // Val
+      //   - val.sizes[0] is top pane size
+      //   - val.sizes[1] is bottom pane size
+      //
+      // Bottom View: 20 <= x <= 80, x starts at 30
+      let bottomSplitSize = val.sizes[1] as number;
+
+      // Translate the Canvas proportionally to the bottom split size.
+      this.canvas.style.transform = `translate(-50%, -${(bottomSplitSize - 30) * 1.5}%)`
+    });
+  } // ngAfterViewInit
 
   //================================================================================
   // Monaco Editor Instance
